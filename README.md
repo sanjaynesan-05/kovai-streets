@@ -20,6 +20,10 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 - [Vehicles](#-vehicles)
 - [Weapons](#-weapons)
 - [Jobs and missions](#-jobs-and-missions)
+- [Story: the Black Scorpions](#-story-the-black-scorpions)
+- [Progress, unlocks and saving](#-progress-unlocks-and-saving)
+- [Things to find](#-things-to-find)
+- [Police](#-police)
 - [Friends and people](#-friends-and-people)
 - [Graphics settings](#-graphics-settings)
 - [Run it locally](#-run-it-locally)
@@ -110,8 +114,15 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 - Third-person on foot, driving, riding and boating.
 - **Mass-based crash physics**: cars spin and shove, buses barely move, tanks flatten everything.
 - Damaged vehicles smoke, catch fire and explode.
-- **Wanted level** up to 5 stars, with police chases and sirens.
-- **7 job types**, plus respect levels that raise your rewards.
+- **Wanted level** up to 5 stars: police cars, **officers on foot, roadblocks and a helicopter**.
+- **A 6-mission story** with original characters, ending in a boss fight.
+- **7 job types**, plus Respect levels that unlock guns, jobs and whole new areas.
+- **Your progress saves automatically** on your device.
+- **A safehouse with a garage** that keeps your cars, plus outfits to change into.
+- **20 hidden film reels, 5 stunt jumps and 4 rampages** to find.
+- **Lock-on aiming, crouching behind cover, vaulting over low walls**, and knockdowns.
+- **Visible car damage:** dents, smashed windows and flat tyres.
+- **Car radio** with three original stations, plus engine sounds that differ by vehicle, gun sounds, footsteps and city ambience.
 - **Talk to anyone** on the street, and make friends with Meena and Divya.
 - **Tea stalls** restore health, the **hospital** heals you for free, and the **gun shop** sells weapons and armour.
 
@@ -126,18 +137,20 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 | `W` `A` `S` `D` | Move / drive |
 | Mouse | Look around (click the game to lock the mouse) |
 | Left click | Shoot / punch combo (hold for automatic weapons) |
-| Right click | Aim / sniper scope |
+| Right click (hold) | Aim and **lock on** to the nearest enemy / sniper scope |
 | `Shift` | Sprint |
-| `Space` | Jump / handbrake |
+| `Space` | Jump (vault onto low walls) / handbrake |
 | `E` or `F` | Get in / out of a vehicle |
 | `T` | Talk to people, friends and tea stalls |
 | Mouse wheel, `Tab` (hold) or `Q` | Weapon wheel |
 | `1`–`9`, `0`, `-`, `=` | Pick a weapon directly |
 | `R` | Reload |
+| `C` | Crouch (next to a wall or car = in cover) |
+| `N` | Change radio station (in a vehicle) |
 | `H` | Horn |
 | `M` | Full city map |
 | `Enter` or `` ` `` | Type a cheat code |
-| `Esc` or `P` | Pause (includes the cheat list and graphics settings) |
+| `Esc` or `P` | Pause: progress, cheat list and settings |
 | Arrow keys | Look around without a mouse |
 
 ### Phone and tablet (landscape)
@@ -152,7 +165,7 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 | **JUMP / BRAKE** | Jump on foot, handbrake when driving |
 | **GUN** | Open the weapon wheel |
 | **TALK / HORN** | Talk on foot, horn when driving |
-| **MAP · CHEAT · II** | Map, cheat box, pause |
+| **MAP · RADIO · CROUCH · CHEAT · II** | Map, radio, take cover, cheat box, pause |
 
 ---
 
@@ -198,7 +211,9 @@ The map is loosely based on Coimbatore's real layout, with some creative licence
 | **Ghat Road / Hilltop Viewpoint** | Hairpin climb into the Western Ghats, waterfall, hill village |
 | **Kovai Coast / Lighthouse Point** | Beach, jetty, boats, lighthouse |
 
-**Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · ♥ friends · ☕ tea stalls · coloured letters = jobs
+**Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · ♥ friends · ☕ tea stalls · coloured letters = jobs · gold **S** = story · green house = safehouse · skull = rampage
+
+The **Western Ghats** and **Kovai Coast** start closed. See [Progress, unlocks and saving](#-progress-unlocks-and-saving).
 
 ---
 
@@ -235,7 +250,9 @@ Every vehicle has its own weight, speed, grip and handling. Bikes lean into turn
 | - | Rocket launcher | Explosive |
 | = | Grenades | Bounce, then explode after a couple of seconds |
 
-Get weapons from the **Kovai Arms Depot** gun shop, as drops from gang members, or with cheats.
+Get weapons from the **Kovai Arms Depot** gun shop, as drops from gang members, or with cheats. Some shop items unlock with Respect: shotgun and grenades at **LV 2**, assault rifle and sniper at **LV 3**, rocket launcher at **LV 4**.
+
+**Combat tips:** hold right click to lock on. Press `C` to crouch: next to a wall or car you're **in cover**, and enemies rarely hit you. Explosions and speeding cars knock you flat for a moment, and people fly, tumble and bounce when hit.
 
 ---
 
@@ -253,7 +270,55 @@ Three jobs show on the map at a time, each with its own coloured beam and letter
 | **F** | Passenger fare | Drive a passenger to their stop |
 | **+** | Emergency run | Rush an injured person to the Government Hospital |
 
-Each job you finish raises your **Respect level**, and rewards grow with it.
+Each job you finish raises your **Respect level** (one level every 3 jobs), and rewards grow with it. Gang clean-ups and getaway chases unlock at **LV 2**, gang bosses at **LV 3**.
+
+---
+
+## 📖 Story: the Black Scorpions
+
+Visit **Paramasivam Anna**, a retired mill foreman, at the Peelamedu mills (gold **S** on the map, with a gold beam). A gang called the **Black Scorpions**, run by **Silk Sundaram**, is taking over Kovai's textile mills.
+
+| # | Mission | What happens | Reward |
+|---|---|---|---|
+| 1 | Smoke Over the Mills | Clear the gang out of the Podanur mill | ₹2,000 |
+| 2 | The Courier | Wreck or steal the courier's black SUV before it escapes | ₹3,000 |
+| 3 | Burning Looms | Defend the Singanallur mill from two waves | ₹4,000 |
+| 4 | Ghat Road Deal | Drive up the ghat road and take down Vettu Velu | ₹5,000 |
+| 5 | The Jetty Shipment | Clear the jetty and sink the smugglers' speedboat | ₹6,000 |
+| 6 | Silk Sundaram | Storm the old Kovai Mills and beat the final boss | ₹25,000 |
+
+Each mission also gives **+2 Respect**. If you fail, talk to Paramasivam again to retry.
+
+---
+
+## 💾 Progress, unlocks and saving
+
+- **Saving is automatic:** every 30 seconds, after jobs and purchases, and when you pause or close the page. Saves stay in your browser on this device. The start screen then shows **Continue** and **New game**.
+- Saved: cash, weapons and ammo, armour, Respect, friendships, story progress, collectibles, the safehouse, garage cars, your outfit and the time of day.
+- **Safehouse** on Perur Road, west of the city (₹5,000). Once you own it you start there, you can save, change outfit and sleep until morning, and up to **3 vehicles** parked inside its garage are kept.
+- **Outfits:** teal shirt & jeans, white veshti, checked lungi, black tee & cargos, cricket jersey and office formals. Change them at the safehouse or in the pause menu.
+- **New areas:** the forest checkpoint to the **Western Ghats** opens at Respect **LV 2** (or after story mission 3). The coast road to **Kovai Coast** opens at **LV 3** (or after story mission 4).
+- The **pause menu** shows your progress and has settings for mouse/swipe sensitivity, invert look, master and radio volume, outfit, the tutorial, and saving or deleting your save.
+- New players get a **short tutorial** (skippable), and the loading and knock-out screens show tips.
+
+---
+
+## 🔍 Things to find
+
+| What | How many | Reward |
+|---|---|---|
+| **Film reels** (spinning gold reels) | 20, hidden around the city, mall, station, flyover, hills and coast | ₹250 each, ₹25,000 for all |
+| **Stunt jumps** (yellow ramps on the outer roads and the beach) | 5 | ₹1,000 for each first jump, ₹10,000 for all. Slow motion while you're in the air |
+| **Rampages** (skull icons) | 4: rocket, SMG, cricket bat, grenade | Take out the target number in 60 seconds: ₹2,500 the first time |
+
+---
+
+## 🚓 Police
+
+- **1+ stars:** police cars chase you. When they stop near you, **officers get out on foot**.
+- **3+ stars:** **roadblocks** appear ahead of you while you're driving.
+- **4+ stars:** a **police helicopter** circles and shoots. Rockets, grenades or plenty of bullets bring it down.
+- Killing an officer adds a star. Lose the cops by staying out of sight, or sleep at your safehouse.
 
 ---
 
@@ -333,9 +398,9 @@ python -m http.server 8000
 | | |
 |---|---|
 | **Engine** | [Three.js](https://threejs.org) r128 (WebGL) |
-| **Code** | One self-contained `index.html` (~240 KB of hand-generated JavaScript) |
+| **Code** | One self-contained `index.html` (~290 KB of generated JavaScript) |
 | **Art** | 100% procedural. Every texture is drawn with Canvas 2D at load time; every model is built from code |
-| **Sound** | Generated live with the Web Audio API (engines, sirens, gunshots, rain, train horn) |
+| **Sound** | Generated live with the Web Audio API: per-vehicle engines, per-gun shots, footsteps, city/sea/bird ambience, three procedural radio stations, sirens, rain and the train horn |
 | **Load time** | About 1–2 seconds to build the whole world |
 
 Some of the techniques used:
@@ -354,7 +419,7 @@ Some of the techniques used:
 
 - **Visual style:** it's stylised and low-poly. Everything is generated by code without hand-made 3D models, so characters and vehicles are simple up close.
 - **Traffic:** AI traffic stays inside the city grid. The ghat road and coast road have no AI cars.
-- **No save system:** cash, weapons and progress reset when you close the page.
+- **Saves are per browser:** progress is stored in your browser's local storage, so it doesn't follow you to another device or browser, and clearing site data erases it. Progress partway through a mission isn't saved.
 - **Performance:** older phones should use **Low** quality. High quality is meant for desktop GPUs.
 - **Geography:** Coimbatore has no coastline in real life. The beach is a fun addition.
 
@@ -362,12 +427,14 @@ Some of the techniques used:
 
 ## 🧭 Roadmap ideas
 
-- [ ] Save and load progress
+- [x] Save and load progress
 - [ ] AI traffic on the ghat and coast roads
-- [ ] A short storyline with connected missions
-- [ ] Police on foot, roadblocks and helicopters at high wanted levels
-- [ ] Car radio with original music
-- [ ] Buyable houses and garages
+- [x] A short storyline with connected missions
+- [x] Police on foot, roadblocks and helicopters at high wanted levels
+- [x] Car radio with original music
+- [x] Buyable houses and garages
+- [x] Collectibles, stunt jumps and rampages
+- [x] Settings menu and tutorial
 - [ ] Gamepad support
 - [ ] Online multiplayer
 
