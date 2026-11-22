@@ -1,0 +1,1376 @@
+# MASTER DEVELOPMENT PROMPT — KOVAI STREETS 2.0
+## Complete Open-World Game Upgrade, Bug Fixes, Gameplay Expansion & Immersion Overhaul
+
+You are a senior game developer, 3D environment artist, gameplay programmer, AI engineer, technical artist, sound designer, and UI/UX designer working on **Kovai Streets**, an existing browser-based 3D open-world game inspired by the streets, culture, atmosphere, and lifestyle of Coimbatore, Tamil Nadu, India.
+
+Your task is to transform the existing game into a much more immersive, polished, detailed, interactive, and believable open-world experience called:
+
+# KOVAI STREETS 2.0
+### Live the Streets. Build Your Name. Own the City.
+
+This is an upgrade to an existing game, NOT a complete replacement.
+
+---
+
+# 1. MOST IMPORTANT RULE: STUDY BEFORE MODIFYING
+
+Before writing or modifying any code:
+
+1. Inspect the entire existing repository.
+2. Identify the main entry point, currently documented as `index.html`.
+3. Inspect all JavaScript, CSS, HTML, 3D assets, models, textures, audio files, configuration files, and dependencies.
+4. Understand the current rendering engine, scene architecture, physics/collision implementation, character controller, vehicle system, NPC system, mission framework, save system, economy, and UI.
+5. Identify how the current map is constructed and how bridges, roads, buildings, terrain, and vegetation are represented.
+6. Identify existing bugs and their root causes instead of applying visual workarounds.
+7. Create a development plan based on the actual architecture.
+
+Do not assume that the documented architecture is identical to the current source code. Verify everything.
+
+### Existing features that MUST be preserved
+
+The game already includes:
+
+- A stylized Coimbatore-inspired open-world map.
+- City roads, Western Ghats, and a fictional Kovai Coast.
+- Main story campaign: Kovai's Mills.
+- Six existing main missions.
+- Black Scorpions gang, led by Silk Sundaram.
+- Paramasivam Anna as a mission giver.
+- Characters including Kathir, Vettu Velu, Meena, and Divya.
+- Jobs and side activities.
+- Rampages and stunt jumps.
+- Twenty hidden film reels.
+- Friendship system.
+- NPCs, tea stalls, hospital, gun shop, and safehouse.
+- Gangs and wanted-level system.
+- Vehicles and driving.
+- Combat and character progression.
+- Day/night cycle and weather.
+- Respect progression.
+- Browser-local save functionality.
+
+Do not remove, silently replace, or break these systems.
+
+### Development principles
+
+- Preserve the existing technology stack unless a change is genuinely necessary.
+- Avoid rewriting the entire game.
+- Reuse existing systems and assets wherever possible.
+- Implement modular, maintainable code.
+- Keep gameplay responsive and browser-compatible.
+- Avoid unnecessary dependencies.
+- Do not introduce placeholder systems that pretend to work.
+- Do not claim a feature is complete unless it has been implemented and tested.
+- Maintain compatibility with existing save data wherever possible.
+- Create backups or use version control before major changes.
+- Test after each major implementation phase.
+
+If a feature cannot be implemented properly within the current architecture, explain the technical limitation and propose a realistic solution.
+
+---
+
+# 2. CRITICAL BUG FIXES
+
+These issues must be addressed before adding large new features.
+
+## 2.1 Flyover and bridge collision bug
+
+### Current problem
+The player cannot drive underneath flyovers and bridges. The underside of the bridge behaves like a solid wall, blocking vehicles and players even when they are travelling on the road underneath.
+
+### Required result
+- Vehicles must be able to pass beneath flyovers.
+- Pedestrians must be able to walk beneath bridges.
+- The bridge deck must remain physically solid from above.
+- Support pillars must retain collision.
+- Road surfaces beneath the bridge must remain accessible.
+- Collision must match the actual geometry of the structure.
+
+### Implementation requirements
+- Inspect the current collision mesh and physics implementation.
+- Separate bridge deck, pillars, road, and surrounding collision geometry.
+- Use simplified collision meshes where appropriate.
+- Avoid oversized bounding boxes that block the entire area beneath the flyover.
+- Verify collision layers and object groups.
+- Check vehicle height and clearance.
+- Test driving underneath from multiple directions.
+
+Do not simply disable all bridge collisions.
+
+## 2.2 Two-wheeler passenger visibility bug
+
+### Current problem
+When the player picks up a friend or NPC on a motorcycle or scooter, the passenger disappears during the ride but becomes visible again after the player exits the vehicle.
+
+### Required result
+The passenger must remain visible throughout the ride.
+
+### Implementation requirements
+- Inspect the passenger attachment and vehicle parenting logic.
+- Correct character visibility and rendering state.
+- Attach the passenger to a suitable pillion position.
+- Implement an appropriate passenger riding animation.
+- Keep the passenger correctly positioned during acceleration, braking, and turning.
+- Prevent clipping through the rider or vehicle.
+- Restore the passenger's normal character state when dismounting.
+- Ensure the passenger cannot accidentally detach or disappear during camera changes.
+
+Test with every supported two-wheeler.
+
+---
+
+# 3. WESTERN GHATS AND NATURAL ENVIRONMENT OVERHAUL
+
+### Current problem
+The grass, trees, and vegetation in the Western Ghats look artificial and repetitive.
+
+### Objective
+Create a more natural Western Ghats environment inspired by the real landscape surrounding Coimbatore.
+
+### Visual improvements
+
+- Natural terrain elevation and slopes.
+- Irregular grass distribution.
+- Multiple grass types and heights.
+- Bushes and shrubs.
+- Trees with varied silhouettes.
+- Rocks, stones, and exposed soil.
+- Natural vegetation density.
+- Mountain ridges and layered distant hills.
+- Forest pathways.
+- Natural lighting and atmospheric fog.
+- More believable transitions between roads, forest, and mountain terrain.
+
+### Vegetation requirements
+
+Avoid placing identical trees and grass at regular intervals.
+
+Use:
+- Randomized vegetation placement.
+- Multiple model variations.
+- Scale and rotation variation.
+- Terrain-aware vegetation placement.
+- Density maps.
+- Natural clustering.
+- Distance-based vegetation rendering.
+- Instancing where supported.
+
+### Performance
+
+Use:
+- Level of Detail.
+- Frustum culling.
+- Instanced rendering.
+- Distance-based grass density.
+- Efficient shadow settings.
+- Reusable environment assets.
+
+Maintain smooth gameplay in a normal desktop browser.
+
+---
+
+# 4. CHARACTER MODELS AND FACIAL IMPROVEMENTS
+
+The current characters should look significantly more detailed and believable.
+
+### Required improvements
+
+- Better character proportions.
+- Improved face geometry.
+- Natural skin materials.
+- Better eyes and eyebrows.
+- Hair and hairstyle variations.
+- Improved clothing textures.
+- More realistic walking and running animations.
+- Better idle animations.
+- Facial expressions.
+- Character-specific appearances.
+
+### Character identity
+
+Each major character should have a recognizable visual identity.
+
+**Paramasivam Anna**
+- Mature appearance.
+- Traditional, respectable clothing.
+- Calm and experienced personality.
+
+**Kathir**
+- Young adult appearance.
+- Casual modern clothing.
+- Energetic personality.
+
+**Silk Sundaram**
+- Intimidating appearance.
+- Distinctive clothing and accessories.
+- Strong antagonist presence.
+
+**Vettu Velu**
+- Rough appearance.
+- Distinctive hairstyle and clothing.
+- Aggressive body language.
+
+**Meena**
+- College-student appearance.
+- Modern casual clothing.
+- Confident personality.
+
+**Divya**
+- Professional software-engineer appearance.
+- Smart casual clothing.
+- Calm and intelligent personality.
+
+### Can custom faces be added?
+
+Design the character system so that custom character faces can be incorporated later.
+
+Support:
+- Custom face textures.
+- UV-mapped facial materials.
+- Replaceable head models.
+- Custom 3D character models.
+- Facial expression and animation compatibility.
+
+If the developer provides personal photographs, evaluate whether they are suitable as references for creating authorized custom character assets. Do not automatically paste a photograph onto a face without appropriate UV mapping, proportions, lighting, and material work.
+
+Obtain permission before using identifiable real people's faces.
+
+---
+
+# 5. EXPAND THE MAIN STORY CAMPAIGN
+
+The existing six-mission Kovai's Mills campaign must remain intact.
+
+Expand the story into a much larger narrative.
+
+### Main storyline direction
+
+The Black Scorpions and Silk Sundaram should remain important to the existing story.
+
+Expand the narrative with:
+- New criminal organizations.
+- Conflicting local interests.
+- Rival businesses.
+- Character relationships.
+- Betrayals.
+- Unexpected alliances.
+- Consequences of player decisions.
+- A larger final confrontation.
+
+The story should feel grounded in Coimbatore rather than becoming a generic international crime story.
+
+### Mission design
+
+Each mission should include:
+
+1. Mission introduction.
+2. Character dialogue.
+3. Clear objective.
+4. Gameplay challenge.
+5. Mission progression.
+6. Optional objectives.
+7. Completion conditions.
+8. Reward.
+9. Story consequences where appropriate.
+
+Introduce mission variety:
+- Driving missions.
+- Delivery missions.
+- Chase sequences.
+- Investigation missions.
+- Stealth missions.
+- Combat missions.
+- Escort missions.
+- Rescue missions.
+- Time-limited objectives.
+- Negotiation and dialogue choices.
+
+Do not make every mission a shooting mission.
+
+### Mission tracking
+
+Create or improve:
+- Mission markers.
+- Mission descriptions.
+- Objective indicators.
+- Mission progress UI.
+- Completion notifications.
+- Reward summaries.
+- Mission replay support if compatible.
+- Persistent mission progression.
+
+---
+
+# 6. UNIQUE CHARACTER STORYLINES
+
+Create dedicated mission chains for Meena and Divya.
+
+## 6.1 Meena's storyline
+
+Meena is a college student and car enthusiast.
+
+Preserve her existing friendship and Kovai Racer reward.
+
+Expand her storyline around:
+- Car culture.
+- Street racing.
+- Vehicle challenges.
+- College life.
+- Personal conflicts.
+- Racing rivalries.
+- Underground racing events.
+
+Possible missions:
+
+1. The First Drive — help Meena retrieve a vehicle.
+2. Kovai Racer — participate in a city racing challenge.
+3. Rival Wheels — compete against a rival racing crew.
+4. The Missing Car — investigate a stolen vehicle.
+5. Final Lap — participate in a major racing event.
+
+Rewards:
+- Special racing vehicle.
+- Vehicle customization unlocks.
+- Friendship progression.
+- Exclusive clothing or accessories.
+
+## 6.2 Divya's storyline
+
+Divya is a software engineer.
+
+Preserve her existing friendship and armour reward.
+
+Build her missions around:
+- Technology.
+- Digital investigation.
+- Corporate conflicts.
+- Data recovery.
+- Cybercrime investigation.
+- Protecting sensitive information.
+- Technology-related mysteries.
+
+Possible missions:
+
+1. Lost Connection — investigate a suspicious incident.
+2. Digital Trail — find clues across the city.
+3. The Data Leak — recover compromised information.
+4. Silent Server — infiltrate a restricted facility.
+5. Final Firewall — prevent a major data breach.
+
+Do not make Divya a stereotypical hacker who magically controls every system. Her missions should be believable and playable.
+
+Rewards:
+- Special armour.
+- Technology-related upgrades.
+- Friendship progression.
+- Unique safehouse features or equipment.
+
+---
+
+# 7. HEIST SYSTEM — PLANNING AND EXECUTION
+
+Introduce a proper heist system.
+
+Heists must feel different from ordinary missions.
+
+### Planning stage
+
+The player should be able to:
+- Meet the crew.
+- Select a target.
+- Gather information.
+- Explore the location.
+- Identify entrances and exits.
+- Select a getaway vehicle.
+- Select crew members.
+- Choose equipment.
+- Decide between stealth and aggressive approaches.
+
+### Execution stage
+
+Include:
+- Entry sequences.
+- Security obstacles.
+- Guards and surveillance.
+- Timed objectives.
+- Crew coordination.
+- Vehicle escape.
+- Police response.
+- Dynamic mission outcomes.
+
+### Heist consequences
+
+Different approaches should produce different outcomes.
+
+For example:
+- Stealth approach: lower police attention, more preparation.
+- Aggressive approach: faster entry, greater police response.
+- Poor preparation: additional obstacles.
+- Crew mistakes: unexpected complications.
+
+### Rewards
+
+- Money.
+- Respect.
+- Special items.
+- Property unlocks.
+- New mission opportunities.
+
+### Important
+Do not implement heists as a simple sequence of generic combat encounters. The planning and execution stages must be meaningfully connected.
+
+---
+
+# 8. CHARACTER VOICEOVER AND DIALOGUE AUDIO
+
+Add voice acting to major character conversations.
+
+### Required characters
+
+- Paramasivam Anna.
+- Kathir.
+- Silk Sundaram.
+- Vettu Velu.
+- Meena.
+- Divya.
+- Mission-specific NPCs where appropriate.
+
+### Voice identity
+
+Create distinct voice profiles:
+
+**Paramasivam Anna:** Mature, warm, authoritative Tamil male voice.
+
+**Kathir:** Young, energetic Tamil male voice.
+
+**Silk Sundaram:** Deep, controlled, intimidating Tamil male voice.
+
+**Vettu Velu:** Rough, aggressive Tamil male voice.
+
+**Meena:** Confident, expressive Tamil female voice.
+
+**Divya:** Calm, intelligent Tamil female voice.
+
+### Language support
+
+Support:
+- Tamil.
+- English.
+- Tamil-English conversational dialogue where appropriate.
+
+Include subtitles and a language setting.
+
+### Technical implementation
+
+Preferred approach:
+- Generate dialogue audio in advance.
+- Store audio assets locally.
+- Associate each dialogue line with its corresponding audio file.
+- Trigger the correct audio during conversations.
+- Include subtitle synchronization.
+- Support audio volume controls.
+- Prevent overlapping dialogue.
+- Provide fallbacks when an audio file is missing.
+
+Browser speech synthesis can be used as a fallback, but it should not be treated as equivalent to professional character voice acting.
+
+Optional dynamic AI dialogue may be explored as a separate feature. It must not be required for core missions to work.
+
+Do not make external AI API calls without an explicit configuration, and never expose API keys in client-side code.
+
+---
+
+# 9. COMPLETE ECONOMY AND CITY LIFESTYLE SYSTEM
+
+Expand the existing money system so that money has meaningful uses throughout the game.
+
+The player should be able to earn, spend, save, invest, customize, and own things.
+
+## 9.1 Clothing stores
+
+Allow players to:
+- Buy T-shirts.
+- Buy shirts.
+- Buy trousers.
+- Buy jeans.
+- Buy shoes.
+- Buy jackets.
+- Buy traditional clothing.
+- Buy accessories.
+- Change outfits.
+- Save outfit combinations.
+
+Different stores should offer different clothing selections.
+
+## 9.2 Vehicle dealerships
+
+Add:
+- Motorcycle dealerships.
+- Scooter dealerships.
+- Car dealerships.
+- Premium vehicle showrooms.
+- Used vehicle markets.
+
+Allow players to:
+- Browse vehicles.
+- View vehicle details.
+- Purchase vehicles.
+- Own multiple vehicles.
+- Store vehicles.
+- Select an active personal vehicle.
+
+Vehicle classes should have distinct prices and performance.
+
+## 9.3 Garages and vehicle customization
+
+Allow:
+- Paint changes.
+- Vehicle colors.
+- Wheel changes.
+- Engine upgrades.
+- Handling upgrades.
+- Braking upgrades.
+- Cosmetic modifications.
+- Repair and maintenance.
+
+Ensure modifications affect gameplay where appropriate.
+
+## 9.4 Restaurants and food
+
+Add restaurants and food stalls.
+
+Examples of locally inspired options:
+- Tea shops.
+- Tiffin shops.
+- Biriyani restaurants.
+- Juice shops.
+- Street-food stalls.
+- Cafes.
+
+Allow the player to interact with shops and purchase food.
+
+Food can restore health or provide temporary gameplay benefits if balanced properly.
+
+## 9.5 Properties and real estate
+
+Introduce purchasable:
+- Apartments.
+- Houses.
+- Premium homes.
+- Garages.
+- Commercial properties.
+
+Each property should have:
+- Purchase cost.
+- Location.
+- Interior or usable interaction.
+- Vehicle storage where applicable.
+- Save functionality.
+- Upgrade possibilities.
+
+## 9.6 Business ownership
+
+Allow the player to own selected businesses.
+
+Possible businesses:
+- Small restaurants.
+- Cafes.
+- Garages.
+- Shops.
+- Commercial properties.
+
+Businesses can generate passive income over time.
+
+Include:
+- Initial investment.
+- Operating costs.
+- Income collection.
+- Upgrade options.
+- Ownership UI.
+
+Keep passive income balanced so it does not make missions or jobs irrelevant.
+
+## 9.7 Other lifestyle systems
+
+Consider:
+- Barber shops.
+- Watches.
+- Electronics.
+- Phone upgrades.
+- Accessories.
+- Personal vehicle collection.
+
+All purchases must update the player's actual inventory, appearance, vehicle collection, or game state.
+
+Do not create fake shop interfaces that do not affect gameplay.
+
+---
+
+# 10. SMART GANG AI AND TERRITORY SYSTEM
+
+### Current problem
+Rival gang members attack the player immediately whenever they see them.
+
+This makes the world feel artificial.
+
+### Required behavior
+
+Implement a gang relationship and hostility system.
+
+**Stage 1 — Neutral**
+- Gang members ignore the player.
+- They perform normal idle activities.
+- They interact with nearby NPCs.
+- They remain within their territory.
+
+**Stage 2 — Suspicious**
+- Gang members notice the player.
+- They observe the player.
+- They may approach or follow at a distance.
+- They react to suspicious behavior.
+
+**Stage 3 — Warning**
+- Gang members verbally warn the player.
+- They communicate that the player is entering their territory.
+- They may ask the player to leave.
+
+**Stage 4 — Hostile**
+- Gang members attack if the player provokes them.
+- They defend themselves if attacked.
+- They respond to attacks on their allies.
+- They may coordinate with nearby gang members.
+
+**Stage 5 — Escalation**
+- Repeated attacks increase hostility.
+- Reinforcements may arrive.
+- The gang may remember previous confrontations.
+- Territory danger increases temporarily.
+
+**Stage 6 — Cooldown**
+- Gang hostility should decrease after the player leaves the area.
+- Enemies should stop chasing indefinitely.
+- NPCs should eventually return to normal behavior.
+
+### Important wanted-level rule
+
+Gang hostility must not automatically make the player wanted.
+
+Police attention should depend on witnessed crimes, reported incidents, evidence, and other appropriate gameplay conditions.
+
+### Technical requirements
+
+Use:
+- Finite-state machines or behavior trees.
+- Detection ranges.
+- Line-of-sight checks.
+- Territory zones.
+- Gang relationship values.
+- Memory of recent incidents.
+- Cooldown timers.
+- Group coordination.
+
+Avoid giving every gang member expensive continuous AI processing.
+
+---
+
+# 11. POLICE AI AND WANTED SYSTEM IMPROVEMENT
+
+Create a more believable police response system.
+
+### Police behavior
+
+- Respond to crimes witnessed by police.
+- Respond to crimes reported by NPCs.
+- Investigate the last known crime location.
+- Search the surrounding area.
+- Pursue vehicles.
+- Coordinate with other police units.
+- Set up roadblocks at higher wanted levels.
+- Use stronger response tactics for more serious incidents.
+- Stop searching when the player has successfully escaped.
+
+### Wanted-level progression
+
+Each wanted level should introduce a meaningful escalation.
+
+For example:
+- Low wanted level: nearby patrol investigation.
+- Medium wanted level: active police pursuit.
+- High wanted level: additional police vehicles and roadblocks.
+- Very high wanted level: coordinated citywide search and specialized units.
+
+Use appropriate balance for the game's world and performance.
+
+### Important
+The player should not receive a wanted level merely for entering a gang's territory or being near a gang member.
+
+---
+
+# 12. NPC AND TRAFFIC POPULATION OVERHAUL
+
+### Current problem
+The city feels too empty.
+
+Increase pedestrian and vehicle density.
+
+### District-specific density
+
+Use different population levels for different parts of the map.
+
+**Gandhipuram**
+- Very high pedestrian density.
+- Heavy traffic.
+- Buses, autos, cars, bikes.
+- Busy intersections.
+
+**Town Hall**
+- High pedestrian density.
+- Commercial activity.
+- Street vendors.
+- Parking and traffic activity.
+
+**Ukkadam**
+- Busy roads.
+- Bus movement.
+- Autos and two-wheelers.
+- Market activity.
+
+**R.S. Puram**
+- Busy commercial streets.
+- Pedestrians and parked vehicles.
+- Moderate-to-high traffic.
+
+**Peelamedu**
+- Commercial and educational activity.
+- Bikes, cars, buses, and pedestrians.
+
+**Outskirts**
+- Lower traffic.
+- More open space.
+- Occasional pedestrians and vehicles.
+
+**Western Ghats**
+- Very low traffic.
+- Sparse pedestrians.
+- Natural environment.
+- Occasional vehicles.
+
+**Kovai Coast**
+- Moderate activity in designated areas.
+- Pedestrians and parked vehicles.
+- Lower density away from developed areas.
+
+### Vehicle variety
+
+Introduce appropriate vehicles:
+- City buses.
+- Cars.
+- Motorcycles.
+- Scooters.
+- Auto-rickshaws.
+- Taxis.
+- Delivery vehicles.
+- Parked vehicles.
+- Occasional heavy vehicles.
+
+### Pedestrian behavior
+
+NPCs should:
+- Walk on sidewalks.
+- Cross roads.
+- Wait at crossings.
+- Gather around shops.
+- Interact with vendors.
+- Sit or stand in designated areas.
+- React to nearby traffic.
+- React to accidents.
+- Run away from dangerous situations where appropriate.
+
+### Traffic behavior
+
+Add:
+- Traffic signals.
+- Lane-following behavior.
+- Vehicle spacing.
+- Basic junction logic.
+- Stopping at signals.
+- Turning at intersections.
+- Pedestrian crossings.
+- Vehicle avoidance.
+- Parking zones.
+
+### Performance requirements
+
+Do not spawn every NPC and vehicle simultaneously.
+
+Use:
+- Distance-based spawning.
+- NPC pooling.
+- Vehicle pooling.
+- Despawn rules.
+- Level of Detail.
+- District population configuration.
+- Efficient navigation.
+- Update throttling for distant entities.
+
+The city should feel busy without making the browser unusable.
+
+---
+
+# 13. AUDIO AND ATMOSPHERE
+
+Create a much richer sound environment.
+
+### Ambient sounds
+
+Include:
+- Traffic.
+- Horns.
+- Motorcycles.
+- Buses.
+- Autos.
+- Pedestrian conversations.
+- Street vendors.
+- Shops.
+- Birds.
+- Wind.
+- Rain.
+- Thunder.
+- Forest ambience.
+
+### Vehicle sounds
+
+Different vehicle categories should have different engine sounds.
+
+Include:
+- Acceleration.
+- Braking.
+- Idling.
+- Horns.
+- Collision sounds.
+- Engine shutdown.
+
+### Environment audio
+
+Use district-based ambient sound profiles.
+
+For example:
+- Commercial districts: traffic and conversations.
+- Forest areas: wind, birds, and natural ambience.
+- Residential areas: quieter background activity.
+- Coastal areas: wind and water ambience.
+
+### Audio controls
+
+Provide:
+- Master volume.
+- Music volume.
+- Effects volume.
+- Dialogue volume.
+- Ambient volume.
+
+Ensure sounds do not overlap excessively.
+
+---
+
+# 14. WEATHER, LIGHTING AND VISUAL POLISH
+
+Improve the existing day/night and weather systems.
+
+### Weather
+
+Add or improve:
+- Clear weather.
+- Cloudy weather.
+- Light rain.
+- Heavy rain.
+- Thunderstorms.
+- Weather transitions.
+
+### Rain effects
+
+Include:
+- Rain particles.
+- Wet road materials.
+- Puddles.
+- Reflections where performance permits.
+- Vehicle tire spray.
+- Reduced visibility during heavy rain.
+
+### Day and night
+
+Improve:
+- Sunrise and sunset.
+- Streetlights.
+- Building lights.
+- Vehicle headlights.
+- Interior lighting.
+- Nighttime atmosphere.
+- Shadows.
+- Fog and distance visibility.
+
+Ensure lighting transitions are smooth.
+
+---
+
+# 15. INTERIORS AND INTERACTIVE LOCATIONS
+
+Make selected buildings enterable and useful.
+
+Prioritize:
+- Safehouse.
+- Restaurants.
+- Shops.
+- Garages.
+- Mission locations.
+- Selected residential properties.
+- Business properties.
+
+Each interior should have:
+- A suitable layout.
+- Interactive objects.
+- Lighting.
+- Collision.
+- Entry and exit transitions.
+- Functional interactions.
+
+Do not create hundreds of empty interiors.
+
+Focus on locations that support gameplay.
+
+---
+
+# 16. PLAYER MOVEMENT AND VEHICLE PHYSICS
+
+Improve movement and driving.
+
+### Character movement
+
+Improve:
+- Walking.
+- Running.
+- Sprinting.
+- Jumping.
+- Entering and exiting vehicles.
+- Interacting with objects.
+- Combat movement.
+- Animation transitions.
+
+### Vehicle handling
+
+Improve:
+- Acceleration.
+- Braking.
+- Steering.
+- Suspension.
+- Turning.
+- Collision response.
+- Vehicle stability.
+- Two-wheeler handling.
+
+Each vehicle class should feel different.
+
+Motorcycles should not handle exactly like cars.
+
+Avoid unrealistic sliding or sudden changes in velocity.
+
+---
+
+# 17. CAMERA, MAP AND NAVIGATION
+
+Improve navigation and player awareness.
+
+### Minimap
+
+Display:
+- Player position.
+- Roads.
+- Important locations.
+- Mission markers.
+- Shops.
+- Safehouse.
+- Garage.
+- Available activities.
+- Relevant enemy or objective markers.
+
+### Navigation
+
+Introduce:
+- Destination selection.
+- Waypoint markers.
+- Route guidance.
+- Distance indicators.
+- Mission destination guidance.
+
+### Camera
+
+Improve:
+- Third-person camera positioning.
+- Vehicle camera.
+- Collision avoidance.
+- Smooth transitions.
+- Camera sensitivity.
+- Optional camera settings.
+
+Do not allow the camera to clip through major objects unnecessarily.
+
+---
+
+# 18. CUTSCENES AND STORY PRESENTATION
+
+Improve mission introductions and important story moments.
+
+Add:
+- Camera transitions.
+- Character framing.
+- Dialogue presentation.
+- Facial expressions.
+- Subtitles.
+- Character animations.
+- Mission title cards.
+
+Cutscenes should be skippable.
+
+After skipping a cutscene, the mission must begin in the correct state.
+
+Do not make long cutscenes for minor activities.
+
+---
+
+# 19. UI AND UX REDESIGN
+
+Improve the interface while preserving the game's visual identity.
+
+Create a clean, polished open-world game UI.
+
+Improve:
+- Main menu.
+- Pause menu.
+- Settings.
+- Mission list.
+- Map.
+- Inventory.
+- Character status.
+- Money display.
+- Respect display.
+- Shop interfaces.
+- Vehicle selection.
+- Property management.
+- Heist planning.
+- Dialogue interface.
+- Notifications.
+
+### Visual direction
+
+Use a modern, professional game interface.
+
+Avoid:
+- Excessive gradients.
+- Unnecessary visual clutter.
+- Too many overlapping panels.
+- Oversized buttons.
+- Generic placeholder icons.
+- Distracting animations.
+
+The interface should feel like a finished commercial game rather than a prototype.
+
+---
+
+# 20. SAVE SYSTEM AND GAME PROGRESSION
+
+The existing browser-local save system must remain compatible.
+
+Expand persistence to include:
+- Mission progression.
+- Side mission progression.
+- Friendship levels.
+- Money.
+- Owned vehicles.
+- Vehicle modifications.
+- Clothing and outfits.
+- Properties.
+- Businesses.
+- Business income.
+- Gang reputation.
+- Wanted level where appropriate.
+- Player upgrades.
+- Heist progression.
+- Collectibles.
+- Settings.
+
+### Save requirements
+
+- Autosave at sensible checkpoints.
+- Manual save if compatible.
+- Handle browser reloads.
+- Handle missing or corrupted save data.
+- Version the save schema.
+- Migrate older save versions safely.
+- Avoid resetting existing player progress.
+
+Provide a recovery or fallback mechanism if a migration fails.
+
+---
+
+# 21. PERFORMANCE AND TECHNICAL QUALITY
+
+The game must remain playable in a desktop browser.
+
+### Performance priorities
+
+- Avoid unnecessary per-frame calculations.
+- Avoid creating and destroying large numbers of objects continuously.
+- Reuse entities through pooling.
+- Use spatial partitioning where appropriate.
+- Optimize collision geometry.
+- Use instanced rendering for repeated assets.
+- Use LOD for distant objects.
+- Optimize textures and models.
+- Avoid excessive real-time shadows.
+- Throttle distant NPC logic.
+- Avoid memory leaks.
+- Clean up unused resources.
+
+### Quality requirements
+
+- No uncaught JavaScript errors.
+- No broken mission progression.
+- No invisible passengers.
+- No flyover collision blockers.
+- No broken vehicle interactions.
+- No duplicated NPCs caused by pooling bugs.
+- No broken save files.
+- No missing asset paths.
+- No nonfunctional shop buttons.
+- No UI elements that claim to work but do nothing.
+
+Create an optional performance setting:
+- Low.
+- Medium.
+- High.
+
+Adjust population, shadows, vegetation, reflections, and visual effects based on the selected quality.
+
+---
+
+# 22. IMPLEMENTATION PHASES
+
+Do not attempt to implement every feature in one uncontrolled code change.
+
+Follow this implementation sequence.
+
+## Phase 0 — Repository Audit
+- Inspect all source files.
+- Understand architecture.
+- Identify root causes.
+- Create a feature inventory.
+- Create an implementation plan.
+- Identify performance risks.
+- Establish a baseline test.
+
+## Phase 1 — Critical Bugs
+- Fix flyover collision.
+- Fix two-wheeler passenger visibility.
+- Verify vehicle and character interactions.
+
+## Phase 2 — Environment
+- Improve Western Ghats terrain.
+- Improve vegetation.
+- Improve road and terrain transitions.
+- Improve lighting and environment details.
+
+## Phase 3 — Character Quality
+- Improve character models.
+- Improve face rendering.
+- Improve animations.
+- Prepare custom face and model support.
+
+## Phase 4 — AI Systems
+- Improve gang behavior.
+- Introduce territory awareness.
+- Improve police AI.
+- Improve wanted-level progression.
+
+## Phase 5 — Population
+- Improve pedestrian density.
+- Improve vehicle density.
+- Add district-specific population.
+- Improve traffic behavior.
+- Optimize entity spawning.
+
+## Phase 6 — Economy
+- Expand clothing.
+- Add dealerships.
+- Add garages.
+- Add restaurants.
+- Add property ownership.
+- Add business ownership.
+- Add passive income.
+
+## Phase 7 — Audio
+- Add character dialogue audio.
+- Add subtitles.
+- Add ambient sounds.
+- Improve vehicle audio.
+- Add audio settings.
+
+## Phase 8 — Character Missions
+- Expand Meena's storyline.
+- Expand Divya's storyline.
+- Add friendship progression and rewards.
+
+## Phase 9 — Heists
+- Add planning.
+- Add crew selection.
+- Add execution.
+- Add escape.
+- Add consequences and rewards.
+
+## Phase 10 — Main Story Expansion
+- Expand Kovai's Mills.
+- Introduce new characters and conflicts.
+- Add mission variety.
+- Add meaningful story progression.
+
+## Phase 11 — Presentation
+- Improve UI.
+- Improve minimap.
+- Improve navigation.
+- Add cutscenes.
+- Improve weather and atmosphere.
+- Improve interiors.
+
+## Phase 12 — Final Testing and Optimization
+- Test every existing feature.
+- Test new features.
+- Test save migration.
+- Test performance.
+- Fix regressions.
+- Document the final implementation.
+
+---
+
+# 23. TESTING CHECKLIST
+
+After each phase, verify the following.
+
+### World and collision
+- [ ] Player can walk under flyovers.
+- [ ] Cars can drive under flyovers.
+- [ ] Motorcycles can drive under flyovers.
+- [ ] Bridge decks remain solid.
+- [ ] Pillars have proper collision.
+- [ ] Terrain does not create invisible barriers.
+
+### Characters
+- [ ] Passengers remain visible on two-wheelers.
+- [ ] Passenger positioning is correct.
+- [ ] Passenger animations work.
+- [ ] Characters enter and exit vehicles correctly.
+- [ ] Character models render correctly.
+- [ ] Facial animation does not break dialogue.
+
+### Missions
+- [ ] Existing six missions still work.
+- [ ] Mission progression is preserved.
+- [ ] New missions start correctly.
+- [ ] Objectives update correctly.
+- [ ] Rewards are granted correctly.
+- [ ] Cutscenes can be skipped safely.
+
+### Economy
+- [ ] Purchases deduct the correct amount.
+- [ ] Purchased items are saved.
+- [ ] Owned vehicles persist.
+- [ ] Properties persist.
+- [ ] Business income is calculated correctly.
+- [ ] Players cannot exploit purchases through repeated interactions.
+
+### AI
+- [ ] Neutral gangs do not attack immediately.
+- [ ] Gang warnings work.
+- [ ] Provocation triggers hostility.
+- [ ] Gang cooldown works.
+- [ ] Police respond to witnessed crimes.
+- [ ] Gang hostility does not automatically create a wanted level.
+
+### Population
+- [ ] City districts have appropriate population density.
+- [ ] NPCs spawn and despawn correctly.
+- [ ] Traffic moves correctly.
+- [ ] NPCs do not endlessly accumulate.
+- [ ] Performance remains acceptable.
+
+### Save system
+- [ ] Existing save files load.
+- [ ] New progression saves.
+- [ ] Reloading restores player progress.
+- [ ] Corrupted data is handled safely.
+- [ ] Older saves are migrated safely.
+
+---
+
+# 24. REQUIRED DEVELOPMENT REPORT
+
+At the end of every implementation phase, provide a concise report containing:
+
+1. Features inspected.
+2. Root causes identified.
+3. Files modified.
+4. Features implemented.
+5. Features not implemented.
+6. Tests performed.
+7. Test results.
+8. Performance impact.
+9. Known limitations.
+10. Recommended next phase.
+
+Do not report a feature as completed merely because code was added. Confirm that it works.
+
+---
+
+# 25. FINAL EXPECTATION
+
+The final version should feel like a living, believable Coimbatore-inspired open-world game.
+
+The player should be able to:
+
+- Explore a detailed city.
+- Drive through properly connected roads and flyovers.
+- Travel through natural Western Ghats environments.
+- Interact with pedestrians.
+- Meet friends.
+- Build relationships.
+- Complete a much larger story campaign.
+- Experience unique Meena and Divya missions.
+- Plan and execute heists.
+- Interact with gangs and police.
+- Earn and spend money.
+- Buy vehicles and customize them.
+- Own properties and businesses.
+- Explore shops and restaurants.
+- Experience character voiceovers.
+- Enjoy changing weather and day/night conditions.
+- Save and continue their progress.
+
+The world must feel active, responsive, and worth exploring.
+
+## FINAL INSTRUCTION TO THE CODING AGENT
+
+Start with Phase 0 only.
+
+Inspect the actual repository and produce a detailed technical audit before modifying anything.
+
+Do not immediately rewrite `index.html`.
+
+Do not delete existing features.
+
+Do not create fake implementations.
+
+Do not sacrifice stability for visual effects.
+
+After the audit, propose the safest implementation order and identify the files that need to change.
+
+Then proceed phase by phase, making focused changes, testing each phase, and preserving all existing functionality.
+
+**The goal is not simply to make Kovai Streets bigger. The goal is to make every part of Kovai Streets feel more alive, believable, interactive, and polished.**

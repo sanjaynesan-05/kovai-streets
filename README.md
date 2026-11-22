@@ -347,27 +347,74 @@ You can also open the game straight into a setting by adding `#low`, `#medium` o
 
 ## 💻 Run it locally
 
-No install or build step is needed.
+The game runs through a local web server. There's no install or build step, but you need [Python 3](https://www.python.org/downloads/) (or any other static file server).
 
-```text
-kovai-streets/
-├── index.html          ← the whole game
-├── three.min.js        ← Three.js r128 (3D engine)
-├── THREE-LICENSE.txt   ← Three.js MIT licence
-├── README.md
-└── screenshots/
-```
+**Windows:** double-click **`start-server.bat`**. It starts the server and opens the game at `http://localhost:8000`. Close its window to stop the server.
 
-1. Download or clone the folder.
-2. Double-click `index.html` to open it in Chrome, Edge, Firefox or Safari.
-
-If your browser blocks local files, run a tiny local server from the folder:
+**Any system:**
 
 ```bash
-# Python 3
+cd kovai-streets
 python -m http.server 8000
 # then open http://localhost:8000
 ```
+
+Opening `index.html` directly as a file still starts the game, but the start screen will warn you. Features that load asset files (voice lines, and models and textures later) need the server.
+
+```text
+kovai-streets/
+├── index.html            ← page markup and script order
+├── css/style.css         ← all styles
+├── js/                   ← game code: 18 classic scripts, loaded in order by index.html
+│   ├── core.js           ← utilities, renderer, scene, collision, geometry helpers, settings
+│   ├── textures.js       ← procedural textures and materials
+│   ├── models.js         ← character models and map icons
+│   ├── vehicles.js       ← vehicle types, traffic AI, meshes, physics, damage, passenger seats
+│   ├── world.js          ← map: roads, blocks, terrain, coast, landmarks, flyover
+│   ├── environment.js    ← street lamps, sky, day/night, weather
+│   ├── actors.js         ← player state, pedestrians, gangs
+│   ├── combat.js         ← weapons, melee, effects, pickups, lock-on
+│   ├── gameplay.js       ← police, shop, hospital, friends, cheats, respawn
+│   ├── missions.js       ← jobs, story, reels, stunt jumps, rampages
+│   ├── passengers.js     ← friends and fare customers riding with you
+│   ├── player.js         ← on-foot movement and camera
+│   ├── hud.js            ← HUD, maps, tutorial
+│   ├── audio.js          ← all sound
+│   ├── input.js          ← keyboard, mouse, touch, pause
+│   ├── progression.js    ← Respect, save system, safehouse, area gates
+│   ├── ui.js             ← pause menu, settings, tips
+│   └── main.js           ← main loop and start-up
+├── three.min.js          ← Three.js r128 (3D engine)
+├── THREE-LICENSE.txt     ← Three.js MIT licence
+├── start-server.bat      ← one-click local server for Windows
+├── tools/regression-test.js ← automated in-browser tests (see below)
+└── screenshots/
+```
+
+The scripts are plain `<script>` files, not ES modules. They share their top-level variables and functions, so **their order in `index.html` matters**.
+
+### Saving
+
+Progress is saved in your browser's local storage, automatically and safely:
+
+- Each save has a version number and a checksum.
+- The previous good save is kept as a backup.
+- A damaged save is detected, the backup is restored, and the damaged copy is kept rather than deleted.
+- Saves from the older format are upgraded automatically.
+- If the browser can't write the save (for example, storage is full), the existing save is never touched.
+- **New game** keeps a copy of the replaced save in the browser as `kovaiSave1.prev`.
+
+### Automated tests
+
+With the server running, open the game, click **Play**, then paste this into the browser console:
+
+```js
+const s=document.createElement('script');s.src='tools/regression-test.js';document.body.appendChild(s);
+// when it has loaded:
+await KST.run('all')   // or one group: 'core', 'vehicles', 'world', 'missions', 'jobs', 'police', 'save', 'saveSafety'
+```
+
+The tests change the game state (cash, missions, save), so run them on a throwaway save.
 
 ---
 
@@ -387,7 +434,7 @@ python -m http.server 8000
 
 ### itch.io (best for reaching gamers)
 1. Create a new project and set **Kind of project** to **HTML**.
-2. Upload a ZIP of `index.html`, `three.min.js` and `THREE-LICENSE.txt`.
+2. Upload a ZIP containing `index.html`, the `css/` and `js/` folders, `three.min.js` and `THREE-LICENSE.txt`.
 3. Tick **"This file will be played in the browser"**.
 4. Mark the content as containing violence, since there are guns, fights and police chases.
 
@@ -398,10 +445,10 @@ python -m http.server 8000
 | | |
 |---|---|
 | **Engine** | [Three.js](https://threejs.org) r128 (WebGL) |
-| **Code** | One self-contained `index.html` (~290 KB of generated JavaScript) |
+| **Code** | `index.html` plus 18 classic JavaScript files in `js/` (~290 KB of generated JavaScript) and `css/style.css` |
 | **Art** | 100% procedural. Every texture is drawn with Canvas 2D at load time; every model is built from code |
 | **Sound** | Generated live with the Web Audio API: per-vehicle engines, per-gun shots, footsteps, city/sea/bird ambience, three procedural radio stations, sirens, rain and the train horn |
-| **Load time** | About 1–2 seconds to build the whole world |
+| **Load time** | About 3 seconds to build the whole world (measured in Chrome) |
 
 Some of the techniques used:
 - **Geometry batching:** thousands of static buildings and props are merged into a handful of meshes for performance.
