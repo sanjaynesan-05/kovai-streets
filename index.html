@@ -50,46 +50,60 @@
 <div id="console" class="hidden"><div>Enter cheat code</div><input id="cheatIn" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24" enterkeyhint="go"><button class="play" id="cheatGo" style="font-size:20px;padding:6px 26px;margin-top:10px">Go</button></div>
 <div id="bigmap" class="hidden"><canvas id="bigmapC" width="760" height="760"></canvas><div class="k">Yellow letters are jobs · <span style="color:#ff6b6b">+</span> hospital · gun = gun shop · ♥ friends · S = story · house = safehouse · skull = rampage · press M to close</div></div>
 
-<div id="start" class="overlay">
-  <div class="panel">
-    <h1>Kovai Streets</h1>
-    <div class="tag">An open-world sandbox set in a city inspired by Coimbatore</div>
-    <div class="keys">
-      <div><b>W A S D</b> Move / drive</div>
-      <div><b>Mouse</b> Look around</div>
-      <div><b>Left click</b> Shoot / punch combo</div>
-      <div><b>Right click</b> Aim + lock on / sniper scope</div>
-      <div><b>Scroll / Tab / Q</b> Weapon wheel</div>
-      <div><b>R</b> Reload</div>
-      <div><b>C</b> Crouch / take cover</div>
-      <div><b>N</b> Car radio station</div>
-      <div><b>E</b> Get in / out of vehicle</div>
-      <div><b>T</b> Talk to people</div>
-      <div><b>Shift</b> Sprint</div>
-      <div><b>Space</b> Jump / handbrake</div>
-      <div><b>M</b> City map</div>
-      <div><b>H</b> Horn</div>
-      <div><b>Enter</b> Type a cheat code</div>
-      <div><b>Esc / P</b> Pause (cheat list)</div>
-    </div>
-    <div class="keys touchkeys">
-      <div><b>Left stick</b> Walk / drive</div>
-      <div><b>Swipe right side</b> Look around</div>
-      <div><b>FIRE</b> Shoot / punch (hold)</div>
-      <div><b>AIM</b> Aim / sniper scope</div>
-      <div><b>CAR</b> Get in / out</div>
-      <div><b>JUMP</b> Jump / handbrake</div>
-      <div><b>GUN</b> Weapon wheel</div>
-      <div><b>TALK / HORN</b> Talk to people / honk</div>
-      <div><b>MAP · CHEAT · II</b> Map, cheat codes, pause</div>
-      <div><b>RADIO · CROUCH</b> Car radio, take cover</div>
-      <div><b>Tip</b> Play in landscape</div>
-    </div>
-    <div class="qsel">GRAPHICS <button data-q="low">LOW</button><button data-q="medium">MEDIUM</button><button data-q="high">HIGH</button></div>
-    <div id="loading">Building Kovai… (this takes a few seconds)</div>
-    <button class="play hidden" id="playBtn">Play</button><button class="play alt hidden" id="newBtn">New game</button><div id="tips"></div><div id="saveNote" class="hidden"></div>
-    <div class="note">Coloured beams are jobs. Red cross = hospital (heals you fast). Gun icon = gun shop. Pink hearts = your friends Meena and Divya.<br><span id="devNote">Works with keyboard + mouse, or touch on a phone (turn it sideways).</span></div>
-  </div>
+<div id="start" class="menu">
+  <div class="mn-shade"></div>
+  <header class="mn-brand">
+    <div class="mn-logo"><svg class="mn-peaks" viewBox="0 0 120 40" aria-hidden="true"><path d="M0 40L34 6l14 14 12-12 30 32z"/><path class="snow" d="M34 6l-7 7h7l3 3 4-3zM60 8l-5 5h5l2 2 3-3z"/></svg><span class="l1">KOVAI</span><span class="l2">STREETS</span></div>
+    <div class="mn-tag">EXPLORE · FIGHT · SURVIVE</div>
+  </header>
+  <aside class="mn-story hidden" id="mnStory" aria-live="polite"></aside>
+  <section class="mn-screen on" id="scrMain">
+    <nav class="mn-nav" aria-label="Main menu">
+      <button class="mn-item primary" data-act="continue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg><span><b>CONTINUE</b><small id="miContinueSub">Resume your journey</small></span></button>
+      <button class="mn-item" data-act="new"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3h3v7.5H21v3h-7.5V21h-3v-7.5H3v-3h7.5z"/></svg><span><b>NEW GAME</b></span></button>
+      <button class="mn-item" data-act="load"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2h9v12H3z"/></svg><span><b>LOAD GAME</b></span></button>
+      <button class="mn-item" data-act="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm8.5 2l-2-.4-.6-1.5 1.2-1.7-1.9-1.9-1.7 1.2-1.5-.6-.4-2h-2.8l-.4 2-1.5.6-1.7-1.2-1.9 1.9 1.2 1.7-.6 1.5-2 .4v2.8l2 .4.6 1.5-1.2 1.7 1.9 1.9 1.7-1.2 1.5.6.4 2h2.8l.4-2 1.5-.6 1.7 1.2 1.9-1.9-1.2-1.7.6-1.5 2-.4z"/></svg><span><b>SETTINGS</b></span></button>
+      <button class="mn-item" data-act="controls"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12a4 4 0 014 4v3a3 3 0 01-5.3 1.9L15.2 14H8.8l-1.5 1.9A3 3 0 012 14v-3a4 4 0 014-4zm1 3v1.5H5.5v1H7V14h1v-1.5h1.5v-1H8V10zm9.5.2a1 1 0 100 2 1 1 0 000-2zm-2 1.8a1 1 0 100 2 1 1 0 000-2z"/></svg><span><b>CONTROLS</b></span></button>
+      <button class="mn-item" data-act="credits"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18v11H3zM3 4.5l16.5-2 .6 4-16.5 2z"/></svg><span><b>CREDITS</b></span></button>
+      <button class="mn-item" data-act="exit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h10v4h-2V5H6v14h6v-2h2v4H4zM15 8l5 4-5 4v-3H9v-2h6z"/></svg><span><b>EXIT</b></span></button>
+    </nav>
+    <div id="loading" class="mn-loading">Building Kovai… <span>(this takes a few seconds)</span></div>
+    <div class="mn-foot"><div id="tips"></div><div id="saveNote" class="hidden"></div></div>
+  </section>
+  <section class="mn-screen panel-screen" id="scrLoad"><h2>LOAD GAME</h2><p class="mn-hint">Saves are kept in this browser. Loading a slot keeps your current save as the "previous" slot.</p><div id="slotList" class="mn-slots"></div><button class="mn-back">‹ BACK</button></section>
+  <section class="mn-screen panel-screen" id="scrSettings"><h2>SETTINGS</h2>
+    <div class="mn-set">
+      <div class="row"><label>Graphics quality</label><div class="qsel"><button data-q="low">LOW</button><button data-q="medium">MEDIUM</button><button data-q="high">HIGH</button></div></div>
+      <div class="row note"><label></label><small>Changing quality reloads the game. Resolution follows your window and the quality preset.</small></div>
+      <div class="row"><label>Display</label><button class="mn-tog" id="mFull">WINDOWED</button></div>
+      <div class="row"><label for="mVol">Master volume</label><input type="range" id="mVol" min="0" max="1" step="0.05"></div>
+      <div class="row"><label for="mRad">Music (car radio) volume</label><input type="range" id="mRad" min="0" max="1" step="0.05"></div>
+      <div class="row"><label for="mSens">Camera sensitivity</label><input type="range" id="mSens" min="0.3" max="2.5" step="0.05"></div>
+      <div class="row"><label>Invert look up / down</label><button class="mn-tog" id="mInv">OFF</button></div>
+      <div class="row"><label>Subtitles</label><button class="mn-tog" id="mSubs">TAMIL + ENGLISH</button></div>
+      <div class="row note"><label></label><small>Separate effects and voice volumes will come with the voice-acting update. The game has no recorded voices yet.</small></div>
+    </div><button class="mn-back">‹ BACK</button></section>
+  <section class="mn-screen panel-screen" id="scrControls"><h2>CONTROLS</h2>
+    <div class="mn-ctl">
+      <div><h4>MOVEMENT</h4><p><kbd>W A S D</kbd>Walk / run</p><p><kbd>Shift</kbd>Sprint</p><p><kbd>Space</kbd>Jump · vault low walls</p><p><kbd>C</kbd>Crouch / take cover</p></div>
+      <div><h4>DRIVING</h4><p><kbd>W / S</kbd>Accelerate · brake / reverse</p><p><kbd>A / D</kbd>Steer</p><p><kbd>Space</kbd>Handbrake / drift</p><p><kbd>E / F</kbd>Get in / out</p><p><kbd>H</kbd>Horn</p><p><kbd>N</kbd>Radio station</p></div>
+      <div><h4>COMBAT</h4><p><kbd>Left click</kbd>Shoot · punch combo</p><p><kbd>Right click</kbd>Aim · lock on · scope</p><p><kbd>R</kbd>Reload</p><p class="tip">Melee an unaware guard for a silent takedown</p></div>
+      <div><h4>WEAPONS</h4><p><kbd>Scroll · Tab · Q</kbd>Weapon wheel</p><p><kbd>1–9 · 0 · - · =</kbd>Pick a weapon</p></div>
+      <div><h4>INTERACTION</h4><p><kbd>T</kbd>Talk · shops · safehouse</p><p><kbd>1–9</kbd>Choose an option</p><p><kbd>M</kbd>City map</p><p><kbd>Enter</kbd>Cheat code</p><p><kbd>Esc / P</kbd>Pause</p></div>
+      <div><h4>CAMERA</h4><p><kbd>Mouse</kbd>Look around</p><p><kbd>Arrow keys</kbd>Look (on foot)</p><p class="tip">Sensitivity and invert are in Settings</p></div>
+      <div class="wide"><h4>TOUCH · PHONE OR TABLET IN LANDSCAPE</h4><p><kbd>Left stick</kbd>Walk / drive</p><p><kbd>Swipe right side</kbd>Look</p><p><kbd>FIRE</kbd>Shoot / punch</p><p><kbd>AIM</kbd>Aim / scope</p><p><kbd>CAR · EXIT</kbd>Get in / out</p><p><kbd>JUMP · BRAKE</kbd>Jump / handbrake</p><p><kbd>GUN</kbd>Weapon wheel</p><p><kbd>TALK · HORN</kbd>Talk / honk</p><p><kbd>MAP · RADIO · CROUCH · CHEAT · II</kbd>Map, radio, cover, cheats, pause</p></div>
+    </div><button class="mn-back">‹ BACK</button></section>
+  <section class="mn-screen panel-screen" id="scrCredits"><h2>CREDITS</h2>
+    <div class="mn-cred">
+      <p><span>Game design, direction and story</span>The Kovai Streets developer</p>
+      <p><span>Code, models, textures and sound</span>Generated with Claude (Anthropic) in conversation with the developer</p>
+      <p><span>3D engine</span>three.js r128 · © three.js authors · MIT licence</p>
+      <p><span>Fonts</span>Bebas Neue · Rajdhani · Google Fonts · SIL Open Font Licence</p>
+      <p class="fine">All characters, shops, companies and events are fictional. Real Coimbatore place names are used only to evoke the city.</p>
+    </div><button class="mn-back">‹ BACK</button></section>
+  <div class="mn-dialog hidden" id="mnDialog" role="dialog" aria-modal="true"><div class="box"><h3 id="dlgT"></h3><p id="dlgB"></p><div class="btns"><button id="dlgOk" class="mn-btn gold">OK</button><button id="dlgNo" class="mn-btn">CANCEL</button></div></div></div>
+  <button class="hidden" id="playBtn" tabindex="-1">Play</button><button class="hidden" id="newBtn" tabindex="-1">New game</button>
+  <footer class="mn-bottom"><div class="mn-tagline">The City is Yours…</div><div class="mn-sub">A Coimbatore-inspired open-world action adventure</div></footer>
 </div>
 <div id="pause" class="overlay hidden"><div class="panel"><h1 style="font-size:84px">Paused</h1>
   <div class="tag">Cheats: tap one below, or press Enter while playing and type the code</div>
@@ -121,7 +135,7 @@
     <label>Saved game</label><div><button class="sbtn" id="sSave">Save now</button><button class="sbtn danger" id="sDel">Delete save</button></div>
   </div>
   <div class="qsel">GRAPHICS <button data-q="low">LOW</button><button data-q="medium">MEDIUM</button><button data-q="high">HIGH</button><div style="font-size:12px;opacity:.6;margin-top:4px">Changing quality reloads the game</div></div>
-  <button class="play" id="resumeBtn">Resume</button></div></div>
+  <button class="play" id="resumeBtn">Resume</button><button class="play alt" id="pauseMenuBtn">Main menu</button></div></div>
 <div id="dead" class="overlay hidden" style="background:rgba(60,0,0,.45)"><div class="panel"><h2>Knocked out</h2><div class="tag" id="deadMsg">Waking up at the hospital…</div></div></div>
 
 <script src="three.min.js"></script>
@@ -143,6 +157,7 @@
 <script src="js/progression.js"></script>
 <script src="js/story2.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/menu.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

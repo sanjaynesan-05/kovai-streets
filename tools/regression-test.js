@@ -61,7 +61,7 @@ groups.jobs=async()=>{const g=G();
 
 groups.vehicles=async()=>{const g=G();
   const land=['car','sport','auto','turbo','bus','police','bike','scooter','lorry','ambulance','tank','hatch','suv','jeep','van','taxi','tempo','cruiser','sports','retro','moped','cycle'];
-  for(const type of land){await t('drive '+type,()=>{clearMission();resetPlayer(-200,-3.5);const v=g.spawnVehicle(type,-195,-3.5,Math.PI/2);g.enterVehicle(v);S(20);g.K.KeyW=true;S(150);g.K.KeyW=false;const sp=v.speed,ok=isFinite(v.pos.x)&&isFinite(v.y)&&sp>2;g.exitV();S(15);park(v);return{pass:ok&&!g.player.vehicle,detail:'speed '+sp.toFixed(1)}})}
+  for(const type of land){await t('drive '+type,()=>{clearMission();resetPlayer(-382,-3.5);const v=g.spawnVehicle(type,-385,-3.5,-Math.PI/2);/* quiet outskirts road */g.enterVehicle(v);S(20);g.K.KeyW=true;S(150);g.K.KeyW=false;const sp=v.speed,ok=isFinite(v.pos.x)&&isFinite(v.y)&&sp>2;g.exitV();S(15);park(v);return{pass:ok&&!g.player.vehicle,detail:'speed '+sp.toFixed(1)}})}
   for(const type of['speedboat','fishboat']){await t('boat '+type,()=>{resetPlayer(0,0);const v=g.spawnVehicle(type,820,0,Math.PI/2);g.player.pos.set(818,0.5,0);g.enterVehicle(v);S(20);g.K.KeyW=true;S(150);g.K.KeyW=false;const ok=isFinite(v.pos.x)&&v.speed>2;g.exitV();S(5);park(v);return{pass:ok,detail:'speed '+v.speed.toFixed(1)}})}
 };
 

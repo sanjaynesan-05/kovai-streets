@@ -82,7 +82,7 @@ function say2(id){const L=A2L[id];if(!L)return;const dur=clamp(1.6+(L.en.length+
 function subBusy(){return!!subCur||subQ.length>0}
 function updateSub(dt){const el=$('sub');if(subCur){subT-=dt;if(subT<=0)subCur=null}
   if(!subCur&&subQ.length){subCur=subQ.shift();subT=subCur.dur;const L=subCur.L;
-    el.className=L.style==='altered'?'altered':'';el.innerHTML=`<b>${esc(L.who)}</b>${L.ta?`<span class="ta">${esc(L.ta)}</span>`:''}<span>${esc(L.en)}</span>`}
+    el.className=L.style==='altered'?'altered':'';el.innerHTML=`<b>${esc(L.who)}</b>${L.ta&&SET.subs!=='en'?`<span class="ta">${esc(L.ta)}</span>`:''}<span>${esc(L.en)}</span>`}
   if(!subCur&&!el.classList.contains('hidden'))el.classList.add('hidden');else if(subCur)el.classList.remove('hidden')}
 function clearSubs(){subQ=[];subCur=null;subT=0;$('sub').classList.add('hidden')}
 

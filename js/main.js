@@ -50,7 +50,7 @@ function update(dt){dt*=slowMo();if(wheelOpen){if(wheelMode==='scroll'&&performa
 let last=performance.now();const zoneSprites=[];
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,Math.max(0,(now-last)/1000));last=now;
   if(started&&!paused&&!consoleOpen){if(cineHold)cineTick(dt);else update(dt)}
-  else if(!started){time+=dt;sim(dt);attractCam(dt);updateSky(dt,false);sun.position.set(-37+SUN_OFF.x,SUN_OFF.y,40+SUN_OFF.z);sun.target.position.set(-37,0,40);updateAudio()}
+  else if(!started){time+=dt;sim(dt);menuCam(dt);updateSky(dt,false);if(AC)updateAmbience(dt);sun.position.set(-37+SUN_OFF.x,SUN_OFF.y,40+SUN_OFF.z);sun.target.position.set(-37,0,40);updateAudio()}
   renderer.render(scene,camera)}
 
 /* ================= init ================= */
