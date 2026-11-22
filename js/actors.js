@@ -69,7 +69,8 @@ function spawnGoon(x,z,spot,aggro,opt){opt=opt||{};const boss=!!opt.boss;
   const wep=opt.wep||(boss?'rifle':rpick(['pistol','pistol','smg','rifle']));h.gun.scale.set(wep==='pistol'?1:1.15,wep==='pistol'?1:wep==='smg'?1.3:2,wep==='pistol'?1:1.15);
   const g={h,x,z,yaw:Math.random()*6,hp:boss?(opt.hp||650):cop?80:100,dead:false,deadT:0,aggro:!!aggro,shootT:RR(0.8,1.8),phase:0,spot,boss,wep,fly:null,cop};goons.push(g);return g}
 function spawnGang(sp){sp.alive=0;const cx=sp.i*CELL+sp.sx*10.5,cz=sp.j*CELL+sp.sz*10.5;for(let k=0;k<4;k++){spawnGoon(cx+RR(-3,3),cz+RR(-3,3),sp);sp.alive++}sp.respawn=0}
-function damageGoon(g,amt,byPlayer,fl){if(g.dead)return;g.hp-=amt;g.aggro=true;if(g.hp<=0){g.dead=true;g.deadT=0;
+function damageGoon(g,amt,byPlayer,fl){if(g.dead)return;
+  if(g.surrender&&!g.surrendered&&g.hp-amt<=g.surrender){g.surrendered=true;g.hp=g.surrender;g.aggro=false;g.passive=true;if(g.cone)g.cone.visible=false;return}/* story bosses that give up instead of dying */g.hp-=amt;g.aggro=true;if(g.hp<=0){g.dead=true;g.deadT=0;
     if(fl)g.fly={vx:fl.vx,vy:fl.vy,vz:fl.vz,y:groundH(g.x,g.z)+0.2,spin:RR(6,10)};else poseDead(g.h,groundH(g.x,g.z));
     if(byPlayer!==false)onGoonKilled(g);if(byPlayer!==false&&g.cop){addWanted(1)}else if(byPlayer!==false){dropCash(g.x,g.z,g.boss?RI(1500,2500):RI(80,260));
       if(g.boss||Math.random()<0.38){const id=g.boss?'rocket':g.wep==='smg'?'smg':g.wep==='rifle'?'rifle':rpick(['smg','shotgun','revolver','bat','knife','grenade']);const wi=WI(id);dropWeapon(g.x+RR(-1,1),g.z+RR(-1,1),wi,id==='rocket'?4:id==='shotgun'?16:id==='revolver'?18:id==='grenade'?3:WEAPONS[wi].melee?0:60)}}
@@ -78,12 +79,13 @@ const _pp={x:0,z:0};
 function updateGoons(dt){const P=playerP();
   for(let i=goons.length-1;i>=0;i--){const g=goons[i];
     if(g.dead){if(g.fly){flyStep(g,dt);continue}g.deadT+=dt;if(g.deadT>30){scene.remove(g.h.g);goons.splice(i,1)}continue}
+    if(g.surrendered)continue;/* kneeling, hands up (posed by story2.js) */
     const dx=P.x-g.x,dz=P.z-g.z,d=Math.hypot(dx,dz);g.h.g.visible=d<220;if(g.cop&&(wanted===0||player.dead)){g.aggro=false;g.copT=(g.copT||0)+dt;animHuman(g.h,0,0,false);g.h.g.position.set(g.x,(g.y=humanY(g.x,g.z,g.y||0)),g.z);if(g.copT>4&&d>40){scene.remove(g.h.g);goons.splice(i,1)}continue}g.copT=0;
     if(player.dead)g.aggro=false;
     if(g.stagger>0){g.stagger-=dt;animHuman(g.h,0,0,false);g.h.armL.rotation.x=g.h.armR.rotation.x=-0.6;g.h.g.position.set(g.x,(g.y=humanY(g.x,g.z,g.y||0)),g.z);g.h.g.rotation.y=g.yaw;continue}
     if(!player.dead&&!player.vehicle&&d<2.4){g.aggro=true;g.yaw=Math.atan2(dx,dz);g.meleeT=(g.meleeT||0.5)-dt;if(g.meleeT<=0){g.meleeT=RR(0.8,1.25);g.punchT=0.28;playerDamage(g.boss?12:8);noise(0.09,650,0.4,2);shake=Math.max(shake,0.08)}
       animHuman(g.h,0,0,true);if(g.punchT>0){g.punchT-=dt;punchAnim(g.h,g.punchT,1,'fists')}g.h.g.position.set(g.x,(g.y=humanY(g.x,g.z,g.y||0)),g.z);g.h.g.rotation.y=g.yaw;continue}
-    if(!player.dead&&(d<36||(g.aggro&&d<75))){g.aggro=true;g.yaw=Math.atan2(dx,dz);let moving=false;
+    if(!player.dead&&((d<36&&!g.passive)||(g.aggro&&d<75))){g.aggro=true;g.yaw=Math.atan2(dx,dz);let moving=false;
       if(d>13){const sp=2.8;_pp.x=g.x+dx/d*sp*dt;_pp.z=g.z+dz/d*sp*dt;pushCircle(_pp,0.35,g.y||0);g.x=_pp.x;g.z=_pp.z;moving=true}
       g.shootT-=dt;if(g.shootT<=0){const W=GW[g.wep];g.shootT=RR(W.rate[0],W.rate[1]);const m=g.h.gun.localToWorld(_v.set(0,-0.85,0));
         enemyShoot(m.x,m.y,m.z,clamp((0.55-d/100)*W.acc,0.1,0.55),W.dmg*(g.boss?1.4:1))}

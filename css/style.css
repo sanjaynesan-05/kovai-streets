@@ -137,3 +137,25 @@ body.touch .keys b{min-width:96px;font-size:14px}body.touch .keys{font-size:14px
 button.play.alt{background:transparent;color:#ffd23f;border:2px solid #ffd23f;box-shadow:none;font-size:22px;padding:8px 26px;margin-left:12px}
 body.touch .settings{font-size:12px;gap:5px 10px}body.touch .progress{font-size:11px}body.touch #tut{font-size:13px;bottom:96px}
 .runNote{max-width:560px;margin:12px auto 0;padding:8px 14px;border-radius:10px;border:1px solid #7fb8ff;background:rgba(127,184,255,.12);color:#d6e9ff;font-size:15px;font-weight:600}
+
+/* ---- Act 2: subtitles, mission meters, phone, title card, CCTV, fade ---- */
+#sub{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);max-width:min(760px,90vw);background:rgba(8,11,16,.78);border-radius:10px;padding:9px 16px;z-index:4;text-align:center;pointer-events:none;text-shadow:none}
+#sub b{display:block;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#ffd23f;font-weight:400}
+#sub span{display:block;font-size:18px;font-weight:600;line-height:1.3}
+#sub span.ta{font-family:'Noto Sans Tamil','Latha','Nirmala UI',sans-serif;font-size:17px;color:#f4e6c3;margin-bottom:3px}
+#sub.altered{background:rgba(0,0,0,.9);border:1px solid #39ff9f}#sub.altered b{color:#39ff9f}#sub.altered span{font-family:'Courier New',monospace;color:#b6ffd9;letter-spacing:1px}
+.mM{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:13px;font-weight:700;letter-spacing:1px}.mM span{min-width:96px;text-align:right}
+.mB{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}.mB div{height:100%}
+#fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:7;transition:opacity 1s}
+#phone{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(360px,88vw);min-height:min(420px,80vh);max-height:92vh;overflow-y:auto;background:#0d1117;border:2px solid #30363d;border-radius:28px;padding:22px 20px;z-index:8;box-shadow:0 20px 60px rgba(0,0,0,.7);font-family:'Rajdhani',sans-serif;cursor:pointer}
+#phone .ph-h{font-size:12px;letter-spacing:2px;color:#39ff9f;border-bottom:1px solid #30363d;padding-bottom:8px;margin-bottom:12px;font-weight:700}
+#phone .ph-b p{margin:0 0 8px;font-size:17px;font-weight:600;color:#e6edf3;background:#161b22;border-radius:12px;padding:8px 12px;display:inline-block;max-width:100%}
+#phone .ph-b p.big{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#ff6b6b;background:none;padding:0 4px}
+#phone .ph-f{margin-top:12px;font-size:11px;letter-spacing:1.5px;color:#8b949e;text-align:center}
+#card{position:fixed;inset:0;z-index:8;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer}
+#card h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,8vw,90px);letter-spacing:6px;margin:0;color:#ffd23f;font-weight:400}
+#card p{font-size:20px;font-weight:600;margin:6px 0;opacity:.85}#card blockquote{font-size:22px;font-style:italic;margin:22px 0 0;max-width:640px;color:#f4e6c3}#card small{margin-top:28px;opacity:.5;font-size:13px}
+#cctv{position:fixed;inset:0;z-index:6;pointer-events:auto;cursor:pointer;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 4px);box-shadow:inset 0 0 160px rgba(0,0,0,.85);filter:grayscale(1)}
+#cctv .cc-top{display:flex;justify-content:space-between;padding:18px 24px;font-family:'Courier New',monospace;font-size:18px;color:#e6e6e6;text-shadow:0 0 4px #000}
+#cctv .cc-off{display:none;position:absolute;inset:0;background:#000;color:#bbb;font-family:'Courier New',monospace;font-size:28px;letter-spacing:4px;align-items:center;justify-content:center}#cctv.off .cc-off{display:flex}
+body.touch #sub{bottom:110px}body.touch #sub span{font-size:14px}

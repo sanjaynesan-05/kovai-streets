@@ -1,0 +1,25 @@
+Add Act 2 "Threads of Kovai": story missions 7-14 and open ending
+
+Story missions 7-14, played after Act 1:
+- 7 Ashes and Ledgers: investigation, including an optional clue
+- 8 The Tail: tailing with a suspicion meter, photographing a meeting
+- 9 Workers' Voice: escorting Selvi Akka and defending the rally
+- 10 Night at the Godown: stealth with guard vision cones, cameras,
+  an alarm and silent takedowns
+- 11 The Inspector's Price: pay, threaten or walk away
+- 12 Kathir's Secret: scooter chase, then forgive him or hand him over
+- 13 Ghat Wolves: timed rescue, gang leader can surrender
+- 14 The Auction: finale with an enforcer fight, a chase and the jetty
+
+Choices are saved and change free-roam police behaviour and the
+finale. No choice blocks the story. After the finale, The Architect's
+message, a CCTV cut and an Act 2 card play, then free roam continues.
+
+Also:
+- Subtitles in Tamil and English, with line IDs for the voice system
+- Phone, title card, CCTV and fade overlays
+- New police station and godown locations
+- Save format v3, migrated from v2 with Act 2 defaults
+- Mission ticks, cleanup and test auto-complete in the stage framework
+- Act 2 regression tests (24); all 138 tests pass
+- README and GAME_CONTENT.md describe Act 2

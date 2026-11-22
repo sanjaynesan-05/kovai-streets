@@ -21,6 +21,7 @@ function initPlay(){
     const f=FRIENDS[0];if(f.perkDone){const v=spawnVehicle('sport',f.home.x+8,f.home.z+4.5,Math.PI/2);v.keep=true}}
   for(const k in GATES)if(areaOpen(k))openGate(k,false);
   PROG.lastLv=respectLv();radioSt=SET.station!=null?SET.station:1;setGun();
+  initAct2();
   if(loaded){$('playBtn').textContent='Continue';$('newBtn').classList.remove('hidden')}
   if(saveNotice){const n=$('saveNote');n.textContent=saveNotice;n.classList.remove('hidden');$('playBtn').addEventListener('click',()=>setTimeout(()=>toast('SAVE NOTICE',saveNotice,6),3800),{once:true})}}
 function updatePlay(dt){
@@ -29,6 +30,7 @@ function updatePlay(dt){
   if(giverBeam)giverBeam.visible=!mission&&PROG.story<STORY.length;
   if(player.vehicle&&player.crouch)player.crouch=false;
   const lv=respectLv();if(lv>PROG.lastLv){PROG.lastLv=lv;setTimeout(()=>toast('RESPECT LV '+lv,lvUnlocks(lv)||'The streets know your name',4.5),3200);queueSave()}
+  updateAct2(dt);
   if(saveQ>0){saveQ-=dt;if(saveQ<=0)saveGame()}saveTimer-=dt;if(saveTimer<=0){saveTimer=30;saveGame()}}
 
 
@@ -47,7 +49,7 @@ function update(dt){dt*=slowMo();if(wheelOpen){if(wheelMode==='scroll'&&performa
   const P=playerP();sun.position.set(P.x+SUN_OFF.x,SUN_OFF.y,P.z+SUN_OFF.z);sun.target.position.set(P.x,0,P.z)}
 let last=performance.now();const zoneSprites=[];
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,Math.max(0,(now-last)/1000));last=now;
-  if(started&&!paused&&!consoleOpen)update(dt);
+  if(started&&!paused&&!consoleOpen){if(cineHold)cineTick(dt);else update(dt)}
   else if(!started){time+=dt;sim(dt);attractCam(dt);updateSky(dt,false);sun.position.set(-37+SUN_OFF.x,SUN_OFF.y,40+SUN_OFF.z);sun.target.position.set(-37,0,40);updateAudio()}
   renderer.render(scene,camera)}
 
@@ -75,4 +77,4 @@ function init(){buildWheel();setupTouch();buildWorld();buildTrees();spawnWandere
   initPlay();$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');
   requestAnimationFrame(loop)}
 setTimeout(()=>{try{const t0=performance.now();init();window.__initMs=performance.now()-t0}catch(e){console.error(e);$('loading').textContent='Something went wrong while building the city: '+e.message}},30);
-window.__game={step:(dt,n)=>{for(let i=0;i<(n||1);i++)update(dt)},saveApi:{parseSave,sanitizeSave,saveSum,SAVE_VERSION,get blocked(){return saveBlocked},get notice(){return saveNotice}},abortMission:()=>{if(mission)missionFail('test')},markerPos:()=>marker.visible?marker.position.clone():null,PROG,startStory,startRampage,RAMPAGES,saveGame,loadGame,toggleCrouch,get heli(){return heli},get respect(){return respectLv()},set rep(v){rep=v},get paused(){return paused},GHAT:()=>GHAT,spawnVehicle,FALLS:()=>FALLS,train,setRain:v=>{rainF=v;rainOn=v>0.5},exitV:()=>exitVehicle(),get tod(){return tod},openWheel:m=>openWheel(m),renderer,raycastAll,camera,player,vehicles,goons,peds,FRIENDS,CHEATS,get mission(){return mission},get offers(){return offers},get wanted(){return wanted},set wanted(v){wanted=v},enterVehicle,startMission,K,setCam:(y,p)=>{camYaw=y;camPitch=p},openTalk,chooseTalk,get talk(){return talk},buyItem};
+window.__game={step:(dt,n)=>{for(let i=0;i<(n||1);i++)update(dt)},storyAuto:()=>{const m=mission;if(m&&m.stages){const s=m.stages[m.stage];if(s&&s.auto)s.auto(m)}},cineSkip,get cineHold(){return cineHold},a2Epilogue:startEpilogue,damageGoon,setTod:v=>{tod=v},STORY,saveApi:{parseSave,sanitizeSave,saveSum,SAVE_VERSION,get blocked(){return saveBlocked},get notice(){return saveNotice}},abortMission:()=>{if(mission)missionFail('test')},markerPos:()=>marker.visible?marker.position.clone():null,PROG,startStory,startRampage,RAMPAGES,saveGame,loadGame,toggleCrouch,get heli(){return heli},get respect(){return respectLv()},set rep(v){rep=v},get paused(){return paused},GHAT:()=>GHAT,spawnVehicle,FALLS:()=>FALLS,train,setRain:v=>{rainF=v;rainOn=v>0.5},exitV:()=>exitVehicle(),get tod(){return tod},openWheel:m=>openWheel(m),renderer,raycastAll,camera,player,vehicles,goons,peds,FRIENDS,CHEATS,get mission(){return mission},get offers(){return offers},get wanted(){return wanted},set wanted(v){wanted=v},enterVehicle,startMission,K,setCam:(y,p)=>{camYaw=y;camPitch=p},openTalk,chooseTalk,get talk(){return talk},buyItem};

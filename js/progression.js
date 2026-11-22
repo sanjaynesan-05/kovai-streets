@@ -24,7 +24,7 @@ function lvUnlocks(lv){const a=[];for(const it of SHOPITEMS)if(it.lv===lv)a.push
      kovaiSave1.corrupt  raw copy of an unreadable save, kept so it is never silently lost
      kovaiSave1.prev     copy of the save that "New game" replaced (not loaded automatically)
    Version 1 saves (flat object with v:1) are migrated on load. Saves from a newer version are left untouched. */
-const SAVE_VERSION=2,SAVE_BAK=SAVE_KEY+'.bak',SAVE_BAD=SAVE_KEY+'.corrupt',SAVE_PREV=SAVE_KEY+'.prev';
+const SAVE_VERSION=3,SAVE_BAK=SAVE_KEY+'.bak',SAVE_BAD=SAVE_KEY+'.corrupt',SAVE_PREV=SAVE_KEY+'.prev';
 let saveQ=0,saveTimer=30,savedT=null,saveBlocked=false,saveWarned=false,saveNotice='';
 function queueSave(){saveQ=0.5}
 function flashSaved(){const el=$('saveTag');if(!el)return;el.style.opacity=1;clearTimeout(savedT);savedT=setTimeout(()=>el.style.opacity=0,1300)}
@@ -32,7 +32,8 @@ function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
 function saveSum(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return h.toString(36)+'.'+s.length}
-const SAVE_MIGRATE={1:o=>{const d=Object.assign({},o);delete d.v;return d}};
+const SAVE_MIGRATE={1:o=>{const d=Object.assign({},o);delete d.v;return d},   // v1 flat object -> v2 data
+  2:d=>{const n=Object.assign({},d);n.prog=Object.assign({},d.prog||{});if(!n.prog.a2)n.prog.a2={};return n}};   // v2 -> v3: Act 2 story state
 function sanitizeSave(d){if(!d||typeof d!=='object'||Array.isArray(d))return null;if(typeof d.cash!=='number'||!isFinite(d.cash))return null;
   const num=(x,def,lo,hi)=>typeof x==='number'&&isFinite(x)?clamp(x,lo,hi):def,arr=(a,n)=>Array.isArray(a)?a.slice(0,n):[];
   const ids=(a,n)=>[...new Set(arr(a,n).filter(x=>Number.isInteger(x)&&x>=0&&x<n))];const p=d.prog&&typeof d.prog==='object'?d.prog:{};
@@ -41,13 +42,13 @@ function sanitizeSave(d){if(!d||typeof d!=='object'||Array.isArray(d))return nul
     fr:arr(d.fr,FRIENDS.length).map(a=>Array.isArray(a)?[num(a[0],0,0,100),!!a[1]]:[0,false]),tod:num(d.tod,8.5,0,24),
     prog:{story:Math.floor(num(p.story,0,0,STORY.length)),reels:ids(p.reels,REELS.length),jumps:ids(p.jumps,RAMPS.length),ramp:ids(p.ramp,RAMPAGES.length),house:!!p.house,
       garage:arr(p.garage,3).filter(c=>c&&VT[c.type]).map(c=>({type:c.type,color:typeof c.color==='string'?c.color:null})),outfit:Math.floor(num(p.outfit,0,0,OUTFITS.length-1)),
-      tut:Math.floor(num(p.tut,0,0,TUT.length)),lastLv:Math.floor(num(p.lastLv,1,1,1e5))}}}
+      tut:Math.floor(num(p.tut,0,0,TUT.length)),lastLv:Math.floor(num(p.lastLv,1,1,1e5)),a2:sanitizeA2(p.a2)}}}
 /* parseSave(raw) -> {ok:true,data,version} or {ok:false,reason:'empty'|'corrupt'|'newer',why} */
 function parseSave(raw){if(raw==null||raw==='')return{ok:false,reason:'empty'};let o;try{o=JSON.parse(raw)}catch(e){return{ok:false,reason:'corrupt',why:'not JSON'}}
   if(!o||typeof o!=='object'||!Number.isInteger(o.v))return{ok:false,reason:'corrupt',why:'no version'};
   if(o.v>SAVE_VERSION)return{ok:false,reason:'newer',why:'version '+o.v};
-  let data;if(o.v===SAVE_VERSION){if(!o.data||typeof o.data!=='object')return{ok:false,reason:'corrupt',why:'no data'};if(o.sum!==saveSum(JSON.stringify(o.data)))return{ok:false,reason:'corrupt',why:'checksum mismatch'};data=o.data}
-  else{let d=o;for(let v=o.v;v<SAVE_VERSION;v++){const m=SAVE_MIGRATE[v];if(!m)return{ok:false,reason:'corrupt',why:'no migration from v'+v};try{d=m(d)}catch(e){return{ok:false,reason:'corrupt',why:'migration failed'}}}data=d}
+  let data;if(o.v>=2){if(!o.data||typeof o.data!=='object')return{ok:false,reason:'corrupt',why:'no data'};if(o.sum!==saveSum(JSON.stringify(o.data)))return{ok:false,reason:'corrupt',why:'checksum mismatch'};data=o.data}else data=o;
+  for(let v=o.v;v<SAVE_VERSION;v++){const m=SAVE_MIGRATE[v];if(!m)return{ok:false,reason:'corrupt',why:'no migration from v'+v};try{data=m(data)}catch(e){return{ok:false,reason:'corrupt',why:'migration failed'}}}
   const clean=sanitizeSave(data);return clean?{ok:true,data:clean,version:o.v}:{ok:false,reason:'corrupt',why:'invalid fields'}}
 function collectSave(){return{cash:Math.floor(player.cash),armor:player.armor,owned:player.owned.slice(),mags:player.mags.slice(),res:player.res.map(r=>r===Infinity?-1:r),weapon:player.weapon,rep,
   fr:FRIENDS.map(f=>[f.fr,f.perkDone]),prog:Object.assign({},PROG,{garage:garageList()}),tod}}
@@ -76,7 +77,7 @@ addEventListener('beforeunload',()=>saveGame());
 
 /* ---------- safehouse & garage ---------- */
 const HOUSE={px:-439,pz:15,price:5000,gx0:-424,gx1:-410,gz0:14,gz1:28};
-function extraExcluded(x,z){if(x>-456&&x<-402&&z>8&&z<38)return true;return false}
+function extraExcluded(x,z){if(x>-456&&x<-402&&z>8&&z<38)return true;return a2Excluded(x,z)}
 function buildSafehouse(){const{gx0,gx1,gz0,gz1}=HOUSE;
   building(-439,24,14,12,7,'#f3c6c0',{noShop:true,noSign:true,noTank:true,style:0});addG(B_PLAIN,GEO.cone4,-439,8.7,24,'#a8432f',Math.PI/4,0,0,10.6,3.4,9.2);
   addBox(B_PLAIN,1.5,2.5,0.12,-439,1.25,17.97,'#6d4c41');addBox(B_PLAIN,3,0.15,1.6,-439,0.08,17.1,'#cfc6b2');
@@ -119,4 +120,4 @@ function buildGates(){for(const k in GATES){const G=GATES[k],x=G.x,s=k==='hills'
 function openGate(k,announce){const G=GATES[k];if(G.open)return;G.open=true;for(const b of G.cols){b.h=-100;b.y0=-200}if(G.grp)G.grp.visible=false;if(announce)toast('NEW AREA OPEN',AREA[k].name+' is now open to explore',3.5)}
 function updateGates(dt){for(const k in GATES){const G=GATES[k];if(!G.open&&areaOpen(k))openGate(k,true);if(G.open)continue;G.msgT-=dt;const P=playerP();
   if(Math.abs(P.x-G.x)<9&&G.msgT<=0){G.msgT=4;floatMsg(k==='hills'?'Forest checkpoint: closed until Respect LV 2 or story mission 3':'Coast road: closed until Respect LV 3 or story mission 4')}}}
-function buildPlayExtras(){buildSafehouse();buildRamps();buildGates()}
+function buildPlayExtras(){buildSafehouse();buildRamps();buildGates();buildAct2World()}

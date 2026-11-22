@@ -91,9 +91,9 @@ function punchAnim(h,t,k,wid){const e=Math.sin(Math.PI*(1-clamp(t/0.28,0,1)));
   if(k===2){h.legR.rotation.x=-1.6*e;return}(k===0?h.armR:h.armL).rotation.x=-1.65*e}
 function knock(o,r,amt){_pp.x=o.x+r.dx*amt;_pp.z=o.z+r.dz*amt;pushCircle(_pp,0.35);o.x=_pp.x;o.z=_pp.z}
 function melee(w){player.fireCD=w.rate;player.lastShot=time;combo=time-comboT>0.9?0:(combo+1)%3;comboT=time;player.punchT=0.28;player.punchK=combo;player.yaw=camYaw;
-  const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw),heavy=combo===2,dmg=w.dmg*(heavy?1.6:1),R=w.range;let hit=false;
+  const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw),heavy=combo===2,dmgBase=w.dmg*(heavy?1.6:1),dmg=dmgBase,R=w.range;let hit=false;
   const inFront=(x,z)=>{const dx=x-player.pos.x,dz=z-player.pos.z,d=Math.hypot(dx,dz);if(d>R+0.4||d<0.01)return null;if((dx*fx+dz*fz)/d<0.4)return null;return{d,dx:dx/d,dz:dz/d}};
-  for(const g of goons){if(g.dead)continue;const r=inFront(g.x,g.z);if(!r)continue;hit=true;const kill=g.hp-dmg<=0;
+  for(const g of goons){if(g.dead)continue;const r=inFront(g.x,g.z);if(!r)continue;hit=true;const dmg=(g.passive&&!g.aggro&&!g.surrender)?dmgBase*4:dmgBase;const kill=g.hp-dmg<=0;/* x4 = silent takedown of an unaware guard */
     damageGoon(g,dmg,true,kill?{vx:r.dx*(heavy?8:4),vy:heavy?4:2.5,vz:r.dz*(heavy?8:4)}:null);if(!kill){g.stagger=heavy?0.9:0.4;knock(g,r,heavy?1.3:0.5)}}
   for(const p of peds){if(p.dead||p.hidden)continue;const r=inFront(p.x,p.z);if(!r)continue;hit=true;if(talk&&talk.obj===p)closeTalk();p.hp-=dmg;
     if(p.hp<=0)killPed(p,true,{vx:r.dx*(heavy?7:4),vy:3,vz:r.dz*(heavy?7:4)});else{p.stagger=heavy?0.8:0.35;if(p.fight||(!p.female&&Math.random()<0.5)){p.fight=true;p.flee=0;knock(p,r,0.4)}else p.flee=7}}

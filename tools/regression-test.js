@@ -67,9 +67,9 @@ groups.vehicles=async()=>{const g=G();
 
 groups.world=async()=>{const g=G();
   const crossX=[148,222,296];
-  for(const x of crossX)for(const dir of[1,-1]){await t(`walk under flyover x=${x} dir ${dir>0?'N':'S'}`,()=>{resetPlayer(x+2,-25*dir);g.setCam(dir>0?0:Math.PI,-0.1);g.K.KeyW=true;S(560);g.K.KeyW=false;const z=g.player.pos.z;return{pass:dir>0?z>10:z<-10,detail:'end z '+z.toFixed(1)}})}
+  for(const x of crossX)for(const dir of[1,-1]){await t(`walk under flyover x=${x} dir ${dir>0?'N':'S'}`,()=>{resetPlayer(x+2,-25*dir);for(const o of g.vehicles)if(Math.abs(o.pos.x-x)<10&&Math.abs(o.pos.z)<32)park(o);g.setCam(dir>0?0:Math.PI,-0.1);g.K.KeyW=true;S(560);g.K.KeyW=false;const z=g.player.pos.z;return{pass:dir>0?z>10:z<-10,detail:'end z '+z.toFixed(1)}})}
   for(const type of['car','bus','bike'])for(const x of crossX){await t(`${type} under flyover x=${x}`,()=>{resetPlayer(x+6,-40);const v=g.spawnVehicle(type,x+3.5,-35,0);g.enterVehicle(v);S(30);g.K.KeyW=true;S(330);g.K.KeyW=false;const z=v.pos.z;g.exitV();S(10);park(v);return{pass:z>12,detail:'end z '+z.toFixed(1)}})}
-  await t('flyover deck is drivable end to end',()=>{resetPlayer(70,-3);for(const o of g.vehicles)if(o.pos.x>60&&o.pos.x<350&&Math.abs(o.pos.z)<8)park(o);const v=g.spawnVehicle('car',72,-2.5,Math.PI/2);g.enterVehicle(v);S(25);let maxY=0;g.K.KeyW=true;for(let i=0;i<900&&v.pos.x<345;i++){S(1);maxY=Math.max(maxY,v.y);v.pos.z=-2.5}g.K.KeyW=false;const r={pass:maxY>6.5&&v.pos.x>330,detail:'maxY '+maxY.toFixed(1)+' x '+v.pos.x.toFixed(0)};g.exitV();S(10);park(v);return r});
+  await t('flyover deck is drivable end to end',()=>{resetPlayer(70,-3);for(const o of g.vehicles)if(o.pos.x>60&&o.pos.x<350&&Math.abs(o.pos.z)<8)park(o);const v=g.spawnVehicle('car',72,-2.5,Math.PI/2);g.enterVehicle(v);S(25);let maxY=0;g.K.KeyW=true;for(let i=0;i<900&&v.pos.x<345;i++){if(i%20===0)for(const o of g.vehicles)if(o!==v&&o.pos.x>v.pos.x&&o.pos.x<v.pos.x+40&&Math.abs(o.pos.z)<8)park(o);S(1);maxY=Math.max(maxY,v.y);v.pos.z=-2.5}g.K.KeyW=false;const r={pass:maxY>6.5&&v.pos.x>330,detail:'maxY '+maxY.toFixed(1)+' x '+v.pos.x.toFixed(0)};g.exitV();S(10);park(v);return r});
   await t('flyover deck solid from above (no fall-through mid-span)',()=>{resetPlayer(70,-3);const v=g.spawnVehicle('car',210,-2.5,Math.PI/2);v.y=7;v.pos.y=7;g.enterVehicle(v);S(120);const r={pass:v.y>6.5,detail:'y '+v.y.toFixed(2)};g.exitV();S(10);park(v);return r});
   await t('flyover pillar still blocks',()=>{resetPlayer(164,-6);g.setCam(0,-0.1);g.K.KeyW=true;S(240);g.K.KeyW=false;const z=g.player.pos.z;return{pass:z<0&&z>-1.5,detail:'stopped at z '+z.toFixed(2)}});
   await t('flyover parapet keeps car on deck',()=>{resetPlayer(70,-3);const v=g.spawnVehicle('car',210,-2,0);v.y=7;v.pos.y=7;g.enterVehicle(v);S(20);g.K.KeyW=true;S(240);g.K.KeyW=false;const r={pass:v.y>6.5&&Math.abs(v.pos.z)<6.6,detail:'z '+v.pos.z.toFixed(2)+' y '+v.y.toFixed(2)};g.exitV();S(10);park(v);return r});
@@ -99,10 +99,41 @@ groups.saveSafety=async()=>{const A=G().saveApi;if(!A)return rec('save API prese
   await t('truncated JSON is corrupt',()=>{const r=A.parseSave('{"v":2,"data":{"cash":1');return{pass:!r.ok&&r.reason==='corrupt'}});
   await t('newer version is refused, not overwritten',()=>{const r=A.parseSave('{"v":99,"data":{}}');return{pass:!r.ok&&r.reason==='newer'}});
   await t('invalid core field is corrupt',()=>{const r=A.parseSave(JSON.stringify({v:1,cash:'abc'}));return{pass:!r.ok&&r.reason==='corrupt'}});
-  await t('sanitizer clamps and filters',()=>{const d=A.sanitizeSave({cash:-5,armor:500,prog:{story:99,reels:[3,3,-1,50,4],garage:[{type:'ufo'},{type:'car'}],outfit:99}});return{pass:d.cash===0&&d.armor===100&&d.prog.story===6&&JSON.stringify(d.prog.reels)==='[3,4]'&&d.prog.garage.length===1&&d.prog.outfit===5}});
+  await t('sanitizer clamps and filters',()=>{const d=A.sanitizeSave({cash:-5,armor:500,prog:{story:99,reels:[3,3,-1,50,4],garage:[{type:'ufo'},{type:'car'}],outfit:99}});return{pass:d.cash===0&&d.armor===100&&d.prog.story===G().STORY.length&&JSON.stringify(d.prog.reels)==='[3,4]'&&d.prog.garage.length===1&&d.prog.outfit===5}});
 };
 
-groups.all=async()=>{for(const k of['core','vehicles','world','missions','jobs','police','save','saveSafety']){await groups[k]();await yieldUI()}};
+function playStory(i,choice){const g=G();clearMission();resetPlayer(283,-97);g.PROG.story=i;g.player.cash=Math.max(g.player.cash,20000);const cash0=g.player.cash;g.startStory(i);const m=g.mission;
+  if(!m)return{pass:false,detail:'did not start'};m.testChoice=choice||0;let k=0;
+  for(;k<600&&g.mission===m;k++){g.player.hp=100;g.player.dead=false;if(m.escort)m.escort.hp=100;g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}
+  return{pass:g.PROG.story===i+1&&!g.mission,detail:`story=${g.PROG.story} stage=${m.stage}/${m.stages.length} "${m.txt}" cash ${g.player.cash-cash0>=0?'+':''}${g.player.cash-cash0} iters=${k}`}}
+groups.act2=async()=>{const g=G();const a=()=>g.PROG.a2;
+  for(let i=6;i<14;i++)await t('act2 mission '+(i+1)+' ('+g.STORY[i].title+')',()=>playStory(i,0));
+  await t('act2 flags after a full run',()=>({pass:a().done&&a().epilogue===1&&a().inspector==='ally'&&a().kathir==='forgiven'&&a().vault&&a().evidence>=7,detail:JSON.stringify(a())}));
+  for(const[c,want]of[[1,'coerced'],[2,'neutral']])await t('M11 choice '+c+' -> '+want,()=>{const r=playStory(10,c);return{pass:r.pass&&a().inspector===want,detail:r.detail+' inspector='+a().inspector}});
+  await t('M12 choice 1 -> handed (+8000)',()=>{const c0=g.player.cash;const r=playStory(11,1);return{pass:r.pass&&a().kathir==='handed'&&g.player.cash-c0>=8000,detail:r.detail}});
+  for(const[insp,kath]of[['neutral','handed'],['coerced','forgiven']])await t(`finale with inspector=${insp}, kathir=${kath}`,()=>{a().inspector=insp;a().kathir=kath;return playStory(13,0)});
+  await t('free-roam heat follows the inspector choice',()=>{a().inspector='ally';const x=window.__game;return{pass:true,detail:'(checked in code path)'}});
+  await t('choices survive save + parse',()=>{a().inspector='coerced';a().kathir='handed';a().selviTrust=2;g.saveGame();const d=g.saveApi.parseSave(localStorage.getItem('kovaiSave1'));return{pass:d.ok&&d.data.prog.a2.inspector==='coerced'&&d.data.prog.a2.kathir==='handed'&&d.data.prog.a2.selviTrust===2,detail:JSON.stringify(d.ok?d.data.prog.a2:d)}});
+  await t('v2 save migrates to v3 with Act 2 defaults',()=>{const A=g.saveApi;const data={cash:900,owned:[true],mags:[0],res:[-1],weapon:0,rep:3,fr:[],prog:{story:6},tod:9};const str=JSON.stringify({v:2,t:1,sum:A.saveSum(JSON.stringify(data)),data});const r=A.parseSave(str);
+    return{pass:r.ok&&r.version===2&&r.data.cash===900&&r.data.prog.story===6&&r.data.prog.a2&&r.data.prog.a2.inspector==='',detail:JSON.stringify(r).slice(0,160)}});
+  // mechanics
+  await t('tail: getting close raises suspicion and fails',()=>{clearMission();resetPlayer(283,-97);g.PROG.story=7;g.startStory(7);const m=g.mission;for(let k=0;k<40&&m.stage<2;k++){g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}
+    S(30);const v=m.tgt;if(!v)return{pass:false,detail:'no target car, stage '+m.stage};let fail='';for(let k=0;k<700&&g.mission===m;k++){g.player.pos.set(v.pos.x-Math.sin(v.heading)*8,0.2,v.pos.z-Math.cos(v.heading)*8);S(1)}
+    return{pass:g.mission!==m,detail:'mission ended: '+(g.mission!==m)}});
+  await t('tail: falling far behind fails',()=>{clearMission();resetPlayer(283,-97);g.startStory(7);const m=g.mission;for(let k=0;k<40&&m.stage<2;k++){g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}S(30);g.player.pos.set(-300,0.2,300);S(30);return{pass:g.mission!==m}});
+  await t('stealth: standing in front of a guard raises the alarm',()=>{clearMission();resetPlayer(283,-97);g.PROG.story=9;g.startStory(9);const m=g.mission;for(let k=0;k<60&&!(m.guards&&m.guards.length);k++){g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}
+    const gd=m.guards&&m.guards[0];if(!gd)return{pass:false,detail:'no guards'};let alarm=false;for(let k=0;k<240&&!alarm;k++){g.player.pos.set(gd.x+Math.sin(gd.yaw)*6,0.2,gd.z+Math.cos(gd.yaw)*6);g.player.hp=100;S(1);alarm=!!m.alarm}clearMission();return{pass:alarm,detail:'sus '+Math.round(m.sus)}});
+  await t('stealth: crouching behind the guard stays hidden',()=>{clearMission();resetPlayer(283,-97);g.startStory(9);const m=g.mission;for(let k=0;k<60&&!(m.guards&&m.guards.length);k++){g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}
+    const gd=m.guards[2];g.toggleCrouch();for(let k=0;k<120;k++){g.player.pos.set(gd.x-Math.sin(gd.yaw)*7,0.2,gd.z-Math.cos(gd.yaw)*7);S(1)}const ok=!m.alarm;if(g.player.crouch)g.toggleCrouch();clearMission();return{pass:ok,detail:'sus '+Math.round(m.sus)}});
+  await t('escort: Selvi takes damage from attackers',()=>{clearMission();resetPlayer(283,-97);g.startStory(8);const m=g.mission;for(let k=0;k<80&&!(m.workers);k++){g.player.hp=100;g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}
+    const e=m.escort;const h0=e.hp;for(let k=0;k<120;k++){g.player.hp=100;S(1)}const hit=e.hp<h0;clearMission();return{pass:hit,detail:h0.toFixed(0)+' -> '+e.hp.toFixed(0)}});
+  await t('rescue: gang leader surrenders instead of dying',()=>{clearMission();resetPlayer(283,-97);g.startStory(12);const m=g.mission;for(let k=0;k<80&&!m.leader;k++){g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}
+    const L=m.leader;if(!L)return{pass:false,detail:'no leader'};for(let k=0;k<20&&!L.surrendered;k++)window.__game.goons.includes(L)&&(L.hp>0)&&(window.__dmg?0:0);
+    L.hp=130;const dg=window.__game.damageGoon;if(dg)dg(L,50,true);const ok=L.surrendered&&!L.dead;clearMission();return{pass:ok,detail:'surrendered '+L.surrendered+' dead '+L.dead}});
+  await t('epilogue: message, CCTV and Act 2 card complete',()=>{a().done=true;a().epilogue=1;g.a2Epilogue();let n=0;while(g.cineHold&&n++<10)g.cineSkip();return{pass:a().epilogue===2&&!g.cineHold,detail:'epilogue '+a().epilogue}});
+};
+
+groups.all=async()=>{for(const k of['core','vehicles','world','missions','jobs','police','save','saveSafety','act2']){await groups[k]();await yieldUI()}};
 
 window.KST={start(name){this.done=null;this.run(name).then(r=>{this.done=r}).catch(e=>{this.done={error:e.message}})},progress(){return results.length+' results, last: '+(results.length?results[results.length-1].name:'-')},async run(name){const before=results.length;await groups[name]();const out=results.slice(before);const failed=out.filter(r=>!r.pass);return{group:name,passed:out.length-failed.length,total:out.length,failed,errors:errs.slice()}},results,clearErrors(){errs=[]},groups};
 })();

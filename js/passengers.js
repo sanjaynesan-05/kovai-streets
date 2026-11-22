@@ -8,7 +8,7 @@
 'use strict';
 
 const _pe=new THREE.Euler(0,0,0,'YXZ'),_po=new THREE.Vector3();
-function farePassenger(){return mission&&mission.type==='fare'&&mission.ped&&!mission.ped.dead?mission.ped:null}
+function farePassenger(){if(!mission)return null;if(mission.type==='fare')return mission.ped&&!mission.ped.dead?mission.ped:null;const e=mission.escort;return e&&!e.dead&&e.follow!==false?e:null}   // fare customer, or a story escort (e.g. Selvi Akka)
 function isFriend(o){return FRIENDS.includes(o)}
 function ridersOf(v){const a=[],fp=farePassenger();if(fp&&fp.inV===v)a.push(fp);for(const f of FRIENDS)if(f.inCar&&f.inV===v)a.push(f);return a}
 function seatFree(v){return ridersOf(v).length<seatsOf(v).n}

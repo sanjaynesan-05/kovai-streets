@@ -50,7 +50,7 @@ function startMission(o){const T=JOBT[o.type],mult=1+rep*0.08;let m={type:o.type
   else if(o.type==='amb'){const dist=Math.hypot(HOSP.x-o.x,HOSP.z-o.z);Object.assign(m,{reward:r50(1500*mult),steps:[{x:HOSP.x,z:HOSP.z,txt:'Rush the injured person to the Government Hospital'}],timer:Math.round(dist/11+22)});toast('EMERGENCY!','Get them to the hospital, fast',2.2)}
   mission=m;noise(0.12,3000,0.2,1)}
 const goodsCap=s=>s.charAt(0).toUpperCase()+s.slice(1);
-function endMissionCleanup(){queueSave();if(mission&&mission.tgt)mission.tgt.keep=false;if(mission&&mission.ped){placePed(mission.ped,0)}if(mission&&mission.target)mission.target.keep=false;mission=null;marker.visible=false;offers=[];offerT=3}
+function endMissionCleanup(){queueSave();if(mission&&mission.cleanup)for(const f of mission.cleanup){try{f()}catch(e){console.error(e)}}if(mission&&mission.escort)clearSubs();if(mission&&mission.tgt)mission.tgt.keep=false;if(mission&&mission.ped){placePed(mission.ped,0)}if(mission&&mission.target)mission.target.keep=false;mission=null;marker.visible=false;offers=[];offerT=3}
 function missionDone(){const m=mission;if(m.type==='hang'){const f=m.friend;addFriend(f,12);toast(f.name.toUpperCase(),'"'+rpick(f.lines.arrive)+'"',3.5);mission=null;marker.visible=false;offerT=3;return}
   player.cash+=m.reward;rep++;toast('JOB DONE','+₹'+m.reward.toLocaleString('en-IN')+' · Respect up',3);noise(0.2,3500,0.25,1);
   if(m.ped){const B=m.steps[m.steps.length-1];m.ped.hidden=false;placePed(m.ped,0)}endMissionCleanup()}
@@ -72,14 +72,14 @@ const GIVER={x:283,z:-100};let giverH=null,giverBeam=null;
 function mk(x,z){marker.visible=true;marker.position.set(x,groundH(x,z),z);marker.children[1].rotation.z+=0.02}
 function findOpen(x,z,rx,rz){for(let t=0;t<30;t++){const px=x+RR(-rx,rx),pz=z+RR(-rz,rz);_pp.x=px;_pp.z=pz;if(!pushCircle(_pp,0.6,0))return[px,pz]}return[x,z]}
 function spawnSquad(x,z,n,m,opt){for(let k=0;k<n;k++){const[px,pz]=findOpen(x,z,opt.rx||8,opt.rz||8);const g=spawnGoon(px,pz,null,!!opt.aggro,{wep:rpick(opt.weps||['pistol','smg','pistol','rifle']),band:'#111'});g.mission=m;m.left++}}
-function stSay(who,line){return{init(m){m.sayT=3.6;toast(who,line,3.6)},upd(m,dt){m.txt=who+' is talking…';return(m.sayT-=dt)<=0}}}
-function stGo(x,z,txt,opt){opt=opt||{};return{timer:opt.timer,upd(m){mk(x,z);m.txt=txt;const P=playerP();return Math.hypot(P.x-x,P.z-z)<(opt.r||6)}}}
-function stKill(x,z,n,txt,opt){opt=opt||{};return{timer:opt.timer,init(m){m.left=0;spawnSquad(x,z,n,m,opt)},upd(m){const P=playerP();if(Math.hypot(P.x-x,P.z-z)>40)mk(x,z);else marker.visible=false;
+function stSay(who,line){return{auto(m){m.sayT=0},init(m){m.sayT=3.6;toast(who,line,3.6)},upd(m,dt){m.txt=who+' is talking…';return(m.sayT-=dt)<=0}}}
+function stGo(x,z,txt,opt){opt=opt||{};return{auto(m){if(player.vehicle)exitVehicle();player.pos.set(x,groundH(x,z)+0.3,z)},timer:opt.timer,upd(m){mk(x,z);m.txt=txt;const P=playerP();return Math.hypot(P.x-x,P.z-z)<(opt.r||6)}}}
+function stKill(x,z,n,txt,opt){opt=opt||{};return{auto(m){m.wave=99;killSquad(m)},timer:opt.timer,init(m){m.left=0;spawnSquad(x,z,n,m,opt)},upd(m){const P=playerP();if(Math.hypot(P.x-x,P.z-z)>40)mk(x,z);else marker.visible=false;
   m.txt=txt+' · enemies left: '+Math.max(0,m.left);if(opt.waves&&m.left<=0&&m.wave<opt.waves){m.wave++;spawnSquad(x,z,n,m,Object.assign({},opt,{aggro:true}));toast('MORE OF THEM!','Wave '+(m.wave+1)+' is here',1.8)}return m.left<=0}}}
-function stBoss(x,z,name,guards,hp,sub){return{init(m){m.left=0;const[px,pz]=findOpen(x,z,3,3);m.boss=spawnGoon(px,pz,null,false,{boss:true,hp,shirt:'#e8b923',band:'#111',wep:'rifle'});m.boss.mission=m;m.left++;
+function stBoss(x,z,name,guards,hp,sub){return{auto(m){if(m.boss&&!m.boss.dead){m.boss.dead=true;m.left--}killSquad(m)},init(m){m.left=0;const[px,pz]=findOpen(x,z,3,3);m.boss=spawnGoon(px,pz,null,false,{boss:true,hp,shirt:'#e8b923',band:'#111',wep:'rifle'});m.boss.mission=m;m.left++;
     spawnSquad(x,z,guards,m,{weps:['smg','rifle'],rx:7,rz:7});toast(name.toUpperCase(),sub,2.6)},
   upd(m){const P=playerP();if(Math.hypot(P.x-x,P.z-z)>40)mk(x,z);else marker.visible=false;m.txt=`Take down ${name} (gold shirt) · guards left: ${Math.max(0,m.left-(m.boss.dead?0:1))}`;return m.boss.dead}}}
-function stWreck(make,txt,opt){opt=opt||{};return{timer:opt.timer,init(m){m.tgt=make();m.tgt.keep=true},upd(m,dt){const v=m.tgt;if(!vehicles.includes(v)||v.wrecked||v===player.vehicle)return true;
+function stWreck(make,txt,opt){opt=opt||{};return{auto(m){if(m.tgt)m.tgt.wrecked=true},timer:opt.timer,init(m){m.tgt=make();m.tgt.keep=true},upd(m,dt){const v=m.tgt;if(!vehicles.includes(v)||v.wrecked||v===player.vehicle)return true;
   mk(v.pos.x,v.pos.z);m.txt=txt;if(opt.tick)opt.tick(v,dt);const P=playerP();if(Math.hypot(v.pos.x-P.x,v.pos.z-P.z)>(opt.far||420))return'They got away';return false}}}
 function courierCar(){let i=clamp(Math.round(GIVER.x/CELL),-NB,NB),j=clamp(Math.round(GIVER.z/CELL),-NB,NB);const dir=rpick(DIRS.filter(d=>inGrid(i-d[0],j-d[1])));
   const p=laneWP(i,j,dir[0],dir[1],-22);const v=spawnVehicle('suv',p.x,p.z,Math.atan2(dir[0],dir[1]),'#151515');makeAI(v,i,j,dir[0],dir[1],22);v.ai.reckless=true;v.ai.flee=true;v.hp=900;return v}
@@ -100,19 +100,19 @@ const STORY=[
   {title:'Silk Sundaram',reward:25000,intro:'This is it. Sundaram and every Scorpion left are holed up in the old Kovai Mills. End it tonight.',
    make:()=>[stKill(256,-111,6,'Storm the old Kovai Mills',{rx:16,rz:3,waves:1}),stBoss(240,-111,'Silk Sundaram',3,2200,'Boss of the Black Scorpions'),stSay('SILK SUNDARAM','"This city… was supposed to be mine…"')]}];
 function startStory(i){const S=STORY[i];if(!S||mission)return;offers=[];
-  mission={type:'story',idx:i,title:`Story ${i+1}/${STORY.length}: ${S.title}`,reward:S.reward,txt:'',steps:[],step:0,timer:null,stages:S.make(),stage:0,wave:0,custom:stageTick,done:storyDone};startStage(mission);noise(0.12,3000,0.2,1)}
-function startStage(m){const s=m.stages[m.stage];marker.visible=false;m.timer=s.timer||null;m.wave=0;if(s.init)s.init(m)}
-function stageTick(dt){const m=mission;if(m.timer!=null){m.timer-=dt;if(m.timer<=0){missionFail('Out of time');return}}
+  mission={type:'story',idx:i,title:`Story ${i+1}/${STORY.length}: ${S.title}`,reward:S.reward,txt:'',steps:[],step:0,timer:null,stages:S.make(),stage:0,wave:0,custom:stageTick,done:storyDone,ticks:[],cleanup:[],meters:[]};startStage(mission);noise(0.12,3000,0.2,1);if(S.onStart)S.onStart(mission)}
+function startStage(m){const s=m.stages[m.stage];marker.visible=false;m.timer=s.timer||null;m.wave=0;m.meters=[];if(s.init)s.init(m)}
+function stageTick(dt){const m=mission;if(m.ticks){for(const f of m.ticks)f(m,dt);if(mission!==m)return}if(m.timer!=null){m.timer-=dt;if(m.timer<=0){missionFail('Out of time');return}}
   const r=m.stages[m.stage].upd(m,dt);if(mission!==m)return;
   if(r===true){m.stage++;if(m.stage>=m.stages.length){marker.visible=false;m.done(m);return}startStage(m)}else if(typeof r==='string')missionFail(r)}
 function storyDone(m){if(m.tgt)m.tgt.keep=false;player.cash+=m.reward;rep+=2;PROG.story=Math.max(PROG.story,m.idx+1);
   toast('MISSION PASSED','+₹'+m.reward.toLocaleString('en-IN')+' · Respect +2',3.2);noise(0.2,3500,0.25,1);
-  if(m.idx===STORY.length-1){player.armor=100;setTimeout(()=>toast('KOVAI IS FREE','You beat the Black Scorpions. Story complete!',5),3400)}
+  if(STORY[m.idx].onDone)STORY[m.idx].onDone(m);if(m.idx===5){player.armor=100;setTimeout(()=>toast('KOVAI IS FREE','You beat the Black Scorpions. Story complete!',5),3400)}
   else setTimeout(()=>{if(!mission)floatMsg('Paramasivam Anna has more work for you (gold S on the map)')},3600);endMissionCleanup()}
 function storyOpts(){const S=STORY[PROG.story];const o=[];if(S&&!mission)o.push({t:`Start "${S.title}" (₹${S.reward.toLocaleString('en-IN')})`,fn:()=>{startStory(PROG.story);return false}});o.push({t:'Bye',fn:()=>false});return o}
 function storyTalk(){const S=STORY[PROG.story];const t={kind:'story',obj:{x:GIVER.x,z:GIVER.z},
   hdr:()=>`<h3>Paramasivam Anna</h3><div class="sub">Retired mill foreman · Story ${Math.min(PROG.story,STORY.length)}/${STORY.length} done</div>`,optsFn:storyOpts,
-  line:mission?'Finish what you are doing first, thambi.':S?S.intro:rpick(['Kovai is quiet again, thanks to you.','The workers ask about you every day. Have some tea!','Sundaram is gone, but stay sharp, thambi.'])};t.opts=storyOpts();return t}
+  line:mission?'Finish what you are doing first, thambi.':S?S.intro:rpick(PROG.a2&&PROG.a2.done?A2_AFTER:['Kovai is quiet again, thanks to you.','The workers ask about you every day. Have some tea!','Sundaram is gone, but stay sharp, thambi.'])};t.opts=storyOpts();return t}
 function extraTalkable(){const p=player.pos;if(Math.hypot(p.x-GIVER.x,p.z-GIVER.z)<3.2)return{kind:'story',hint:'to talk to Paramasivam Anna',custom:storyTalk};
   if(Math.hypot(p.x-HOUSE.px,p.z-HOUSE.pz)<2.8)return{kind:'house',hint:PROG.house?'to use your safehouse':'to look at the house for sale',custom:houseTalk};return null}
 

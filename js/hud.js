@@ -66,6 +66,7 @@ function updateHUD(dt){setTxt(hud.cash,'₹'+Math.max(0,Math.floor(player.cash))
   areaT-=dt;if(areaT<=0){areaT=0.4;const P=playerP();setTxt(hud.area,district(P.x,P.z));setTxt($('clock'),clockText())}
   let mh='';if(mission){const st=mission.steps[mission.step];let txt=mission.txt?mission.txt:st?st.txt:mission.type==='gang'?`Goons left: ${mission.left}`:mission.type==='boss'?`Kill ${mission.bossName} (white shirt). Guards: ${Math.max(0,mission.left-(mission.boss.dead?0:1))}`:mission.type==='chase'?'Wreck the black getaway car!':'';
     mh=`<div class="mT">${esc(mission.title)}${mission.reward?' · ₹'+mission.reward.toLocaleString('en-IN'):''}</div><div class="mX">${esc(txt)}</div>`;
+    for(const mt of(mission.meters||[]).concat([mission.searchMeter,mission.detMeter,mission.escortMeter])){if(!mt)continue;mh+=`<div class="mM"><span>${esc(mt.label)}</span><div class="mB"><div style="width:${Math.round(clamp(mt.v,0,1)*50)*2}%;background:${mt.col}"></div></div></div>`}
     if(mission.timer!=null){const t=Math.max(0,Math.ceil(mission.timer));mh+=`<div class="mC ${t<=10?'low':''}">${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</div>`}}
   if(mh!==lastMissionHTML){hud.mission.innerHTML=mh;lastMissionHTML=mh}
   if(floatT>0){floatT-=dt;if(floatT<=0)setTxt(hud.hint,'')}

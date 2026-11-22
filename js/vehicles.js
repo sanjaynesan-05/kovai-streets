@@ -275,7 +275,7 @@ function updateVehicles(dt){const P=playerP();
       if(v===player.vehicle&&v.sink>1.4){exitVehicle();floatMsg('Your ride sank! Swim to the shore')}if(v.sink>3){v.sunk=true;v.wrecked=true;v.wreckT=20;v.ai=null;v.policeAI=null}}
     if(v.wrecked){v.wreckT+=dt;v.speed*=Math.max(0,1-1.5*dt);if(v.wreckT<6&&Math.random()<dt*6)smoke(v.pos.x,1.5,v.pos.z);
       if(v.wreckT>45&&Math.hypot(v.pos.x-P.x,v.pos.z-P.z)>90)removeVehicle(v);continue}
-    if(v===player.vehicle)driveUpdate(v,dt);else if(v.policeAI)updPolice(v,dt);else if(v.ai)updAI(v,dt);
+    if(v===player.vehicle)driveUpdate(v,dt);else if(v.policeAI)updPolice(v,dt);else if(v.ai)updAI(v,dt);else if(v.script)v.script(v,dt);
     else{v.speed*=Math.max(0,1-2.5*dt);if(Math.abs(v.speed)<0.05)v.speed=0}}
   for(const v of vehicles)integrate(v,dt);
   collideVehicles();

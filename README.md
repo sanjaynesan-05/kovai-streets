@@ -289,6 +289,23 @@ Visit **Paramasivam Anna**, a retired mill foreman, at the Peelamedu mills (gold
 
 Each mission also gives **+2 Respect**. If you fail, talk to Paramasivam again to retry.
 
+### Act 2: Threads of Kovai (missions 7–14)
+
+Sundaram was never the real power. Investigate the industrialist **R. Devarajan**, protect union leader **Selvi Akka**, decide the fate of **Inspector Bhaskar** and **Kathir**, and stop an illegal auction of the mills. Behind it all is a mastermind known only as **"A"**.
+
+| # | Mission | Type |
+|---|---|---|
+| 7 | Ashes and Ledgers | Investigation: search the burned mill for evidence |
+| 8 | The Tail | Follow Devarajan unseen (suspicion meter), photograph a meeting |
+| 9 | Workers' Voice | Escort Selvi to a rally and protect her |
+| 10 | Night at the Godown | Stealth: guards with vision cones, cameras, silent takedowns |
+| 11 | The Inspector's Price | Choice: pay, threaten or walk away from Bhaskar |
+| 12 | Kathir's Secret | Chase, then choose: forgive Kathir or hand him over |
+| 13 | Ghat Wolves | Rescue Selvi from the hills, with an optional "capture the leader alive" |
+| 14 | The Auction | Finale: stop the auction, beat the enforcer, chase Devarajan to the jetty |
+
+Your choices change free-roam police behaviour and the finale. Act 2 ends with an open ending: a message from **The Architect**. See [GAME_CONTENT.md](GAME_CONTENT.md) for the full story (spoilers).
+
 ---
 
 ## 💾 Progress, unlocks and saving
@@ -411,7 +428,7 @@ With the server running, open the game, click **Play**, then paste this into the
 ```js
 const s=document.createElement('script');s.src='tools/regression-test.js';document.body.appendChild(s);
 // when it has loaded:
-await KST.run('all')   // or one group: 'core', 'vehicles', 'world', 'missions', 'jobs', 'police', 'save', 'saveSafety'
+await KST.run('all')   // or one group: 'core', 'vehicles', 'world', 'missions', 'jobs', 'police', 'save', 'saveSafety', 'act2'
 ```
 
 The tests change the game state (cash, missions, save), so run them on a throwaway save.

@@ -11,6 +11,7 @@ This document covers all the content in **Kovai Streets**: the full storyline, e
 1. [Setting](#1-setting)
 2. [Main characters](#2-main-characters)
 3. [The full storyline](#3-the-full-storyline)
+   - [Act 2: Threads of Kovai](#3b-act-2-threads-of-kovai-story-missions-714)
 4. [Jobs (repeatable missions)](#4-jobs-repeatable-missions)
 5. [Rampages](#5-rampages)
 6. [Stunt jumps](#6-stunt-jumps)
@@ -150,7 +151,63 @@ The game's central theme is Kovai's **textile mills**. Its story is about a gang
 
 **Ending:** "MISSION PASSED", then **"KOVAI IS FREE: You beat the Black Scorpions. Story complete!"** You get ₹25,000, full armour and +2 Respect.
 
-**After the story,** Paramasivam has new lines, such as *"Kovai is quiet again, thanks to you"* and *"The workers ask about you every day. Have some tea!"*, and his gold beam and map icon disappear.
+**After Act 1,** Paramasivam's gold beam stays on the map: Act 2 starts with him.
+
+---
+
+## 3b. Act 2: Threads of Kovai (story missions 7–14)
+
+> **"You thought you were fighting a gang. You were fighting a system."**
+
+**Summary:** Silk Sundaram was never the real power. A respected industrialist, **R. Devarajan**, funded the Black Scorpions to frighten mill workers and force through land sales to **Thendral Builders**. Behind him is someone known only as **"A"**, *The Architect*, whose face, name and position are never revealed. Act 2 ends Devarajan's operation and the illegal mill auction. The conspiracy stays alive, and The Architect knows who you are.
+
+**New characters:**
+- **R. Devarajan:** the visible villain. White veshti, gold chain.
+- **Selvi Akka:** the mill workers' union leader, an active ally in the investigation.
+- **Inspector Bhaskar:** an uncertain ally. Your choice decides his role.
+- **Kathir:** returns from Act 1. He has been leaking information because his sister was threatened.
+- **Malai Rajan:** leader of the Ghat Wolves, a smuggling gang from the hills.
+- **Kanal Kannan:** Devarajan's enforcer.
+
+**How it works:**
+- All missions start from Paramasivam Anna (gold **S**). Each gives cash and **+2 Respect**.
+- Dialogue appears as subtitles, in Tamil with English underneath for the Tamil lines.
+- Choices and story flags are saved.
+- If a mission fails, talk to Paramasivam to retry. No choice blocks the story: every path reaches the finale.
+
+| # | Mission | Type | What you do | Reward |
+|---|---|---|---|---|
+| 7 | **Ashes and Ledgers** | Investigation | Search the burned Singanallur mill for a **ledger**, **Sundaram's phone** and a **land agreement**. Gang members patrol with vision cones: avoid them or fight. *Optional:* a visitor pass from the night of the fire hints at an insider. The phone shows a contact saved only as **"A"** | ₹5,000 |
+| 8 | **The Tail** | Driving / surveillance | Follow Devarajan's white SUV from Gandhipuram, past a Race Course hotel and a Peelamedu office (where he takes a phone call), to a quiet meeting. Stay **20–75 m** behind: too close raises a **suspicion meter**, too far loses him. Stop and hold steady to **photograph the meeting**. *Optional:* get close to the second car to capture its registration number | ₹7,500 |
+| 9 | **Workers' Voice** | Escort / protection | Pick up **Selvi Akka** at the Podanur mill gate and get her to the workers' rally at Town Hall (she rides pillion or in your car). Fight off six attackers while keeping her **health bar** above zero. *Optional:* free **3 trapped workers** (+₹2,500, Selvi trust) | ₹10,000 |
+| 10 | **Night at the Godown** | Stealth | At night, infiltrate the Thendral Builders godown south of Ukkadam. Disable the security panel, which turns the cameras off, then photograph 3 documents and get out. Guards patrol with **vision cones**, so crouch to stay hidden and use the rear door. Melee on an unaware guard is a **silent takedown**. Being spotted raises the alarm (guards attack, reinforcements arrive) but the mission continues. *Bonus:* no alarm (+₹3,000). The documents reveal **PROJECT KOVAI · AUTHORIZED BY: A** | ₹12,500 |
+| 11 | **The Inspector's Price** | Dialogue choice | Meet Inspector Bhaskar at the new **Kovai Central Police Station** on the north road. Choose: **pay ₹10,000** (ally), **threaten him with the evidence** (coerced) or **walk away** (neutral) | ₹3,000 |
+| 12 | **Kathir's Secret** | Chase + choice | Watch the Gandhipuram bus stand, chase the leaking scooter rider and corner him. It's Kathir. Choose: **forgive him** (₹4,000, he helps in the finale) or **hand him to the police** (₹8,000, the police ease off for 10 minutes, Paramasivam is hurt) | choice |
+| 13 | **Ghat Wolves** | Rescue | Selvi has been kidnapped and taken to the hill village on the ghat road. Free her within **4 minutes**, quietly or by force, then escape **250 m** with her alive. *Optional:* beat leader **Malai Rajan** until he **surrenders** and capture him alive (+₹3,000, Selvi trust). You learn about **Devarajan's Vault** | ₹15,000 |
+| 14 | **The Auction** (finale) | Multi-stage | (1) Go to Kovai Central mall with Selvi and interrupt the auction. (2) Defeat enforcer **Kanal Kannan** and his guards. (3) Chase Devarajan's SUV across the city, over the flyover, to the coast. (4) Stop him on the jetty before he reaches his boat, or disable the boat. Then the confrontation, a phone call from an altered voice: *"Project Kovai is compromised. Close the operation."*, and a fade to black | ₹25,000 |
+
+### How your choices change Act 2
+
+| Choice | During free roam | In the finale |
+|---|---|---|
+| Bhaskar **ally** (paid) | Wanted stars fade faster. The helicopter only comes at 5 stars | His men hold two guards outside (3 guards inside) |
+| Bhaskar **coerced** (threatened) | Normal police | He shares intel (4 guards), but may betray you: 50% chance of 2 stars during the chase |
+| Bhaskar **neutral** (walked away) | Stars fade more slowly | All 5 guards, and the police join in (2 stars during the chase) |
+| Kathir **forgiven** | — | Kathir leaves you a fast car outside the mall |
+| Kathir **handed over** | Police ease off for 10 minutes | No help from Kathir |
+| Selvi trust **2+** (bonus objectives in missions 9 and 13) | — | Workers attend as witnesses: **Devarajan's reputation is finished**. Otherwise his public name survives |
+
+### The open ending: The Architect's message
+
+After the finale, go back to your safehouse (or just keep playing for a while if you don't own it). Then:
+1. An encrypted message arrives: *"You have been busy. You removed a few pieces from the board. Silk Sundaram. Devarajan. The mills. Interesting. But you still don't understand the game. Coimbatore is only one part of the plan. We should meet someday. — A"*
+2. A second message: *"I know where you live."*
+3. A CCTV camera view of your safehouse, which cuts to **NO SIGNAL**.
+4. **ACT 2 COMPLETE:** *"The city was never the target. It was the testing ground."*
+
+Free roam continues. Two black SUVs stay parked across the road from your safehouse. Paramasivam has new lines about **the Vault**, Act 3's starting point.
+
+**Total Act 2 rewards:** ₹82,000 (₹86,000 if you hand Kathir over), up to ₹8,500 more from bonus objectives, minus ₹10,000 if you pay Bhaskar. +16 Respect.
 
 ---
 

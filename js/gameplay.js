@@ -28,7 +28,7 @@ function updateWanted(dt){if(starFlashT>0){starFlashT-=dt;if(starFlashT<=0)$('st
   let cops=0,seen=false;const P=playerP();
   for(const v of vehicles)if(v.policeAI&&!v.policeAI.leaving){cops++;if(Math.hypot(v.pos.x-P.x,v.pos.z-P.z)<75)seen=true}
   if(wanted>0){const want=Math.min(4,wanted);policeSpawnT-=dt;if(cops<want&&policeSpawnT<=0){policeSpawnT=3.5;spawnPolice()}
-    if(seen)wantedCool=0;else{wantedCool+=dt;if(wantedCool>10+wanted*3){wanted--;wantedCool=0;if(wanted===0)toast('Lost the cops','The heat is off',2.2)}}}}
+    if(seen)wantedCool=0;else{wantedCool+=dt;if(wantedCool>(10+wanted*3)*heatMult()){wanted--;wantedCool=0;if(wanted===0)toast('Lost the cops','The heat is off',2.2)}}}}
 
 /* ================= places, hospital, shop ================= */
 let SHOP={x:9.5,z:83.5};
@@ -166,7 +166,7 @@ function updatePoliceExtra(dt){const P=playerP();
       if(d<26&&Math.abs(v.speed)<3&&!player.vehicle&&foot<2+wanted*1.5){pa.out=true;const fx=Math.sin(v.heading),fz=Math.cos(v.heading);
         for(const s of[-1,1]){spawnGoon(v.pos.x+fz*s*1.9,v.pos.z-fx*s*1.9,null,true,{cop:true,wep:wanted>=3?rpick(['pistol','smg','rifle']):'pistol'});foot++}}}
     if(wanted>=3){roadblockT-=dt;if(roadblockT<=0){roadblockT=RR(22,32);if(player.vehicle&&Math.abs(player.vehicle.speed)>8)spawnRoadblock()}}}
-  heliCD-=dt;if(wanted>=4&&!player.dead&&(!heli||(!heli.alive&&!heli.falling))&&heliCD<=0)spawnHeli();
+  heliCD-=dt;if(wanted>=heliStars()&&!player.dead&&(!heli||(!heli.alive&&!heli.falling))&&heliCD<=0)spawnHeli();
   if(heli)updateHeli(dt)}
 function spawnRoadblock(){const v=player.vehicle;const fx=Math.sin(v.heading),fz=Math.cos(v.heading);let best=null,bd=1e9;
   for(let i=-NB;i<=NB;i++)for(let j=-NB;j<=NB;j++){const nx=i*CELL,nz=j*CELL,dx=nx-v.pos.x,dz=nz-v.pos.z,ahead=dx*fx+dz*fz,lat=Math.abs(dx*fz-dz*fx);if(ahead<70||ahead>190||lat>14)continue;if(ahead<bd){bd=ahead;best={nx,nz}}}

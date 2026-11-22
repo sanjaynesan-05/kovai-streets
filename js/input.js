@@ -8,7 +8,7 @@ const K={};
 
 /* ================= input ================= */
 let mouseL=false,locked=false,lockWanted=false,paused=true,started=false,time=0;
-addEventListener('keydown',e=>{if(consoleOpen)return;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab','Enter'].includes(e.code))e.preventDefault();
+addEventListener('keydown',e=>{if(consoleOpen)return;if(cineHold&&started&&!paused){if(['Space','Enter'].includes(e.code))e.preventDefault();cineKey(e);return}if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab','Enter'].includes(e.code))e.preventDefault();
   K[e.code]=true;if(e.repeat)return;if(!started||paused){if(started&&e.code==='KeyP')resume();return}
   const num=e.code.startsWith('Digit')?parseInt(e.code.slice(5))-1:-1;
   if(e.code==='Enter'||e.code==='NumpadEnter'||e.code==='Backquote'){openConsole();return}
@@ -29,7 +29,7 @@ addEventListener('keydown',e=>{if(consoleOpen)return;if(['Space','ArrowUp','Arro
   else if(e.code==='KeyP'||(e.code==='Escape'&&!locked))pause()});
 addEventListener('keyup',e=>{K[e.code]=false;if(e.code==='Tab'&&wheelOpen&&wheelMode==='hold')closeWheel(true)});
 addEventListener('blur',()=>{for(const k in K)K[k]=false;mouseL=false;aiming=false});
-canvas.addEventListener('mousedown',e=>{if(!started||paused||consoleOpen||isTouch)return;audioInit();if(!locked&&lockWanted!==false)requestLock();
+canvas.addEventListener('mousedown',e=>{if(!started||paused||consoleOpen||isTouch)return;if(cineHold){cineKey(null);return}audioInit();if(!locked&&lockWanted!==false)requestLock();
   if(e.button===0){if(wheelOpen){closeWheel(true);return}mouseL=true;if(talk)return;if(player.vehicle)fire();else if(!WEAPONS[player.weapon].auto)fire()}if(e.button===2)aiming=!player.vehicle});
 addEventListener('mouseup',e=>{if(e.button===0)mouseL=false;if(e.button===2)aiming=false});
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
