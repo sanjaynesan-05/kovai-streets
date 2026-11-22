@@ -66,12 +66,12 @@ function openTalk(t){if(t.custom){talk=t.custom();renderTalk();return}if(t.kind=
     talk={kind:'ped',obj:p,line:rpick(['Vanakkam! Yes?','Hello! Need something?','Hi! What happened?']),opts:pedOpts(p)}}
   else if(t.kind==='stall')talk={kind:'stall',obj:t.obj,line:rpick(['Vanakkam! Tea, coffee?','Fresh tea, just boiled!','Come, sit. What you want?']),opts:stallOpts(t.obj)};
   else talk={kind:'friend',obj:t.obj,line:rpick(t.obj.lines.hi),opts:friendOpts(t.obj)};renderTalk()}
-function closeTalk(){if(talk&&talk.kind==='ped')talk.obj.talk=false;talk=null;$('talk').classList.add('hidden')}
+function closeTalk(){if(talk&&talk.kind==='story')stopVoice();if(talk&&talk.kind==='ped')talk.obj.talk=false;talk=null;$('talk').classList.add('hidden')}
 function renderTalk(){if(!talk)return;const o=talk.obj;let h='';
   if(talk.hdr)h=talk.hdr();else if(talk.kind==='ped')h=`<h3>${esc(o.name)}</h3><div class="sub">Passer-by</div>`;
   else if(talk.kind==='stall')h=`<h3>Tea kadai</h3><div class="sub">Roadside tea stall · Cash ₹${Math.floor(player.cash).toLocaleString('en-IN')}</div>`;
   else h=`<h3>${esc(o.name)}</h3><div class="sub">${esc(o.bio)} · Friendship ${Math.round(o.fr)}%</div><div class="fbar"><div style="width:${o.fr}%"></div></div>`;
-  h+=`<div class="line">“${esc(talk.line)}”</div>`;talk.opts.forEach((op,k)=>{h+=`<div class="opt ${op.off?'off':''}" data-k="${k}"><b>${k+1}</b>${esc(op.t)}</div>`});
+  h+=`<div class="line">“${esc(talk.line)}”</div>${talk.lineEn?`<div class="lineEn">${esc(talk.lineEn)}</div>`:''}`;talk.opts.forEach((op,k)=>{h+=`<div class="opt ${op.off?'off':''}" data-k="${k}"><b>${k+1}</b>${esc(op.t)}</div>`});
   h+=`<div class="foot">${isTouch?'Tap an option':'Press a number to choose'} · walk away to leave</div>`;$('talk').innerHTML=h;$('talk').classList.remove('hidden')}
 function chooseTalk(k){if(!talk)return;const op=talk.opts[k];if(!op)return;const r=op.fn();if(r===false){closeTalk();return}if(typeof r==='string')talk.line=r;
   talk.opts=talk.optsFn?talk.optsFn():talk.kind==='ped'?pedOpts(talk.obj):talk.kind==='stall'?stallOpts(talk.obj):friendOpts(talk.obj);renderTalk()}

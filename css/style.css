@@ -245,3 +245,9 @@ body.touch #sub{bottom:110px}body.touch #sub span{font-size:14px}
 /* menu sits directly under the logo (set by menu.js from the real logo size) */
 @media (min-width:701px){#start .mn-screen{top:var(--mn-top,40vh)}#start .panel-screen{top:var(--mn-top,30vh);bottom:16px}}
 .mn-set .row>button{justify-self:start;min-width:190px}
+
+/* ---- subtitles: Tamil primary, English secondary (smaller) ---- */
+#sub span.ta{font-family:'Noto Sans Tamil','Latha','Nirmala UI',sans-serif;font-size:20px;font-weight:600;color:#fff;margin-bottom:2px}
+#sub span.en{font-size:14px;font-weight:600;opacity:.78}#sub span.en.main{font-size:18px;opacity:1}
+.panel2 .lineEn{font-size:13px;opacity:.7;margin:-6px 0 10px}
+body.touch #sub span.ta{font-size:15px}body.touch #sub span.en{font-size:11px}

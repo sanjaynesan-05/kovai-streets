@@ -86,19 +86,19 @@ function courierCar(){let i=clamp(Math.round(GIVER.x/CELL),-NB,NB),j=clamp(Math.
 function scorpionBoat(){const v=spawnVehicle('speedboat',820,170,0);v.hp=600;return v}
 const STORY=[
   {title:'Smoke Over the Mills',reward:2000,intro:'Vanakkam, thambi. I ran the looms at Podanur for thirty years. Now the Black Scorpions squeeze my workers for money every week. Will you help?',
-   make:()=>[stSay('PARAMASIVAM','"Go to the Podanur mill and chase those Scorpions out!"'),stKill(182,259,5,'Clear the Black Scorpions out of the Podanur mill',{rx:16,rz:3}),stSay('PARAMASIVAM','"Nandri! But they answer to someone bigger: Silk Sundaram."')]},
+   make:()=>[stTalk('a1_m1_go'),stKill(182,259,5,'Clear the Black Scorpions out of the Podanur mill',{rx:16,rz:3}),stTalk('a1_m1_end')]},
   {title:'The Courier',reward:3000,intro:'Sundaram sends a courier around in a black SUV to collect his "protection" money. Today is collection day.',
-   make:()=>[stSay('PARAMASIVAM','"The courier is near the mills right now. Stop that black SUV!"'),stWreck(courierCar,'Wreck or steal the black courier SUV',{timer:150}),stSay('KATHIR','"I\'m Kathir, Anna\'s nephew. The workers got their money back. Sundaram will be furious."')]},
+   make:()=>[stTalk('a1_m2_go'),stWreck(courierCar,'Wreck or steal the black courier SUV',{timer:150}),stTalk('a1_m2_end')]},
   {title:'Burning Looms',reward:4000,intro:'Kathir was right. The Scorpions are attacking the Singanallur mill to teach us a lesson!',
-   make:()=>[stSay('KATHIR','"They\'re torching the looms! Get to the Singanallur mill, fast!"'),stKill(330,111,5,'Defend the Singanallur mill',{rx:16,rz:3,aggro:true,waves:1,timer:240}),stSay('PARAMASIVAM','"The looms are safe. Sundaram\'s man Vettu Velu buys guns up in the Ghats. I had the forest checkpoint opened for you."')]},
+   make:()=>[stTalk('a1_m3_go'),stKill(330,111,5,'Defend the Singanallur mill',{rx:16,rz:3,aggro:true,waves:1,timer:240}),stTalk('a1_m3_end')]},
   {title:'Ghat Road Deal',reward:5000,intro:'Vettu Velu is meeting gun runners at the hilltop viewpoint. Without those guns, Sundaram is weak.',
-   make:()=>[stGo(GHAT_TOP.x,GHAT_TOP.z,'Drive up the ghat road to the hilltop viewpoint',{r:40}),stBoss(GHAT_TOP.x+6,GHAT_TOP.z+4,'Vettu Velu',4,900,'Sundaram\'s right-hand man'),stSay('PARAMASIVAM','"Velu is finished! Their last guns come by sea. The coast road is open to you now."')]},
+   make:()=>[stGo(GHAT_TOP.x,GHAT_TOP.z,'Drive up the ghat road to the hilltop viewpoint',{r:40}),stBoss(GHAT_TOP.x+6,GHAT_TOP.z+4,'Vettu Velu',4,900,'Sundaram\'s right-hand man'),stTalk('a1_m4_end')]},
   {title:'The Jetty Shipment',reward:6000,intro:'Sundaram\'s last shipment arrives by speedboat at the jetty on Kovai Coast. Stop it.',
    make:()=>[stGo(650,200,'Go to the jetty on Kovai Coast',{r:14}),stKill(725,200,4,'Take out the smugglers on the jetty',{rx:24,rz:1.4}),
      stWreck(scorpionBoat,'Sink the smugglers\' speedboat (take a boat, or shoot it from the jetty)',{far:700,tick:(v,dt)=>{if(v!==player.vehicle){v.heading+=0.35*dt;v.speed=13}}}),
-     stSay('PARAMASIVAM','"No guns, no money. Sundaram is hiding in the old Kovai Mills. Finish this, thambi."')]},
+     stTalk('a1_m5_end')]},
   {title:'Silk Sundaram',reward:25000,intro:'This is it. Sundaram and every Scorpion left are holed up in the old Kovai Mills. End it tonight.',
-   make:()=>[stKill(256,-111,6,'Storm the old Kovai Mills',{rx:16,rz:3,waves:1}),stBoss(240,-111,'Silk Sundaram',3,2200,'Boss of the Black Scorpions'),stSay('SILK SUNDARAM','"This city… was supposed to be mine…"')]}];
+   make:()=>[stKill(256,-111,6,'Storm the old Kovai Mills',{rx:16,rz:3,waves:1}),stBoss(240,-111,'Silk Sundaram',3,2200,'Boss of the Black Scorpions'),stTalk('a1_m6_end')]}];
 function startStory(i){const S=STORY[i];if(!S||mission)return;offers=[];
   mission={type:'story',idx:i,title:`Story ${i+1}/${STORY.length}: ${S.title}`,reward:S.reward,txt:'',steps:[],step:0,timer:null,stages:S.make(),stage:0,wave:0,custom:stageTick,done:storyDone,ticks:[],cleanup:[],meters:[]};startStage(mission);noise(0.12,3000,0.2,1);if(S.onStart)S.onStart(mission)}
 function startStage(m){const s=m.stages[m.stage];marker.visible=false;m.timer=s.timer||null;m.wave=0;m.meters=[];if(s.init)s.init(m)}
@@ -112,7 +112,9 @@ function storyDone(m){if(m.tgt)m.tgt.keep=false;player.cash+=m.reward;rep+=2;PRO
 function storyOpts(){const S=STORY[PROG.story];const o=[];if(S&&!mission)o.push({t:`Start "${S.title}" (₹${S.reward.toLocaleString('en-IN')})`,fn:()=>{startStory(PROG.story);return false}});o.push({t:'Bye',fn:()=>false});return o}
 function storyTalk(){const S=STORY[PROG.story];const t={kind:'story',obj:{x:GIVER.x,z:GIVER.z},
   hdr:()=>`<h3>Paramasivam Anna</h3><div class="sub">Retired mill foreman · Story ${Math.min(PROG.story,STORY.length)}/${STORY.length} done</div>`,optsFn:storyOpts,
-  line:mission?'Finish what you are doing first, thambi.':S?S.intro:rpick(PROG.a2&&PROG.a2.done?A2_AFTER:['Kovai is quiet again, thanks to you.','The workers ask about you every day. Have some tea!','Sundaram is gone, but stay sharp, thambi.'])};t.opts=storyOpts();return t}
+  line:''};const lid=mission?null:S?'intro_'+(PROG.story+1):PROG.a2&&PROG.a2.done?rpick(A2_AFTER):null,L=lid&&DIALOGUE[lid];
+  if(L){t.line=SET.subs==='en'?L.en:L.ta;t.lineEn=SET.subs==='both'?L.en:'';playVoice(lid)}
+  else t.line=mission?'Finish what you are doing first, thambi.':rpick(['Kovai is quiet again, thanks to you.','The workers ask about you every day. Have some tea!','Sundaram is gone, but stay sharp, thambi.']);t.opts=storyOpts();return t}
 function extraTalkable(){const p=player.pos;if(Math.hypot(p.x-GIVER.x,p.z-GIVER.z)<3.2)return{kind:'story',hint:'to talk to Paramasivam Anna',custom:storyTalk};
   if(Math.hypot(p.x-HOUSE.px,p.z-HOUSE.pz)<2.8)return{kind:'house',hint:PROG.house?'to use your safehouse':'to look at the house for sale',custom:houseTalk};return null}
 

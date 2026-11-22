@@ -80,8 +80,10 @@
       <div class="row"><label for="mRad">Music (car radio) volume</label><input type="range" id="mRad" min="0" max="1" step="0.05"></div>
       <div class="row"><label for="mSens">Camera sensitivity</label><input type="range" id="mSens" min="0.3" max="2.5" step="0.05"></div>
       <div class="row"><label>Invert look up / down</label><button class="mn-tog" id="mInv">OFF</button></div>
+      <div class="row"><label>Voice language</label><button class="mn-tog" id="mVoice">TAMIL</button></div>
       <div class="row"><label>Subtitles</label><button class="mn-tog" id="mSubs">TAMIL + ENGLISH</button></div>
-      <div class="row note"><label></label><small>Separate effects and voice volumes will come with the voice-acting update. The game has no recorded voices yet.</small></div>
+      <div class="row"><label for="mDialog">Dialogue volume</label><input type="range" id="mDialog" min="0" max="1" step="0.05"></div>
+      <div class="row note"><label></label><small>Lines without a recording are shown as subtitles only. A separate effects volume will come later.</small></div>
     </div><button class="mn-back">‹ BACK</button></section>
   <section class="mn-screen panel-screen" id="scrControls"><h2>CONTROLS</h2>
     <div class="mn-ctl">
@@ -95,8 +97,7 @@
     </div><button class="mn-back">‹ BACK</button></section>
   <section class="mn-screen panel-screen" id="scrCredits"><h2>CREDITS</h2>
     <div class="mn-cred">
-      <p><span>Game design, direction and story</span>The Kovai Streets developer</p>
-      <p><span>Code, models, textures and sound</span>Generated with Claude (Anthropic) in conversation with the developer</p>
+      <p><span>Game design, direction and story</span>Sanjay Nesan J . The Kovai Streets developer</p>
       <p><span>3D engine</span>three.js r128 · © three.js authors · MIT licence</p>
       <p><span>Fonts</span>Bebas Neue · Rajdhani · Google Fonts · SIL Open Font Licence</p>
       <p class="fine">All characters, shops, companies and events are fictional. Real Coimbatore place names are used only to evoke the city.</p>
@@ -130,6 +131,9 @@
     <label>Invert look up / down</label><div><button class="sbtn" id="sInv">OFF</button></div>
     <label for="sVol">Master volume</label><input type="range" id="sVol" min="0" max="1" step="0.05">
     <label for="sRad">Radio volume</label><input type="range" id="sRad" min="0" max="1" step="0.05">
+    <label>Voice language</label><div><button class="sbtn" id="sVoice">TAMIL</button></div>
+    <label>Subtitles</label><div><button class="sbtn" id="sSubs">TAMIL + ENGLISH</button></div>
+    <label for="sDialog">Dialogue volume</label><input type="range" id="sDialog" min="0" max="1" step="0.05">
     <label>Outfit</label><div><button class="sbtn" id="sOutfit">Change</button> <span id="sOutfitName"></span></div>
     <label>Tutorial</label><div><button class="sbtn" id="sTut">Restart</button><button class="sbtn" id="sTutSkip">Skip</button></div>
     <label>Saved game</label><div><button class="sbtn" id="sSave">Save now</button><button class="sbtn danger" id="sDel">Delete save</button></div>
@@ -155,6 +159,8 @@
 <script src="js/audio.js"></script>
 <script src="js/input.js"></script>
 <script src="js/progression.js"></script>
+<script src="js/lines.js"></script>
+<script src="js/voice.js"></script>
 <script src="js/story2.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/menu.js"></script>

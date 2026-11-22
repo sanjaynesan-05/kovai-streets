@@ -1,0 +1,14 @@
+{
+  "_help": "One voice per character for AI4Bharat Indic Parler-TTS. 'description' is the natural-language voice prompt (keep it in English, the model expects that). 'seed' keeps the voice consistent between lines: change it to try a different take. 'filter' is an optional ffmpeg audio filter applied after generation. Edit freely and re-run generate.py with --force for that character.",
+  "paramasivam": {"description": "An elderly man in his sixties speaks in a warm, calm and slightly slow voice with a deep, gentle tone. The recording is very clear and close-up, with no background noise.", "seed": 101},
+  "player":      {"description": "A young man in his twenties speaks in a clear, confident, neutral voice at a moderate pace. The recording is very clear and close-up, with no background noise.", "seed": 202},
+  "kathir":      {"description": "A young man in his early twenties speaks quickly and energetically with an expressive, slightly high-pitched voice. The recording is very clear, with no background noise.", "seed": 303},
+  "selvi":       {"description": "A middle-aged woman speaks in a firm, confident and clear voice with strong conviction, at a moderate pace. The recording is very clear and close-up, with no background noise.", "seed": 404},
+  "devarajan":   {"description": "A man in his late fifties speaks in a smooth, controlled, cold and authoritative voice, slowly and deliberately, with a low pitch. The recording is very clear, with no background noise.", "seed": 505},
+  "bhaskar":     {"description": "A middle-aged man speaks in a tired, careful, low and slightly rough voice at a measured pace. The recording is very clear, with no background noise.", "seed": 606},
+  "malai":       {"description": "A man speaks in a loud, rough, harsh and gravelly voice with an aggressive tone. The recording is clear, with no background noise.", "seed": 707},
+  "sundaram":    {"description": "A man speaks in a weak, breathless and fading voice, slowly, as if badly hurt. The recording is clear, with no background noise.", "seed": 808},
+  "guard":       {"description": "A man shouts loudly and urgently in a rough voice. The recording is clear, with no background noise.", "seed": 909},
+  "radio":       {"description": "A man speaks quickly and flatly in a clipped, official voice. The recording is clear.", "seed": 111, "filter": "highpass=f=350,lowpass=f=3200,acompressor"},
+  "architect":   {"description": "A person speaks in a very calm, even, emotionless and quiet voice, slowly. The recording is very clear, with no background noise.", "seed": 222, "filter": "asetrate=24000*0.88,aresample=24000,atempo=1.12,aecho=0.6:0.5:35:0.35"}
+}

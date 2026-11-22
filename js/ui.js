@@ -20,10 +20,11 @@ function extraIcons(a){a.push({x:HOUSE.px,z:HOUSE.pz,img:ICON.house,edge:true});
 function renderPause(){const el=$('progress');if(!el)return;
   el.innerHTML=[`Story <span>${PROG.story}/${STORY.length}</span>`,`Film reels <span>${PROG.reels.length}/${REELS.length}</span>`,`Stunt jumps <span>${PROG.jumps.length}/${RAMPS.length}</span>`,
     `Rampages <span>${PROG.ramp.length}/${RAMPAGES.length}</span>`,`Respect <span>LV ${respectLv()}</span>`,`Safehouse <span>${PROG.house?'Owned':'₹5,000'}</span>`].map(s=>`<div>${s}</div>`).join('');
-  $('sSens').value=SET.sens;$('sVol').value=SET.vol;$('sRad').value=SET.radio;$('sInv').textContent=SET.inv?'ON':'OFF';$('sOutfitName').textContent=OUTFITS[PROG.outfit].n;$('sDel').textContent='Delete save'}
-function onPause(){saveGame();renderPause();if(AC){const t=AC.currentTime;for(const g of[RADIO_G,engGain,engLfoG,sirGain,amb&&amb.city,amb&&amb.sea])if(g)g.gain.setTargetAtTime(0,t,0.05)}}
+  $('sSens').value=SET.sens;$('sVol').value=SET.vol;$('sRad').value=SET.radio;$('sInv').textContent=SET.inv?'ON':'OFF';$('sOutfitName').textContent=OUTFITS[PROG.outfit].n;$('sDel').textContent='Delete save';$('sVoice').textContent=SET.voice==='en'?'ENGLISH':'TAMIL';$('sSubs').textContent=subsLabel();$('sDialog').value=SET.dialog}
+function onPause(){pauseVoice();saveGame();renderPause();if(AC){const t=AC.currentTime;for(const g of[RADIO_G,engGain,engLfoG,sirGain,amb&&amb.city,amb&&amb.sea])if(g)g.gain.setTargetAtTime(0,t,0.05)}}
 {const on=(id,ev,fn)=>{const el=$(id);if(el)el.addEventListener(ev,fn)};
   on('sSens','input',e=>{SET.sens=+e.target.value;saveSettings()});on('sVol','input',e=>{SET.vol=+e.target.value;saveSettings()});on('sRad','input',e=>{SET.radio=+e.target.value;saveSettings()});
+  on('sVoice','click',()=>{toggleVoiceLang();renderPause()});on('sSubs','click',()=>{cycleSubs();renderPause()});on('sDialog','input',e=>{SET.dialog=+e.target.value;saveSettings()});
   on('sInv','click',()=>{SET.inv=!SET.inv;saveSettings();renderPause()});on('sOutfit','click',()=>{if(player.human)setOutfit((PROG.outfit+1)%OUTFITS.length)});
   on('sTut','click',()=>{PROG.tut=0;tutS.step=-1;floatMsg('Tutorial restarted')});on('sTutSkip','click',()=>{PROG.tut=TUT.length;queueSave()});
   on('sSave','click',()=>{saveGame();$('sSave').textContent='Saved!';setTimeout(()=>$('sSave').textContent='Save now',1200)});

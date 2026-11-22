@@ -66,12 +66,14 @@ function loadSlot(i){menuSound('ok');if(i===0)return startFromMenu();const k=MEN
 
 /* ---------- settings (the same SET store the game and pause menu use) ---------- */
 function renderMenuSettings(){$('mVol').value=SET.vol;$('mRad').value=SET.radio;$('mSens').value=SET.sens;$('mInv').textContent=SET.inv?'ON':'OFF';
-  $('mSubs').textContent=SET.subs==='en'?'ENGLISH ONLY':'TAMIL + ENGLISH';$('mFull').textContent=document.fullscreenElement?'FULLSCREEN':'WINDOWED';
+  $('mSubs').textContent=subsLabel();$('mVoice').textContent=SET.voice==='en'?'ENGLISH':'TAMIL';$('mDialog').value=SET.dialog;$('mFull').textContent=document.fullscreenElement?'FULLSCREEN':'WINDOWED';
   $('mFull').disabled=!document.documentElement.requestFullscreen}
 $('mVol').addEventListener('input',e=>{SET.vol=+e.target.value;saveSettings()});$('mRad').addEventListener('input',e=>{SET.radio=+e.target.value;saveSettings()});
 $('mSens').addEventListener('input',e=>{SET.sens=+e.target.value;saveSettings()});
 $('mInv').addEventListener('click',()=>{SET.inv=!SET.inv;saveSettings();renderMenuSettings();menuSound('ok')});
-$('mSubs').addEventListener('click',()=>{SET.subs=SET.subs==='en'?'both':'en';saveSettings();renderMenuSettings();menuSound('ok')});
+$('mSubs').addEventListener('click',()=>{cycleSubs();renderMenuSettings();menuSound('ok')});
+$('mVoice').addEventListener('click',()=>{toggleVoiceLang();renderMenuSettings();menuSound('ok')});
+$('mDialog').addEventListener('input',e=>{SET.dialog=+e.target.value;saveSettings()});
 $('mFull').addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()}catch(e){}menuSound('ok')});
 document.addEventListener('fullscreenchange',()=>{if(MENU.screen==='scrSettings')renderMenuSettings()});
 

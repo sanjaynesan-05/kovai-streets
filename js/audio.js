@@ -62,7 +62,7 @@ function playStep(st,i,t,sd){const s=i%16,bar=Math.floor(i/16);
     if(s%4===2&&Math.random()<0.5)tone(hz(rpick(ch)+12),t,sd*3,'sine',0.03,RADIO_G,0.02)}}
 function updateRadio(){if(!AC||!RADIO_G)return;const v=player.vehicle,on=!!v&&radioSt>0&&!v.s.cycle&&!player.dead,t=AC.currentTime;
   if(on&&!radioWas)floatMsg('📻 '+STATIONS[radioSt].n+(isTouch?' · tap RADIO to change':' · press N to change'));radioWas=on;
-  RADIO_G.gain.setTargetAtTime(on?SET.radio*0.6:0,t,0.3);if(!on){radioNextT=0;return}
+  RADIO_G.gain.setTargetAtTime(on?SET.radio*0.6*(voiceActive()?0.3:1):0,t,0.3)   /* radio dips while someone speaks */;if(!on){radioNextT=0;return}
   const sd=60/STATIONS[radioSt].bpm/4;if(radioNextT<t)radioNextT=t+0.05;while(radioNextT<t+0.25){playStep(radioSt,radioStep,radioNextT,sd);radioStep++;radioNextT+=sd}}
 let amb=null;
 function initAmbience(){const n=AC.sampleRate*2,b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);let last=0;for(let i=0;i<n;i++){last=(last+0.02*(Math.random()*2-1))/1.02;d[i]=last*3.5}

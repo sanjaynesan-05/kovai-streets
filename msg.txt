@@ -1,24 +1,17 @@
-Add cinematic main menu with live city background
+Add Tamil-first voice system with AI4Bharat TTS generator
 
-Replace the old start screen with a left-side game menu: Continue,
-New Game, Load Game, Settings, Controls, Credits and Exit.
-
-- Background: a slow golden-hour camera over the real game city,
-  using the existing renderer, plus city ambience sounds
-- Story panel shows the current act, next mission and story progress
-  calculated from the save (no hard-coded values)
-- Continue loads the existing save and shows when it was last played;
-  a new-player layout appears when there is no save
-- New Game asks for confirmation and keeps the old save as "previous"
-- Load Game lists the save system's three slots (current, autosave
-  backup, before last New game); loading keeps the current save
-- Settings use the shared settings store: graphics, fullscreen,
-  master and music volume, camera sensitivity, invert look, subtitle
-  language
-- Controls screen lists the real key bindings and touch controls
-- Credits screen
-- Exit explains that browsers can't close their own tab
-- Pause menu gets a "Main menu" button that saves first
-- Keyboard (arrows, Enter, Escape), mouse and touch input;
-  responsive layout for short and narrow screens
-- Vehicle regression tests moved to a road without traffic
+- js/lines.js: all 83 story lines (Act 1, Act 2, intro and after-story talk)
+  with speaker, Tamil and English text and mood, used by the game and the generator
+- js/voice.js: plays recordings listed in assets/voice/manifest.json; a line
+  without a recording shows as subtitles only
+- Tamil is the default voice and subtitle language; English is optional
+- New settings in the main menu and pause menu: voice language (Tamil/English),
+  subtitles (Tamil + small English / Tamil only / English only) and dialogue volume
+- Subtitles and phone talks show Tamil with smaller English underneath
+- Radio volume drops while a character is speaking; voices pause with the game
+- Act 1 missions now use the shared dialogue lines (stTalk) instead of inline text
+- tools/voice: generate.py (Indic Parler-TTS on a local GPU, ffmpeg to MP3),
+  voices.json (one voice per character, with effects for the Architect and the
+  police radio) and a setup README
+- assets/voice: manifest and generated Tamil/English MP3s
+- .gitignore: exclude the .venv-voice environment

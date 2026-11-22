@@ -16,75 +16,19 @@ function sanitizeA2(a){a=a&&typeof a==='object'?a:{};const s=v=>typeof v==='stri
     insider:!!a.insider,plate:!!a.plate,workers:n(a.workers,3),stealth:!!a.stealth,leader:['captured','killed','escaped'].includes(a.leader)?a.leader:s(''),vault:!!a.vault,done:!!a.done,epilogue:n(a.epilogue,2),strongCase:!!a.strongCase}}
 
 /* ---------- dialogue lines (IDs are stable: the voice system will map recordings to them) ---------- */
-const A2L={
-  m7_brief:{who:'PARAMASIVAM',en:'Someone searched the burned Singanallur mill after the fire. Go and see what they missed, thambi.'},
-  m7_intro:{who:'PARAMASIVAM',ta:'நம்ம ஊர்ல எல்லாருக்கும் தெரிஞ்சது சுந்தரம் தான். ஆனா அவனுக்கு பின்னாடி யாரோ இருக்காங்கன்னு எனக்கு எப்பவுமே சந்தேகம்.',en:'Everyone in our town only knew Sundaram. But I always suspected someone was standing behind him.'},
-  m7_player:{who:'YOU',en:'Then we find out who.'},
-  m7_insider:{who:'YOU',en:'A visitor pass from the night of the fire... with a name I know. I will keep this to myself for now.'},
-  m7_end:{who:'PARAMASIVAM',en:'A ledger, a land deal with Thendral Builders... and this phone. One contact we cannot trace. Saved only as "A".'},
-  m8_brief:{who:'PARAMASIVAM',en:'Devarajan drives around the city today in a white SUV. Follow him, but never let him see you.'},
-  m8_call:{who:'DEVARAJAN',en:'(on the phone) Everything is moving according to the plan. Don\'t worry about the old mill.'},
-  m8_call2:{who:'DEVARAJAN',ta:'இந்த ஊர்ல என்ன நடக்கணும்னு நம்ம முடிவு பண்ணணும்.',en:'We should be the ones deciding what happens in this town.'},
-  m8_photo:{who:'YOU',en:'Got the meeting on camera. The face is hidden, but the car isn\'t.'},
-  m8_plate:{who:'YOU',en:'And the second car\'s registration number. Perfect.'},
-  m8_end:{who:'PARAMASIVAM',en:'That second car is registered to a company I worked for, long ago. I do not like this, thambi.'},
-  m9_brief:{who:'SELVI AKKA',en:'They made our workers sign papers they could not read. I have the originals. Get me to the workers\' rally at Town Hall.'},
-  m9_ambush:{who:'SELVI AKKA',en:'Those are Devarajan\'s men! Keep them away from the workers!'},
-  m9_end:{who:'SELVI AKKA',ta:'இது வெறும் நிலத்துக்கான சண்டை இல்ல. ஆயிரம் குடும்பங்களோட வாழ்க்கை.',en:'This isn\'t just a fight over land. It\'s the lives of a thousand families.'},
-  m9_docs:{who:'SELVI AKKA',en:'Keep a copy of the ownership papers. If anything happens to me, these must reach the people.'},
-  m10_brief:{who:'PARAMASIVAM',en:'The papers point to a Thendral Builders godown south of Ukkadam. Go at night. Photograph everything, and do not get seen.'},
-  m10_alarm:{who:'GUARD',en:'Intruder! Lock the gates!'},
-  m10_end:{who:'YOU',en:'Payments to officials, a shipment to somewhere in the hills... and the same letter as on the phone.'},
-  m11_brief:{who:'PARAMASIVAM',en:'Inspector Bhaskar wants to meet you at the Central police station, north of the city. Alone. Be careful.'},
-  m11_a:{who:'INSPECTOR BHASKAR',en:'You are making noise in places where the whole department is listening.'},
-  m11_b:{who:'INSPECTOR BHASKAR',en:'That mill fire was no accident. Someone ordered it, to burn the papers and scare the workers.'},
-  m11_c:{who:'INSPECTOR BHASKAR',en:'I can help you. But I need protection, or a reason. So what will it be?'},
-  m11_pay:{who:'INSPECTOR BHASKAR',en:'Fine. I will pass you what I can. Don\'t expect me to trust you.'},
-  m11_threat:{who:'INSPECTOR BHASKAR',en:'...So my name is in those papers too. All right. I will cooperate. For now.'},
-  m11_walk:{who:'INSPECTOR BHASKAR',en:'Then stay out of my way, and I will stay out of yours. Maybe.'},
-  m11_end:{who:'INSPECTOR BHASKAR',en:'Devarajan is only the name you can see. The person you are looking for doesn\'t leave fingerprints.'},
-  m12_brief:{who:'PARAMASIVAM',en:'Someone is leaking everything we do. A scooter keeps leaving a meeting spot by the Gandhipuram bus stand. Find out who.'},
-  m12_seen:{who:'YOU',en:'That rider... Kathir?!'},
-  m12_caught:{who:'KATHIR',ta:'நான் உன்னை ஏமாத்தணும்னு நினைக்கலடா. எனக்கு வேற வழியே இல்ல.',en:'I never wanted to cheat you, da. I had no other way.'},
-  m12_why:{who:'KATHIR',en:'They found my sister\'s address. Said they would visit her if I didn\'t tell them where you go. I was protecting her.'},
-  m12_forgive:{who:'KATHIR',en:'...Thank you. I won\'t forget this. When it matters, I\'ll be there.'},
-  m12_hand:{who:'PARAMASIVAM',en:'You handed him to the police? He was family, thambi. ...Go. I need some time.'},
-  m13_brief:{who:'PARAMASIVAM',en:'Selvi is gone. A note says: "Stop digging, or she stays in the hills." The Ghat Wolves have her, in the hill village up the ghat road.'},
-  m13_found:{who:'SELVI AKKA',en:'You came! They wanted the land records. Get me out of here!'},
-  m13_surrender:{who:'MALAI RAJAN',en:'Enough! Enough... I give up.'},
-  m13_leader:{who:'MALAI RAJAN',en:'Devarajan hired us. But he takes orders too. He keeps his papers in a private place. He calls it the Vault.'},
-  m13_end:{who:'MALAI RAJAN',en:'Devarajan is scared of the same person you are looking for. He doesn\'t even know who owns the whole game.'},
-  m13_vault:{who:'SELVI AKKA',en:'I heard their leader on the phone. Devarajan keeps everything in a private store he calls "the Vault".'},
-  m13_selvi:{who:'SELVI AKKA',en:'I am alive because of you. Tomorrow, the land papers go public.'},
-  m14_brief:{who:'PARAMASIVAM',en:'Devarajan is auctioning the old mills today at Kovai Central mall. If it goes through, the workers lose everything. This is Project Kovai.'},
-  m14_selvi:{who:'SELVI AKKA',en:'These are the original ownership papers. This auction is a fraud!'},
-  m14_dev:{who:'DEVARAJAN',en:'Get rid of them. Burn those papers!'},
-  m14_run:{who:'YOU',en:'He\'s getting away. He\'s heading for the coast!'},
-  m14_q:{who:'YOU',ta:'சுந்தரம், இந்த கேங், இந்த மில்... எல்லாத்துக்கும் பின்னாடி யாரு?',en:'Sundaram, this gang, these mills... who is behind all of it?'},
-  m14_d1:{who:'DEVARAJAN',ta:'நீ என்னைத் தோற்கடிச்சிருக்கலாம். ஆனா நான் யாருக்காக வேலை பார்த்தேன்னு எனக்கே தெரியாது.',en:'You may have beaten me. But even I don\'t know who I was working for.'},
-  m14_what:{who:'YOU',en:'What do you mean?'},
-  m14_d2:{who:'DEVARAJAN',ta:'நீ தேடுற ஆள்... உன்னைப் பற்றி எனக்கு தெரிஞ்சத விட அதிகமா தெரிஞ்சிருக்கும்.',en:'The person you\'re looking for... knows far more about you than I ever did.'},
-  m14_call:{who:'UNKNOWN CALLER',en:'Project Kovai is compromised. Close the operation.',style:'altered'},
-  m14_late:{who:'DEVARAJAN',en:'You\'re already too late.'},
-  a_police:{who:'INSPECTOR BHASKAR',en:'My men are outside the mall. Two of his guards won\'t get past them.'},
-  a_coerced:{who:'INSPECTOR BHASKAR',en:'His enforcer is inside, with guards. That is all you get from me.'},
-  a_betray:{who:'POLICE RADIO',en:'All units: suspect heading east on Avinashi Road. Use force.'},
-  a_neutral:{who:'POLICE RADIO',en:'All units respond to Kovai Central. Detain everyone involved.'},
-  a_kathir:{who:'KATHIR',en:'Take my car, it\'s right outside! Go, go!'},
-  a_workers:{who:'SELVI AKKA',en:'The workers came as witnesses. Everyone will know what he did.'},
-  end_strong:{who:'SELVI AKKA',en:'With the workers\' testimony, Devarajan\'s name is finished in Kovai.'},
-  end_weak:{who:'PARAMASIVAM',en:'He lost the mills. But without witnesses, his reputation survives. People like him always land on their feet.'}};
-const A2_AFTER=['Devarajan\'s vault is out there somewhere. When we are ready, we will find it.','Selvi says the land papers are with the court now. The workers have hope again.','Someone sent me flowers today. No name. Only a card with the letter A.'];
+const A2L=DIALOGUE;   /* all lines live in lines.js (Tamil primary, English secondary) */
+const A2_AFTER=['after_1','after_2','after_3'];
 
 /* ---------- subtitles ---------- */
 let subQ=[],subCur=null,subT=0;
-function say2(id){const L=A2L[id];if(!L)return;const dur=clamp(1.6+(L.en.length+(L.ta?L.ta.length*0.5:0))/16,3,10);subQ.push({L,dur})}
+function say2(id){const L=A2L[id];if(!L)return;const dur=clamp(1.6+(L.en.length+(L.ta?L.ta.length*0.5:0))/16,3,10);subQ.push({L,dur,id})}
 function subBusy(){return!!subCur||subQ.length>0}
-function updateSub(dt){const el=$('sub');if(subCur){subT-=dt;if(subT<=0)subCur=null}
+function updateSub(dt){const el=$('sub');resumeVoice();if(subCur){subT-=dt;if(subT<=0)subCur=null}
   if(!subCur&&subQ.length){subCur=subQ.shift();subT=subCur.dur;const L=subCur.L;
-    el.className=L.style==='altered'?'altered':'';el.innerHTML=`<b>${esc(L.who)}</b>${L.ta&&SET.subs!=='en'?`<span class="ta">${esc(L.ta)}</span>`:''}<span>${esc(L.en)}</span>`}
+    el.className=L.spk==='architect'?'altered':'';el.innerHTML=`<b>${esc(whoText(L))}</b>${lineHTML(L)}`;
+    const it=subCur;playVoice(it.id,len=>{if(subCur===it)subT=Math.max(subT,len+0.4)})}
   if(!subCur&&!el.classList.contains('hidden'))el.classList.add('hidden');else if(subCur)el.classList.remove('hidden')}
-function clearSubs(){subQ=[];subCur=null;subT=0;$('sub').classList.add('hidden')}
+function clearSubs(){stopVoice();subQ=[];subCur=null;subT=0;$('sub').classList.add('hidden')}
 
 /* ---------- cinematic overlays: phone message, CCTV, title card, fade ---------- */
 let cineHold=false,cine=null;
