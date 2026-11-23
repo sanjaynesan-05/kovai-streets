@@ -68,11 +68,11 @@ function spawnGoon(x,z,spot,aggro,opt){opt=opt||{};const boss=!!opt.boss;
   if(boss)h.g.scale.setScalar(1.18);
   const wep=opt.wep||(boss?'rifle':rpick(['pistol','pistol','smg','rifle']));h.gun.scale.set(wep==='pistol'?1:1.15,wep==='pistol'?1:wep==='smg'?1.3:2,wep==='pistol'?1:1.15);
   const g={h,x,z,yaw:Math.random()*6,hp:boss?(opt.hp||650):cop?80:100,dead:false,deadT:0,aggro:!!aggro,shootT:RR(0.8,1.8),phase:0,spot,boss,wep,fly:null,cop};goons.push(g);return g}
-function spawnGang(sp){sp.alive=0;const cx=sp.i*CELL+sp.sx*10.5,cz=sp.j*CELL+sp.sz*10.5;for(let k=0;k<4;k++){spawnGoon(cx+RR(-3,3),cz+RR(-3,3),sp);sp.alive++}sp.respawn=0;sp.st='neutral';sp.kills=0;sp.reinf=false}
+function spawnGang(sp){sp.alive=0;const{x:cx,z:cz}=gangCenter(sp);for(let k=0;k<4;k++){spawnGoon(cx+RR(-3,3),cz+RR(-3,3),sp);sp.alive++}sp.respawn=0;sp.st='neutral';sp.kills=0;sp.reinf=false}
 /* Gang territory: neutral → suspicious (inside GANG_R) → warning (inside GANG_WARN_R, spoken line) → hostile (stay GANG_WARN_T s, or aim at / hit / shoot near them)
    → cooldown (more than 75 m away; back to neutral after GANG_COOL_T s). Only hangout gangs (g.spot); story-mission enemies keep their own aggro/passive. Never adds wanted stars. */
 const GANG_R=30,GANG_WARN_R=16,GANG_WARN_T=6,GANG_COOL_T=60,GANG_WARN=['gang_warn_1','gang_warn_2'];
-function gangCenter(sp){return{x:sp.i*CELL+sp.sx*10.5,z:sp.j*CELL+sp.sz*10.5}}
+function gangCenter(sp){return sp.gx!=null?{x:sp.gx,z:sp.gz}:{x:sp.i*CELL+sp.sx*10.5,z:sp.j*CELL+sp.sz*10.5}}/* gx/gz: real-map hangout (geosites.js) */
 function gangProvoke(sp){if(sp.st!=='hostile'){sp.st='hostile';say2('gang_attack')}for(const g of goons)if(g.spot===sp&&!g.dead)g.aggro=true}
 function updateGangs(dt){const P=playerP();
   for(const sp of gangSpots){if(sp.alive<=0)continue;const c=gangCenter(sp),d=player.dead?999:Math.hypot(P.x-c.x,P.z-c.z);
@@ -106,7 +106,7 @@ function updateGoons(dt){const P=playerP();
     else{if(d>75&&!g.spot)g.aggro=false;if(g.spot&&g.spot.st!=='neutral'&&!player.dead)g.yaw+=angDiff(g.yaw,Math.atan2(dx,dz))*Math.min(1,dt*3);else g.yaw+=Math.sin(time*0.5+i)*dt*0.3;animHuman(g.h,0,0,false)}
     g.h.g.position.set(g.x,(g.y=humanY(g.x,g.z,g.y||0)),g.z);g.h.g.rotation.y=g.yaw}
   updateGangs(dt);
-  for(const sp of gangSpots){if(sp.alive<=0){sp.respawn+=dt;const cx=sp.i*CELL,cz=sp.j*CELL;if(sp.respawn>100&&Math.hypot(P.x-cx,P.z-cz)>140)spawnGang(sp)}}}
+  for(const sp of gangSpots){if(sp.alive<=0){sp.respawn+=dt;const{x:cx,z:cz}=gangCenter(sp);if(sp.respawn>100&&Math.hypot(P.x-cx,P.z-cz)>140)spawnGang(sp)}}}
 
 
 /* ================= wanderers & static people ================= */

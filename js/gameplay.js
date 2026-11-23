@@ -48,7 +48,7 @@ function updateWanted(dt){if(starFlashT>0){starFlashT-=dt;if(starFlashT<=0)$('st
     if(seen)wantedCool=0;else{wantedCool+=dt;if(wantedCool>(10+wanted*3)*heatMult()){wanted--;wantedCool=0;if(wanted===0)toast('Lost the cops','The heat is off',2.2)}}}}
 
 /* ================= places, hospital, shop ================= */
-let SHOP={x:9.5,z:83.5};
+let SHOP=WO(9.5,83.5);/* WO: real-map position in ?world=geo (geosites.js), unchanged otherwise */
 const PLACES=[{n:'the reservoir bank',x:ox(640),z:40},{n:'the Race Course walking track',x:185,z:8.6},{n:'VOC Park',x:111,z:-65.4},{n:'the Saibaba Colony temple',x:-333,z:-301},{n:'Ukkadam lake',x:-111,z:229},
   {n:'the Town Hall clock tower',x:-37,z:81},{n:'the Podanur pond',x:259,z:303},{n:'Singanallur lake',x:481,z:144},{n:'the Singanallur bus stand',x:481,z:70},{n:'the Ukkadam bus stand',x:-37,z:218},{n:'Marudhamalai temple',x:-703,z:-152},{n:'the Gandhipuram bus stand',x:37,z:-155},{n:'R.S. Puram park',x:-185,z:7.5}];
 function updateZones(dt){const healEl=$('heal');let healing=false;
@@ -68,10 +68,10 @@ function buyItem(k){const it=SHOPITEMS[k];if(!it)return;if((it.lv||1)>respectLv(
 
 /* ================= friends & talking ================= */
 const FRIENDS=[
-  {name:'Meena',bio:'College student · loves fast cars',home:{x:111,z:-8.6},look:{shirt:'#e83e8c',pants:'#f4f1e8',skin:'#8d5524',long:true,hair:'#1b1410'},fr:20,perk:'car',
+  {name:'Meena',bio:'College student · loves fast cars',home:WO(111,-8.6),look:{shirt:'#e83e8c',pants:'#f4f1e8',skin:'#8d5524',long:true,hair:'#1b1410'},fr:20,perk:'car',
    lines:{hi:['Hey you! Back again?','Vanakkam! I was just thinking about you.','Oh hi! Bored of classes already.'],gift:['Malli flowers! They smell amazing. Thank you!','Aww, you remembered. Thank you!'],
      arrive:['This is my favourite spot in all of Kovai. Thanks for bringing me!','Okay, this was fun. You drive like a maniac though!','Let us come here again sometime, okay?'],low:'Hmm, I don\'t know you that well yet. Maybe hang out first?'}},
-  {name:'Divya',bio:'Software engineer at the IT park',home:{x:259,z:-230.6},look:{shirt:'#4361ee',pants:'#22223b',skin:'#a0662f',long:true,hair:'#2b1a10'},fr:10,perk:'armor',
+  {name:'Divya',bio:'Software engineer at the IT park',home:WO(259,-230.6),look:{shirt:'#4361ee',pants:'#22223b',skin:'#a0662f',long:true,hair:'#2b1a10'},fr:10,perk:'armor',
    lines:{hi:['Hi! Escaping a meeting, don\'t tell anyone.','Hey! Need a break from my laptop.','Vanakkam! Good timing, I just pushed my code.'],gift:['Jasmine! Best thing that happened today.','You are sweet. Thank you!'],
      arrive:['Wow, I needed this. Thank you!','Nice! Much better than my office view.','We should do this every Friday.'],low:'Let\'s hang out a bit more first, then we\'ll see.'}}];
 FRIENDS.forEach(f=>Object.assign(f,{x:f.home.x,z:f.home.z,yaw:0,comp:false,armed:false,inCar:false,shootT:1,phase:0,giftT:-99,hitT:-99,perkDone:false,awayT:0}));

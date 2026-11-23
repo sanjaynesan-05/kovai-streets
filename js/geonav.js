@@ -14,7 +14,7 @@ const NAV_W={trunk:3,primary:3,secondary:2.5,tertiary:2,trunk_link:1.5,primary_l
 const NAV_V={trunk:1.15,primary:1.05,secondary:1,tertiary:0.9,unclassified:0.75,residential:0.65,living_street:0.45,service:0.4,track:0.35};   // cruise speed factor by road class
 const SIG_CYCLE=18;                                          // seconds per signal phase (east-west, then north-south)
 
-function initGeoNav(){Promise.all(['graph_pilot','roads'].map(n=>fetch('geodata/processed/pilot/'+n+'.json').then(r=>r.json()))).then(([g,rd])=>{
+function initGeoNav(){Promise.all(['graph_pilot','roads','pois'].map(n=>fetch('geodata/processed/pilot/'+n+'.json').then(r=>r.json()))).then(([g,rd,pois])=>{GEO_POIS=pois.pois.filter(p=>POI_ICON[p.kind]);
   const roads=rd.roads,E=NAV.E;for(let i=0;i<g.nodes.length;i++){NAV.OUT.push([]);NAV.IN.push([]);NAV.PADJ.push([])}
   g.edges.forEach(([f,t,len,ri,a,b],k)=>{const r=roads[ri],n0=g.nodes[f];let pts=r.pts.slice(a,b+1);if(Math.hypot(pts[0][0]-n0[0],pts[0][1]-n0[1])>0.5)pts=pts.slice().reverse();
     const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
@@ -26,7 +26,7 @@ function initGeoNav(){Promise.all(['graph_pilot','roads'].map(n=>fetch('geodata/
     for(const n of l){const d=Math.hypot(g.nodes[n][0]-s[0],g.nodes[n][1]-s[1]);if(d<bd){bd=d;best=n}}if(best>=0&&!NAV.SIG.has(best))NAV.SIG.set(best,{x:g.nodes[best][0],z:g.nodes[best][1],off:gwHash(best)*SIG_CYCLE*2,m:null})}
   NAV.nodes=g.nodes;{const N=g.nodes.length,comp=NAV.comp=new Int32Array(N).fill(-1),size=[];for(let s=0;s<N;s++){if(comp[s]>=0)continue;let n=0;const st=[s];comp[s]=size.length;
     while(st.length){const u=st.pop();n++;for(const k of NAV.OUT[u].concat(NAV.IN[u])){const e=E[k];for(const v of[e.f,e.t])if(comp[v]<0){comp[v]=size.length;st.push(v)}}}size.push(n)}NAV.mainC=size.indexOf(Math.max(...size))}   /* connected pieces; GPS snaps to the main one */
-  NAV.ready=true;
+  NAV.ready=true;initGeoSites();/* G6: mission sites, gangs, reels, ramps */
   for(let n=0;n<AI_TARGET;n++)spawnAI(aiType(),25);for(let n=0;n<QS.peds;n++)spawnPed()}).catch(e=>console.error('road graph',e))}
 
 /* edges whose start lies within r metres of (x, z) */
@@ -51,6 +51,7 @@ function geoSpawnAI(type,minDist){if(!NAV.ready)return null;const P=playerP(),ca
 function geoAINext(v){const a=v.ai,cur=NAV.E[a.e],h0=navDir(cur,true);const opts=[];
   for(const k of NAV.OUT[cur.t]){if(k===cur.rev)continue;const e=NAV.E[k];let turn=Math.abs(angDiff(h0,navDir(e,false)));if(turn>2.6)continue;
     opts.push([k,(NAV_W[e.cls]||0.5)*(0.25+Math.cos(turn/2)**4)])}
+  if(a.flee&&opts.length){const P=playerP();let best=-1e9,bo=null;for(const o of opts){const n=NAV.nodes[NAV.E[o[0]].t],d=Math.hypot(n[0]-P.x,n[1]-P.z)+Math.random()*60;if(d>best){best=d;bo=o}}if(bo)bo[1]=1e6}/* runaways pick the road leading away from the player */
   let k=null;if(!opts.length){if(cur.rev!=null)k=cur.rev;else{a.stuck=99;a.wps=[{x:v.pos.x,z:v.pos.z}];return}}
   else{let tot=0;for(const o of opts)tot+=o[1];let r=Math.random()*tot;k=opts[opts.length-1][0];for(const o of opts){r-=o[1];if(r<=0){k=o[0];break}}}
   const e=NAV.E[k],turn=Math.abs(angDiff(h0,navDir(e,false)));a.e=k;a.lane=navLane(e,a.two);a.cruise=a.base*(NAV_V[e.cls]||0.7);a.wps=navWps(e,a.lane,1);a.turnWp=turn>0.6?a.wps[0]:null}
@@ -140,6 +141,5 @@ function geoRoadblock(){const v=player.vehicle;if(!v||!NAV.ready)return;const fx
 const POI_ICON={};let GEO_POIS=[];
 function letterIcon(L,bg){const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');g.fillStyle=bg;g.beginPath();g.arc(16,16,14,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=2.5;g.stroke();
   g.fillStyle='#fff';g.font='bold 18px Rajdhani,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(L,16,17);return c}
-function initGeoPois(){POI_ICON.hospital=ICON.hosp;POI_ICON.police=letterIcon('P','#1d4ed8');POI_ICON.bus_station=letterIcon('B','#2b9348');
-  fetch('geodata/processed/pilot/pois.json').then(r=>r.json()).then(j=>{GEO_POIS=j.pois.filter(p=>POI_ICON[p.kind])}).catch(()=>{})}
+function initGeoPois(){POI_ICON.hospital=ICON.hosp;POI_ICON.police=letterIcon('P','#1d4ed8');POI_ICON.bus_station=letterIcon('B','#2b9348')}/* the list itself loads with the road graph */
 function geoIcons(){return GEO_POIS.map(p=>({x:p.x,z:p.z,img:POI_ICON[p.kind],edge:false,near:true}))}

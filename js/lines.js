@@ -49,16 +49,16 @@ const DIALOGUE={
  "a1_m3_end": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "தறிகள் தப்பிச்சுடுச்சு. சுந்தரத்தோட ஆள் வெட்டு வேலு மலைப்பக்கம் துப்பாக்கி வாங்குறான். உனக்காக காட்டு செக்போஸ்ட்ட திறக்க வச்சிருக்கேன்.",
-  "en": "The looms are safe. Sundaram's man Vettu Velu buys guns up in the Ghats. I had the forest checkpoint opened for you.",
+  "ta": "தறிகள் தப்பிச்சுடுச்சு. சுந்தரத்தோட ஆள் வெட்டு வேலு பழைய கல்குவாரி யார்டுல துப்பாக்கி வாங்குறான். அங்க கவனமா இரு.",
+  "en": "The looms are safe. Sundaram's man Vettu Velu buys guns at the old quarry yard. Be careful there.",
   "mood": "calm",
   "whoTa": "பரமசிவம் அண்ணா"
  },
  "a1_m4_end": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "வேலு கதை முடிஞ்சது! அவங்க கடைசி துப்பாக்கிகள் நீர்த்தேக்கம் வழியா படகுல வருது. நீர்த்தேக்க ரோடு இப்போ உனக்கு திறந்திருக்கு.",
-  "en": "Velu is finished! Their last guns come across the reservoir by boat. The reservoir road is open to you now.",
+  "ta": "வேலு கதை முடிஞ்சது! அவங்க கடைசி துப்பாக்கிகள் உக்கடம் குளம் வழியா படகுல, ஒரு பழைய ஜெட்டிக்கு வருது.",
+  "en": "Velu is finished! Their last guns come by boat across Ukkadam Lake, to an old jetty.",
   "mood": "pleased",
   "whoTa": "பரமசிவம் அண்ணா"
  },
@@ -337,8 +337,8 @@ const DIALOGUE={
  "m13_brief": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "செல்வியக் காணோம். ஒரு சீட்டுல எழுதியிருக்கு: \"தோண்டுறத நிறுத்து, இல்லைன்னா அவ மலையிலயே இருப்பா.\" காட் வுல்ஃப்ஸ் அவள காட் ரோட்டு மேல இருக்கிற மலை கிராமத்துல வச்சிருக்காங்க.",
-  "en": "Selvi is gone. A note says: \"Stop digging, or she stays in the hills.\" The Ghat Wolves have her, in the hill village up the ghat road.",
+  "ta": "செல்வியக் காணோம். ஒரு சீட்டுல எழுதியிருக்கு: \"தோண்டுறத நிறுத்து, இல்லைன்னா அவ காணாம போயிடுவா.\" காட் வுல்ஃப்ஸ் அவள நகரத்துல ஒரு பழைய சுவர் சூழ்ந்த காம்பவுண்டுல வச்சிருக்காங்க.",
+  "en": "Selvi is gone. A note says: \"Stop digging, or she disappears.\" The Ghat Wolves are holding her in an old walled compound in the city.",
   "mood": "desperate",
   "whoTa": "பரமசிவம் அண்ணா"
  },
@@ -417,8 +417,8 @@ const DIALOGUE={
  "m14_run": {
   "spk": "player",
   "who": "YOU",
-  "ta": "அவன் தப்பிக்கிறான். நீர்த்தேக்கம் பக்கம் போறான்!",
-  "en": "He's getting away. He's heading for the reservoir!",
+  "ta": "அவன் தப்பிக்கிறான். குளத்துப் பக்கம் போறான்!",
+  "en": "He's getting away. He's heading for the lake!",
   "mood": "urgent",
   "whoTa": "நீ"
  },
@@ -561,16 +561,16 @@ const DIALOGUE={
  "intro_4": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "வெட்டு வேலு மலை உச்சி வியூ பாயிண்ட்ல துப்பாக்கி கடத்தல்காரங்கள சந்திக்கிறான். அந்த துப்பாக்கிகள் இல்லாம சுந்தரம் பலவீனம்.",
-  "en": "Vettu Velu is meeting gun runners at the hilltop viewpoint. Without those guns, Sundaram is weak.",
+  "ta": "வெட்டு வேலு பழைய கல்குவாரி யார்டுல துப்பாக்கி கடத்தல்காரங்கள சந்திக்கிறான். அந்த துப்பாக்கிகள் இல்லாம சுந்தரம் பலவீனம்.",
+  "en": "Vettu Velu is meeting gun runners at the old quarry yard. Without those guns, Sundaram is weak.",
   "mood": "warm",
   "whoTa": "பரமசிவம் அண்ணா"
  },
  "intro_5": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "சுந்தரத்தோட கடைசி சரக்கு கோவை நீர்த்தேக்க ஜெட்டிக்கு ஸ்பீட்போட்டுல வருது. அதை நிறுத்து.",
-  "en": "Sundaram's last shipment arrives by speedboat at the jetty on Kovai Reservoir. Stop it.",
+  "ta": "சுந்தரத்தோட கடைசி சரக்கு உக்கடம் குளத்துல இருக்கிற ஒரு பழைய ஜெட்டிக்கு ஸ்பீட்போட்டுல வருது. அதை நிறுத்து.",
+  "en": "Sundaram's last shipment arrives by speedboat at an old jetty on Ukkadam Lake. Stop it.",
   "mood": "warm",
   "whoTa": "பரமசிவம் அண்ணா"
  },

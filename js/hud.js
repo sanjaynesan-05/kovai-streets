@@ -21,7 +21,7 @@ function buildMinimapBase(){if(REALMAP)return;/* geoworld.js draws its own map *
   o.fillStyle='#6d655a';o.fillRect(X(-BOUND),Z(TRACKZ-2.5),2*BOUND*MS,5*MS);o.fillStyle='#a64b2a';o.fillRect(X(70),Z(380+GX),80*MS,14*MS);o.fillStyle='#bdb5a3';o.fillRect(X(50),Z(394.2+GX),120*MS,7.4*MS);
   o.fillStyle='#9a9a96';o.fillRect(X(FLY.xa),Z(-FLY.hw),(FLY.xb-FLY.xa)*MS,FLY.hw*2*MS);o.fillStyle='#cfc6b2';o.fillRect(X(STATUE.x-22),Z(STATUE.z-22),44*MS,44*MS);o.fillRect(X(STATUE.x-2),Z(STATUE.z),4*MS,190*MS);
   o.fillStyle='#262a2f';o.fillRect(X(STATUE.x-6),Z(STATUE.z-8),12*MS,10*MS);o.fillStyle='#8b6b4a';o.fillRect(X(648+GX),Z(197.5),132*MS,5*MS)}
-function mapIcons(){if(REALMAP)return geoIcons();const a=[{x:HOSP.x,z:HOSP.z,img:ICON.hosp,edge:true},{x:SHOP.x,z:SHOP.z,img:ICON.gun,edge:true}];
+function mapIcons(){if(REALMAP){const a=geoIcons();a.push({x:HOSP.x,z:HOSP.z,img:ICON.hosp,edge:true},{x:SHOP.x,z:SHOP.z,img:ICON.gun,edge:true});for(const f of FRIENDS)if(!f.comp&&!f.goingHome)a.push({x:f.home.x,z:f.home.z,img:ICON.heart,edge:true});extraIcons(a);return a}const a=[{x:HOSP.x,z:HOSP.z,img:ICON.hosp,edge:true},{x:SHOP.x,z:SHOP.z,img:ICON.gun,edge:true}];
   for(const f of FRIENDS)if(!f.comp&&!f.goingHome)a.push({x:f.home.x,z:f.home.z,img:ICON.heart,edge:true});for(const st of STALLS)a.push({x:st.cx,z:st.cz,img:ICON.tea,edge:false});extraIcons(a);return a}
 function drawMinimap(){const P=playerP();const c=mctx;c.save();c.clearRect(0,0,180,180);c.beginPath();c.arc(90,90,90,0,Math.PI*2);c.clip();c.fillStyle='#8f9a66';c.fillRect(0,0,180,180);
   const th=camYaw+Math.PI,cs=Math.cos(th),sn=Math.sin(th);

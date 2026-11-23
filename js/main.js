@@ -5,6 +5,12 @@
 'use strict';
 
 /* ---------- init & per-frame ---------- */
+/* film reels: grid spots, or real-map sidewalks near the same places (step G6) */
+function createReels(){
+  const rg=(()=>{const B=GB();gb(B,CY(0.38,0.38,0.08,20),0,0,0,'#e8b923',Math.PI/2,0,0);for(let k=0;k<5;k++){const a=k/5*Math.PI*2;gb(B,CY(0.08,0.08,0.1,10),Math.cos(a)*0.2,Math.sin(a)*0.2,0,'#3a2a10',Math.PI/2,0,0)}gb(B,CY(0.06,0.06,0.12,8),0,0,0,'#111',Math.PI/2,0,0);return gbGeo(B)})();
+  REELS.forEach((e,id)=>{let x,z,hi=0;if(REALMAP){const T=e[0]==='hill'?SITE('dealyard'):e[0]==='falls'?SITE('hideout'):null;[x,z]=T?[T.x-12,T.z+4]:geoSidewalk(...W(e[0],e[1]))}else {if(e[0]==='hill'){x=GHAT_TOP.x-12;z=GHAT_TOP.z+4}else if(e[0]==='falls'){const p=PLACES.find(q=>q.n==='the hill falls')||{x:-700,z:110};x=p.x;z=p.z}else{x=e[0];z=e[1];hi=e[2]}}
+    const y=surfaceH(x,z,hi?99:0)+0.9;const m=new THREE.Mesh(rg,VCB);m.position.set(x,y,z);scene.add(m);reelObjs.push({id,x,z,y,m,got:PROG.reels.includes(id)});if(PROG.reels.includes(id))m.visible=false});
+}
 function initPlay(){
   giverH=makeHuman({shirt:'#f4f1e8',pants:'#f4f1e8',lower:'veshti',sleeve:'long',glasses:true,hair:'#c9c9c9',hairStyle:'short',stache:true,skin:'#6b3f1d'});giverH.g.position.set(GIVER.x,0.16,GIVER.z);giverH.g.rotation.y=-Math.PI/2;
   const gs=iconSprite('story',GIVER.x,3.4,GIVER.z,1.8);gs.userData.y=3.4;zoneSprites.push(gs);
@@ -13,9 +19,7 @@ function initPlay(){
    const s=iconSprite('house',HOUSE.px,3.6,HOUSE.pz,2.2);s.userData.y=3.6;zoneSprites.push(s)}
   for(const r of RAMPAGES){r.sp=iconSprite('skull',r.x,1.6,r.z,1.5)}
   const loaded=loadGame();
-  const rg=(()=>{const B=GB();gb(B,CY(0.38,0.38,0.08,20),0,0,0,'#e8b923',Math.PI/2,0,0);for(let k=0;k<5;k++){const a=k/5*Math.PI*2;gb(B,CY(0.08,0.08,0.1,10),Math.cos(a)*0.2,Math.sin(a)*0.2,0,'#3a2a10',Math.PI/2,0,0)}gb(B,CY(0.06,0.06,0.12,8),0,0,0,'#111',Math.PI/2,0,0);return gbGeo(B)})();
-  if(!REALMAP)REELS.forEach((e,id)=>{/* film reels get real-street spots in step G6 */let x,z,hi=0;if(e[0]==='hill'){x=GHAT_TOP.x-12;z=GHAT_TOP.z+4}else if(e[0]==='falls'){const p=PLACES.find(q=>q.n==='the hill falls')||{x:-700,z:110};x=p.x;z=p.z}else{x=e[0];z=e[1];hi=e[2]}
-    const y=surfaceH(x,z,hi?99:0)+0.9;const m=new THREE.Mesh(rg,VCB);m.position.set(x,y,z);scene.add(m);reelObjs.push({id,x,z,y,m,got:PROG.reels.includes(id)});if(PROG.reels.includes(id))m.visible=false});
+  if(!REALMAP)createReels();/* real map: created by initGeoSites once the road graph has loaded */
   setOutfit(PROG.outfit||0);
   if(loaded){if(PROG.house){player.pos.set(HOUSE.px,0,HOUSE.pz-3);camYaw=Math.PI;player.yaw=Math.PI}spawnGarage();
     const f=FRIENDS[0];if(f.perkDone){const v=spawnVehicle('sport',f.home.x+8,f.home.z+4.5,Math.PI/2);v.keep=true}}
@@ -79,7 +83,8 @@ function init(){buildWheel();setupTouch();if(REALMAP){initGeo();return}buildWorl
 /* real-geography pilot (step G2): world, sky, player and a car to drive; traffic, people, gangs and missions follow in G4-G6 */
 function initGeo(){initGeoWorld();initGeoNav();initGeoPois();$('bigmap').querySelector('.k').textContent='Click the map to set a GPS destination (click it again to clear) · + hospital · P police · B bus stand · press M to close';buildSky();buildRain();
   player.human=makeHuman({shirt:'#2a9d8f',pants:'#22223b',skin:'#8d5524',gun:true});player.human.g.position.copy(player.pos);setGun();
-  initPlay();GW.starters.push(spawnVehicle('car',player.pos.x+4,player.pos.z+3,0,'#b3202a'),spawnVehicle('bike',player.pos.x+7,player.pos.z+3,0));
-  toast('REAL COIMBATORE · PILOT','Test build: no missions yet · M = map and GPS',6);$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');requestAnimationFrame(loop)}
+  for(const f of FRIENDS){f.h=makeHuman({...f.look,gun:true});f.h.gun.visible=false;f.icon=iconSprite('heart',f.home.x,3.4,f.home.z,2)}
+  initPlay();GWLD.starters.push(spawnVehicle('car',player.pos.x+4,player.pos.z+3,0,'#b3202a'),spawnVehicle('bike',player.pos.x+7,player.pos.z+3,0));
+  toast('REAL COIMBATORE · PILOT','Story, jobs and GPS on real streets · M = map',6);$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');requestAnimationFrame(loop)}
 setTimeout(()=>{try{const t0=performance.now();init();window.__initMs=performance.now()-t0}catch(e){console.error(e);$('loading').textContent='Something went wrong while building the city: '+e.message}},30);
 window.__game={step:(dt,n)=>{for(let i=0;i<(n||1);i++)update(dt)},storyAuto:()=>{const m=mission;if(m&&m.stages){const s=m.stages[m.stage];if(s&&s.auto)s.auto(m)}},cineSkip,get cineHold(){return cineHold},a2Epilogue:startEpilogue,damageGoon,setTod:v=>{tod=v},STORY,saveApi:{parseSave,sanitizeSave,saveSum,SAVE_VERSION,get blocked(){return saveBlocked},get notice(){return saveNotice}},abortMission:()=>{if(mission)missionFail('test')},markerPos:()=>marker.visible?marker.position.clone():null,PROG,startStory,startRampage,RAMPAGES,saveGame,loadGame,toggleCrouch,get heli(){return heli},get respect(){return respectLv()},set rep(v){rep=v},get paused(){return paused},GHAT:()=>GHAT,spawnVehicle,FALLS:()=>FALLS,train,setRain:v=>{rainF=v;rainOn=v>0.5},exitV:()=>exitVehicle(),get tod(){return tod},openWheel:m=>openWheel(m),renderer,raycastAll,camera,player,vehicles,goons,peds,FRIENDS,CHEATS,get mission(){return mission},get offers(){return offers},get wanted(){return wanted},set wanted(v){wanted=v},enterVehicle,startMission,K,setCam:(y,p)=>{camYaw=y;camPitch=p},openTalk,chooseTalk,get talk(){return talk},buyItem};

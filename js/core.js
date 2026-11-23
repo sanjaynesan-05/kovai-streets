@@ -75,7 +75,7 @@ const ROAD_W=12;   // width of the drawn (new) road segments
 function segDist(x,z,a,b){const dx=b[0]-a[0],dz=b[1]-a[1],L=dx*dx+dz*dz;let t=L?((x-a[0])*dx+(z-a[1])*dz)/L:0;t=clamp(t,0,1);return Math.hypot(x-a[0]-dx*t,z-a[1]-dz*t)}
 function drawnSeg(a,b){return(a[0]!==b[0]&&a[1]!==b[1])||Math.max(Math.abs(a[0]),Math.abs(b[0]),Math.abs(a[1]),Math.abs(b[1]))>LIM+HR}
 const NEWSEGS=[];for(const r of ROADS)for(let i=1;i<r.pts.length;i++)if(drawnSeg(r.pts[i-1],r.pts[i]))NEWSEGS.push({n:r.n,a:r.pts[i-1],b:r.pts[i]});
-function onNewRoad(x,z,m){for(const s of NEWSEGS)if(segDist(x,z,s.a,s.b)<ROAD_W/2+(m||0))return true;return false}
+function onNewRoad(x,z,m){if(REALMAP)return false;/* grid-world roads only */for(const s of NEWSEGS)if(segDist(x,z,s.a,s.b)<ROAD_W/2+(m||0))return true;return false}
 function roadName(x,z){if(REALMAP)return geoRoadName(x,z);for(const r of ROADS)for(let i=1;i<r.pts.length;i++)if(segDist(x,z,r.pts[i-1],r.pts[i])<(drawnSeg(r.pts[i-1],r.pts[i])?ROAD_W/2:HR))return r.n;return null}
 function district(x,z){let b=null,bd=1e18;for(const d of DISTRICTS){const q=(d.x-x)**2+(d.z-z)**2;if(q<bd){bd=q;b=d}}return b.n}
 

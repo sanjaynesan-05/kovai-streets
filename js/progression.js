@@ -76,21 +76,21 @@ function deleteAllSaves(){for(const k of[SAVE_KEY,SAVE_BAK,SAVE_BAD,SAVE_PREV])l
 addEventListener('beforeunload',()=>saveGame());
 
 /* ---------- safehouse & garage ---------- */
-const HOUSE={px:ox(-439),pz:15,price:5000,gx0:ox(-424),gx1:ox(-410),gz0:14,gz1:28};
+const HOUSE=(()=>{const p=W(ox(-439),15),a=W(ox(-424),14),b=W(ox(-410),28);return{px:p[0],pz:p[1],price:5000,gx0:a[0],gx1:b[0],gz0:a[1],gz1:b[1]}})();/* W: real-map position in ?world=geo */
 function extraExcluded(x,z){if(x>ox(-456)&&x<ox(-402)&&z>8&&z<38)return true;return a2Excluded(x,z)}
 function buildSafehouse(){const{gx0,gx1,gz0,gz1}=HOUSE;
-  building(ox(-439),24,14,12,7,'#f3c6c0',{noShop:true,noSign:true,noTank:true,style:0});addG(B_PLAIN,GEO.cone4,ox(-439),8.7,24,'#a8432f',Math.PI/4,0,0,10.6,3.4,9.2);
-  addBox(B_PLAIN,1.5,2.5,0.12,ox(-439),1.25,17.97,'#6d4c41');addBox(B_PLAIN,3,0.15,1.6,ox(-439),0.08,17.1,'#cfc6b2');
+  building(...W(ox(-439),24),14,12,7,'#f3c6c0',{noShop:true,noSign:true,noTank:true,style:0});addG(B_PLAIN,GEO.cone4,W(ox(-439),24)[0],8.7,W(ox(-439),24)[1],'#a8432f',Math.PI/4,0,0,10.6,3.4,9.2);
+  addBox(B_PLAIN,1.5,2.5,0.12,W(ox(-439),17.97)[0],1.25,W(ox(-439),17.97)[1],'#6d4c41');addBox(B_PLAIN,3,0.15,1.6,W(ox(-439),17.1)[0],0.08,W(ox(-439),17.1)[1],'#cfc6b2');
   const h=4.2,C='#d9d2c4';addBox(B_PLAIN,0.4,h,gz1-gz0,gx0,h/2,(gz0+gz1)/2,C);addCollider(gx0-0.2,gz0,gx0+0.2,gz1,h);
   addBox(B_PLAIN,0.4,h,gz1-gz0,gx1,h/2,(gz0+gz1)/2,C);addCollider(gx1-0.2,gz0,gx1+0.2,gz1,h);
   addBox(B_PLAIN,gx1-gx0,h,0.4,(gx0+gx1)/2,h/2,gz1,C);addCollider(gx0,gz1-0.2,gx1,gz1+0.2,h);
   addBox(B_PLAIN,gx1-gx0+0.6,0.3,gz1-gz0+0.6,(gx0+gx1)/2,h+0.15,(gz0+gz1)/2,'#7a7a7a');addCollider(gx0,gz0,gx1,gz1,h+0.3,h);
-  addBox(B_PLAIN,gx1-gx0,0.8,0.3,(gx0+gx1)/2,h-0.4,gz0,'#c0392b');addFlat(B_SIDE,gx0,7,gx1,gz1,0.05,'#ffffff',2.5);addFlat(B_SIDE,ox(-442),7,ox(-436),18,0.05,'#ffffff',2.5);
+  addBox(B_PLAIN,gx1-gx0,0.8,0.3,(gx0+gx1)/2,h-0.4,gz0,'#c0392b');addFlat(B_SIDE,gx0,gz0-7,gx1,gz1,0.05,'#ffffff',2.5);addFlat(B_SIDE,...W(ox(-442),7),...W(ox(-436),18),0.05,'#ffffff',2.5);
   const sg=textPlane('SAFEHOUSE GARAGE',7,0.9,'#1d3557','#ffd23f');sg.position.set((gx0+gx1)/2,h+0.75,gz0-0.25);sg.rotation.y=Math.PI;
-  for(const x of[-452,-404])palm(ox(x),12);neem(ox(-450),34)}
+  for(const x of[-452,-404])palm(...W(ox(x),12));neem(...W(ox(-450),34))}
 function inGarage(x,z){return x>HOUSE.gx0+0.4&&x<HOUSE.gx1-0.4&&z>HOUSE.gz0-0.5&&z<HOUSE.gz1-0.4}
 function garageList(){if(!PROG.house)return[];const a=[];for(const v of vehicles){if(v.wrecked||v.s.boat)continue;if(inGarage(v.pos.x,v.pos.z)&&a.length<3)a.push({type:v.type,color:v.color||null})}return a}
-function spawnGarage(){if(!PROG.house)return;const slots=[-420.5,-417,-413.5].map(ox);PROG.garage.slice(0,3).forEach((c,i)=>{if(!VT[c.type])return;const v=spawnVehicle(c.type,slots[i],22,Math.PI,c.color||undefined);v.keep=true})}
+function spawnGarage(){if(!PROG.house)return;const slots=[-420.5,-417,-413.5].map(x=>W(ox(x),22));PROG.garage.slice(0,3).forEach((c,i)=>{if(!VT[c.type])return;const v=spawnVehicle(c.type,slots[i][0],slots[i][1],Math.PI,c.color||undefined);v.keep=true})}
 const OUTFITS=[{n:'Teal shirt & jeans',o:{shirt:'#2a9d8f',pants:'#22223b',lower:'pants',sleeve:'short'}},
   {n:'White veshti',o:{shirt:'#f4f1e8',pants:'#f4f1e8',lower:'veshti',sleeve:'long',chain:true}},
   {n:'Checked lungi',o:{shirt:'#e9c46a',pants:'#1d4ed8',lower:'lungi',sleeve:'short'}},
@@ -118,6 +118,6 @@ function buildGates(){for(const k in GATES){const G=GATES[k],x=G.x,s=k==='hills'
   box(2.4,2.6,2.4,k==='hills'?'#3f5130':'#1d3557',x+s*2.5,1.3,-10.5);box(2.8,0.2,2.8,'#c1121f',x+s*2.5,2.7,-10.5);
   const sg=textPlane(k==='hills'?'FOREST CHECKPOINT · RESPECT LV 2':'RESERVOIR ROAD CLOSED · RESPECT LV 3',9,1.1,'#f2d13a','#111');sg.position.set(x+s*0.3,3.2,0);sg.rotation.y=s*Math.PI/2;g.add(sg);scene.add(g);G.grp=g}}
 function openGate(k,announce){const G=GATES[k];if(G.open)return;G.open=true;for(const b of G.cols){b.h=-100;b.y0=-200}if(G.grp)G.grp.visible=false;if(announce)toast('NEW AREA OPEN',AREA[k].name+' is now open to explore',3.5)}
-function updateGates(dt){for(const k in GATES){const G=GATES[k];if(!G.open&&areaOpen(k))openGate(k,true);if(G.open)continue;G.msgT-=dt;const P=playerP();
+function updateGates(dt){if(REALMAP)return;/* the hills and reservoir gates belong to the grid world */for(const k in GATES){const G=GATES[k];if(!G.open&&areaOpen(k))openGate(k,true);if(G.open)continue;G.msgT-=dt;const P=playerP();
   if(Math.abs(P.x-G.x)<9&&G.msgT<=0){G.msgT=4;floatMsg(k==='hills'?'Forest checkpoint: closed until Respect LV 2 or story mission 3':'Reservoir road: closed until Respect LV 3 or story mission 4')}}}
 function buildPlayExtras(){buildSafehouse();buildRamps();buildGates();buildAct2World()}
