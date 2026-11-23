@@ -26,23 +26,9 @@ function spawnVehicle(type,x,z,h,color){const s=VT[type];color=color||vehColor(t
 function removeVehicle(v){const i=vehicles.indexOf(v);if(i>=0)vehicles.splice(i,1);scene.remove(v.mesh)}
 
 /* traffic AI (keeps to the left, like Indian roads) */
-const inGrid=(i,j)=>i>=-NB&&i<=NB&&j>=-NB&&j<=NB;
-const laneWP=(i,j,dx,dz,off,ln)=>{ln=ln||LANE;return{x:i*CELL+dx*off+dz*ln,z:j*CELL+dz*off-dx*ln}};
-const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
-function aiNext(v){if(v.ai.geo)return geoAINext(v);/* real road graph (geonav.js) */const a=v.ai;const opts=[];
-  for(const[dx,dz,w]of[[a.dx,a.dz,0.5],[a.dz,-a.dx,0.25],[-a.dz,a.dx,0.25]])if(inGrid(a.i+dx,a.j+dz))opts.push([dx,dz,w]);
-  let ch;if(!opts.length)ch=[-a.dx,-a.dz];else{let tot=0;for(const o of opts)tot+=o[2];let r=Math.random()*tot;ch=opts[opts.length-1];for(const o of opts){r-=o[2];if(r<=0){ch=o;break}}}
-  if(a.flee&&opts.length){const P=playerP();let best=-1e9;for(const o of opts){const nx=(a.i+o[0])*CELL,nz=(a.j+o[1])*CELL;const d=Math.hypot(nx-P.x,nz-P.z)+Math.random()*60;if(d>best){best=d;ch=o}}}
-  if(v.y>2.5&&inGrid(a.i+a.dx,a.j+a.dz))ch=[a.dx,a.dz];const nx=ch[0],nz=ch[1];const exit=laneWP(a.i,a.j,nx,nz,8,a.lane);a.i+=nx;a.j+=nz;a.dx=nx;a.dz=nz;a.wps=[exit,laneWP(a.i,a.j,nx,nz,-9,a.lane)];a.turnWp=exit}
+function aiNext(v){return geoAINext(v)}
 function playerP(){return player.vehicle?player.vehicle.pos:player.pos}
-function makeAI(v,i,j,dx,dz,cruise){const lane=v.s.cycle?RR(5.0,5.6):v.s.two?RR(2.0,5.4):LANE;v.ai={lane,i,j,dx,dz,wps:[laneWP(i,j,dx,dz,-9,lane)],turnWp:null,cruise,blockT:0,stuck:0,hitT:0};v.speed=cruise*0.6;v.vx=Math.sin(v.heading)*v.speed;v.vz=Math.cos(v.heading)*v.speed}
-function spawnAI(type,minDist){if(REALMAP)return geoSpawnAI(type,minDist);/* real road graph (geonav.js) */
-  const P0=playerP(),pi=Math.round(P0.x/CELL),pj=Math.round(P0.z/CELL);/* D2: spawn within 5 blocks of the player */
-  for(let t=0;t<80;t++){const i=clamp(pi+RI(-5,5),-NB,NB),j=clamp(pj+RI(-5,5),-NB,NB);const[dx,dz]=rpick(DIRS);if(!inGrid(i-dx,j-dz))continue;
-    const p=laneWP(i,j,dx,dz,-RR(12,58));const P=playerP();if(Math.hypot(p.x-P.x,p.z-P.z)<minDist)continue;
-    if(vehicles.some(v=>Math.abs(v.pos.x-p.x)<9&&Math.abs(v.pos.z-p.z)<9))continue;
-    const v=spawnVehicle(type,p.x,p.z,Math.atan2(dx,dz));const cr=CRUISE[type]||[9,11];makeAI(v,i,j,dx,dz,RR(cr[0],cr[1]));if(v.s.two)addRider(v);return v}
-  return null}
+function spawnAI(type,minDist){return geoSpawnAI(type,minDist)}
 const CRUISE={car:[12,16],auto:[8.5,11],bus:[9,11],bike:[13,17],scooter:[9,12],lorry:[9,11],ambulance:[16,19],hatch:[11,15],suv:[12,16],jeep:[11,14],van:[10,13],taxi:[12,15],tempo:[9,11],cruiser:[12,15],sports:[15,19],retro:[8,11],moped:[7,9],cycle:[4,5.5]};
 function aiType(){const T=[['car',14],['hatch',12],['auto',14],['bike',8],['scooter',7],['retro',3],['moped',3],['cycle',5],['cruiser',3],['sports',2],['suv',6],['jeep',3],['van',4],['taxi',4],['tempo',4],['bus',5],['lorry',5],['ambulance',2]];let t=0;for(const x of T)t+=x[1];let r=Math.random()*t;for(const x of T){r-=x[1];if(r<=0)return x[0]}return'car'}
 

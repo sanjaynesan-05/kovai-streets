@@ -106,7 +106,9 @@ Phases are kept small, so each one is a single focused change followed by one co
 
 ## Phase D: Coimbatore city map, then population and traffic (TODO §12)
 
-> **Superseded (2026-11-23):** the grid city is being replaced by real Coimbatore geography at 1:1, starting with a 6 × 6 km pilot. Steps D6–D8 below are replaced by the G0–G8 plan in `geodata/README.md`. D1–D5 stay in the game until step G7 removes the grid world.
+> **Superseded (2026-11-23):** the grid city has been replaced by real Coimbatore geography at 1:1 (a 6 × 6 km pilot), steps G0–G7 in `geodata/README.md`. Steps D1–D5 below described the grid world, which G7 removed. Next for the map: G8, growing beyond the pilot (and elevation, once approved).
+
+> **Phase D complete (2026-11-23):** D1–D5 done (on the grid world, since replaced); D6 done as G4–G5 (road graph, GPS); D7 done on the real map (`js/geolife.js`: density from real building counts, local vehicle mix, street lamps at night, parked cars, vendor carts with vendors, generated bus stops with waiting passengers); D8 done as G7 (`geodata/validation/`). Regression suite: 100 / 100.
 
 **Goal:** a map that people from Coimbatore recognise, then a busier city on top of it.
 
@@ -134,9 +136,9 @@ Phases are kept small, so each one is a single focused change followed by one co
 | D3 ✓ (needs your playtest; Podanur Junction stays on the south line) | Place districts and landmarks from the registry: bus stands, Town Hall, Koniamman Temple, the railway junction, the lakes (Valankulam, Ukkadam/Periyakulam, Singanallur), Race Course, VOC Park, Lakshmi Mills, Hope College, the airport edge, and Marudhamalai temple in the hills. New blocks get district-specific buildings. | Each landmark is within one block of its registry position; missions near moved landmarks still complete |
 | D4 ✓ (needs your playtest; AI traffic still drives only on the grid, so the angled stretches carry no traffic until D6/D7) | Arterial roads as angled, named roads joining the grid at the real junctions: Avinashi, Trichy, Mettupalayam, Sathy, Palakkad and Pollachi Roads. Cross Cut Road, DB Road, Race Course Road and 100 Feet Road become named grid streets. The flyover becomes the Avinashi Road flyover. | Cars drive each arterial end to end without getting stuck; flyover and underpass tests pass |
 | D5 ✓ (needs your playtest and 3 voice lines regenerated) | The coast becomes the reservoir: water, a jetty, and the hill road. Missions 5 and 14 are reworded. | Missions 5 and 14 complete; nothing still refers to a beach or the sea |
-| D6 | Road graph and GPS: a navigation graph built from the grid and the arterials, a route line on the minimap, distance to the destination, and landmark, shop and police markers. | GPS route avoids buildings between any two districts |
-| D7 | Population and traffic (the original Phase D scope below): density by district, local vehicle mix (town buses, autos, two-wheelers), parked cars, traffic signals at the named junctions. | Counts differ by district; frame time within 10% of the baseline |
-| D8 | Validation report: landmark and junction positions against the registry, connectivity, frame rate in dense and hill areas, and a list of what still needs manual checking. | Report written; open items listed |
+| D6 ✓ (as G4–G5) | Road graph and GPS: a navigation graph built from the grid and the arterials, a route line on the minimap, distance to the destination, and landmark, shop and police markers. | GPS route avoids buildings between any two districts |
+| D7 ✓ (js/geolife.js) | Population and traffic (the original Phase D scope below): density by district, local vehicle mix (town buses, autos, two-wheelers), parked cars, traffic signals at the named junctions. | Counts differ by district; frame time within 10% of the baseline |
+| D8 ✓ (as G7) | Validation report: landmark and junction positions against the registry, connectivity, frame rate in dense and hill areas, and a list of what still needs manual checking. | Report written; open items listed |
 
 **Original Phase D scope (now step D7):**
 

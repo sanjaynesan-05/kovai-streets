@@ -97,8 +97,6 @@ function escortTick(m,e,dt){if(!e||e.dead)return;const P=e.inV?e.inV.pos:e;let d
   m.escortMeter={label:e.name,v:e.hp/100,col:e.hp>40?'#2ecc71':'#ff6b6b'};if(e.hp<=0&&!e.dead){e.dead=true;poseDead(e.h,humanY(P.x,P.z,0));missionFail(e.name+' was badly hurt')}}
 
 /* ---------- scripted driving (vehicle.script runs inside updateVehicles, before physics) ---------- */
-function nodeRoute(nodes,stops){const pts=[];for(let k=0;k<nodes.length-1;k++){const a=nodes[k],b=nodes[k+1],dx=Math.sign(b[0]-a[0]),dz=Math.sign(b[1]-a[1]);
-  const p1=laneWP(a[0],a[1],dx,dz,9),p2=laneWP(b[0],b[1],dx,dz,-9);pts.push(p1);if(stops&&stops[k])pts.push(Object.assign({x:(p1.x+p2.x)/2,z:(p1.z+p2.z)/2},stops[k]));pts.push(p2)}return pts}
 function routeDrive(R){return(v,dt)=>{if(R.hold>0){R.hold-=dt;v.speed*=Math.max(0,1-4*dt);return}const p=R.pts[R.i];if(!p){v.speed*=Math.max(0,1-3*dt);R.done=true;return}
   const dx=p.x-v.pos.x,dz=p.z-v.pos.z,d=Math.hypot(dx,dz);if(d<4.5){if(p.stop){R.hold=p.stop;if(R.onStop)R.onStop(p)}R.i++;return}
   const diff=angDiff(v.heading,Math.atan2(dx,dz));let target=R.speed;if(Math.abs(diff)>0.5)target=Math.min(target,7);const n=R.pts[R.i+1];
@@ -131,14 +129,13 @@ function heatMult(){const a=A2();return policeFavourT>0?0.5:a.inspector==='ally'
 function heliStars(){return A2().inspector==='ally'?5:4}
 
 /* ---------- world additions (built with the map) ---------- */
-const POLICE_ST={...WO(32,ox(-402)),door:WO(21,ox(-402))},GODOWN=WO(-125,ox(455));/* WO: real-map position in ?world=geo (geosites.js) */
+const POLICE_ST={...WO(32,ox(-402)),door:WO(21,ox(-402))},GODOWN=WO(-125,ox(455));/* WO: grid-world position converted to the real map (geosites.js) */
 function a2Excluded(x,z){return(x>2&&x<48&&z>ox(-418)&&z<ox(-386))||(x>-162&&x<-88&&z>ox(426)&&z<ox(484))}
-function buildAct2World(){buildPoliceStation();buildGodown()}
 /* Kovai Central Police Station (fictional) */
 function buildPoliceStation(){
   building(POLICE_ST.x,POLICE_ST.z,16,12,7,'#e8d8b0',{noShop:true,noSign:true,noTank:true,style:0});addBox(B_PLAIN,16.3,0.6,12.3,POLICE_ST.x,3.6,POLICE_ST.z,'#c1121f');addBox(B_PLAIN,16.3,0.3,12.3,POLICE_ST.x,4.05,POLICE_ST.z,'#1d4ed8');
   addFlat(B_SIDE,...W(7,ox(-410)),...W(24,ox(-394)),0.05,'#ffffff',2.5);const ps=textPlane('KOVAI CENTRAL POLICE STATION',11,1.1,'#1d3557','#ffffff');ps.position.set(POLICE_ST.x-8.2,5.4,POLICE_ST.z);ps.rotation.y=-Math.PI/2;
-  for(const z of[-408,-396].map(ox)){const[x,zz]=W(14,z);if(REALMAP){const v=spawnVehicle('police',x,zz,0);v.keep=true}else PARKED.push({type:'police',x,z:zz,h:0})}}
+  for(const z of[-408,-396].map(ox)){const[x,zz]=W(14,z);const v=spawnVehicle('police',x,zz,0);v.keep=true}}
 /* Thendral Builders godown (fictional): walled yard, warehouse with doors, crates for cover. Written in pre-D2 coordinates; moved south by GX (D2) and to its real-map site by W */
 function buildGodown(){const[tx,tz]=W(-125,ox(455));shifted(tx+125,tz-455,()=>{
   const W=(x0,z0,x1,z1,h,c)=>{addBox(B_PLAIN,Math.abs(x1-x0)||0.4,h,Math.abs(z1-z0)||0.4,(x0+x1)/2,h/2,(z0+z1)/2,c);addCollider(Math.min(x0,x1)-(x0===x1?0.2:0),Math.min(z0,z1)-(z0===z1?0.2:0),Math.max(x0,x1)+(x0===x1?0.2:0),Math.max(z0,z1)+(z0===z1?0.2:0),h)};
@@ -167,12 +164,11 @@ STORY.push(
    stGo(GIVER.x,GIVER.z,'Take the evidence to Paramasivam Anna',{r:5}),stTalk('m7_end'),
    stPhone({header:'RECOVERED PHONE · SILK SUNDARAM',lines:['"Payment received. The old mill burns tonight."','"The workers will sign by Friday."','Saved contact:','A'],footer:'NUMBER UNREGISTERED · NO CALL HISTORY'})]},
  {title:'The Tail',reward:7500,intro:'Devarajan smiles for the newspapers. Let us see where he goes when the cameras are away.',
-  make:()=>[stTalk('m8_brief'),stGo(...(REALMAP?geoSidewalk(TAIL_START[0],TAIL_START[1]):W(-100,-151.5)),'Wait near Gandhipuram for Devarajan\'s white SUV',{r:16}),
-   {init(m){const NR=[[-1,-2],[1,-2],[1,-1],[2,-1],[3,-1],[3,-2],[4,-2],[4,-3],[4,-4]],ST={2:{stop:8,id:'hotel'},5:{stop:9,id:'office'},7:{stop:1e9,id:'meet'}};
-      const R={pts:REALMAP?geoTailRoute():nodeRoute(NR,ST),i:0,speed:13,hold:0};/* real map: the same route on real roads */
-      const p0=R.pts[0],p1=R.pts[1]||p0;const v=spawnVehicle('suv',p0.x,p0.z,REALMAP?Math.atan2(p1.x-p0.x,p1.z-p0.z):Math.PI/2,'#f2f2f2');v.keep=true;v.hp=1e6;v.script=routeDrive(R);m.tgt=v;m.R=R;m.sus=0;m.lostT=0;m.photo=0;m.plateT=0;
+  make:()=>[stTalk('m8_brief'),stGo(...geoSidewalk(TAIL_START[0],TAIL_START[1]),'Wait near Gandhipuram for Devarajan\'s white SUV',{r:16}),
+   {init(m){const R={pts:geoTailRoute(),i:0,speed:13,hold:0};/* Gandhipuram bus stand -> VOC Park -> Lakshmi Mills (geosites.js) */
+      const p0=R.pts[0],p1=R.pts[1]||p0;const v=spawnVehicle('suv',p0.x,p0.z,Math.atan2(p1.x-p0.x,p1.z-p0.z),'#f2f2f2');v.keep=true;v.hp=1e6;v.script=routeDrive(R);m.tgt=v;m.R=R;m.sus=0;m.lostT=0;m.photo=0;m.plateT=0;
       R.onStop=p=>{if(p.id==='hotel')floatMsg('He\'s stopped at a hotel by VOC Park. Keep your distance.');if(p.id==='office'){floatMsg('A construction office in Peelamedu…');say2('m8_call');say2('m8_call2')}
-        if(p.id==='meet'){m.atMeet=true;const mp=REALMAP?{x:v.pos.x,z:v.pos.z}:null,van=spawnVehicle('van',...(mp?[mp.x+6,mp.z+9]:W(301.5,-272)),Math.PI,'#1a1a1a');van.keep=true;m.van=van;m.contact=npc(LOOK.contact,...(mp?[mp.x,mp.z+15]:W(295.5,-259)),-Math.PI/2);floatMsg('A meeting. Photograph it from 20–75 m: stop and hold steady.')}};
+        if(p.id==='meet'){m.atMeet=true;const mp={x:v.pos.x,z:v.pos.z},van=spawnVehicle('van',mp.x+6,mp.z+9,Math.PI,'#1a1a1a');van.keep=true;m.van=van;m.contact=npc(LOOK.contact,mp.x,mp.z+15,-Math.PI/2);floatMsg('A meeting. Photograph it from 20–75 m: stop and hold steady.')}};
       m.cleanup.push(()=>{removeVehicle(v);if(m.van)removeVehicle(m.van);npcGone(m.contact)})},
     upd(m,dt){const v=m.tgt,P=playerP(),d=Math.hypot(v.pos.x-P.x,v.pos.z-P.z);mk(v.pos.x,v.pos.z);
       if(d<20)m.sus+=((20-d)*2.5+12)*dt;else m.sus=Math.max(0,m.sus-7*dt);if(d>75)m.lostT+=dt;else m.lostT=0;
@@ -220,7 +216,7 @@ STORY.push(
    {upd(){return!subBusy()},auto(){clearSubs()}},stTalk('m11_end')]},
  {title:'Kathir\'s Secret',reward:4000,intro:'Every move we make, Devarajan knows before we do. Someone close is talking. I cannot sleep, thambi.',
   make:()=>[stTalk('m12_brief'),stGo(...W(14,-160),'Watch the meeting spot by the Gandhipuram bus stand',{r:20}),
-   {timer:180,init(m){let v;if(REALMAP)v=geoFleeCar('scooter',...W(14,-160),'#2a9d8f',16);else{const p=laneWP(0,-2,1,0,-22);v=spawnVehicle('scooter',p.x,p.z,Math.PI/2,'#2a9d8f');makeAI(v,0,-2,1,0,16);v.ai.reckless=true;v.ai.flee=true}v.keep=true;v.hp=1e6;
+   {timer:180,init(m){const v=geoFleeCar('scooter',...W(14,-160),'#2a9d8f',16);v.keep=true;v.hp=1e6;
       const k=makeHuman(LOOK.kathir);v.mesh.add(k.g);k.g.position.set(0,0.08,-0.2);seatPose(k);v.rider=k;m.kv=v;m.close=0;m.seen=false;m.cleanup.push(()=>removeVehicle(v));floatMsg('A scooter is leaving the meeting spot. Follow it!')},
     upd(m,dt){const v=m.kv,P=playerP(),d=Math.hypot(v.pos.x-P.x,v.pos.z-P.z);mk(v.pos.x,v.pos.z);if(!m.seen&&d<40){m.seen=true;say2('m12_seen')}
       if(d<7||(d<12&&Math.abs(v.speed)<1.5))m.close+=dt;else m.close=Math.max(0,m.close-dt*0.5);m.meters=[{label:'Cornering him',v:m.close/2.5,col:'#ffd23f'}];m.txt='Chase the scooter and corner the rider';
@@ -234,10 +230,9 @@ STORY.push(
      {t:'Hand him to the police (₹8,000, police ease off for a while)',fn:m=>{A2().kathir='handed';m.reward=8000;wanted=0;policeFavourT=600;say2('m12_hand')}}]}),
    {upd(){return!subBusy()},auto(){clearSubs()}}]},
  {title:'Ghat Wolves',reward:15000,intro:'They have taken Selvi. The Ghat Wolves, smugglers from the hills. Bring her back, thambi. Please.',
-  make:()=>{let c,n,l,sx,sz;if(REALMAP){const H=SITE('hideout');c={x:H.x,z:H.z};n={x:H.x+1,z:H.z};l=1;sx=0;sz=1}/* real map: the walled compound (geosites.js) */
-   else{const i=Math.min(GHAT.length-8,Math.floor(GHAT.length*0.7)+6);c=GHAT[i];n=GHAT[i+1];l=Math.hypot(n.x-c.x,n.z-c.z)||1;sx=-(n.z-c.z)/l;sz=(n.x-c.x)/l}
+  make:()=>{const H=SITE('hideout'),c={x:H.x,z:H.z},n={x:H.x+1,z:H.z},l=1,sx=0,sz=1;/* the walled compound (geosites.js) */
    const V={x:c.x,z:c.z},S={x:c.x+sx*8,z:c.z+sz*8};
-   return[stTalk('m13_brief'),stGo(V.x,V.z,REALMAP?'Find the Ghat Wolves\' hideout in the old compound':'Find the Ghat Wolves\' hideout in the hill village',{r:70}),
+   return[stTalk('m13_brief'),stGo(V.x,V.z,'Find the Ghat Wolves\' hideout in the old compound',{r:70}),
     stDo(m=>{const e=selviEscort(m,S.x,S.z,false);e.tied=true;m.ticks.push((m,dt)=>{if(e.tied){e.h.g.position.y-=0.45;seatPose(e.h);e.h.armL.rotation.x=e.h.armR.rotation.x=0.4}});
       const pts=k=>{const[x,z]=findOpen(V.x,V.z,16,16);return[[x,z],findOpen(x,z,8,8)]};
       addGuards(m,[0,1,2,3,4,5].map(k=>({path:pts(k)})),{wep:'rifle',band:'#3f5130',range:15});
@@ -246,7 +241,7 @@ STORY.push(
           if(holdAt(L,L.x,L.z,1,dt,2)){m.captured=true;a.leader='captured';say2('m13_leader')}}if(L.dead&&!a.leader)a.leader='killed'})}),
     {timer:240,upd(m,dt){const e=m.escort;mk(e.x,e.z);m.txt='Free Selvi Akka before they move her';const h=holdAt(e,e.x,e.z,2,dt);m.meters=e.hold>0?[{label:'Untying…',v:e.hold/2,col:'#ffd23f'}]:[];return h},auto(m){m.escort.hold=99}},
     stDo(m=>{const e=m.escort;e.tied=false;e.follow=true;m.escortActive=true;say2('m13_found');raiseAlarm(m,null);setTimeout(()=>{if(mission===m)for(let k=0;k<3;k++){const g=spawnGoon(V.x-sx*30+RR(-5,5),V.z-sz*30+RR(-5,5),null,true,{wep:'rifle',band:'#3f5130'});g.mission=m}},20000)}),
-    {upd(m){const e=m.escort,P=e.inV?e.inV.pos:e;m.txt=REALMAP?'Escape with Selvi Akka: get 250 m away from the compound':'Escape with Selvi Akka: get 250 m away from the village';m.meters=[];marker.visible=false;return Math.hypot(P.x-V.x,P.z-V.z)>250},
+    {upd(m){const e=m.escort,P=e.inV?e.inV.pos:e;m.txt='Escape with Selvi Akka: get 250 m away from the compound';m.meters=[];marker.visible=false;return Math.hypot(P.x-V.x,P.z-V.z)>250},
      auto(m){if(m.escort.inV)alightPassenger(m.escort);m.escort.x=V.x+300;m.escort.z=V.z;testNear(m.escort,2)}},
     stDo(m=>{m.escortActive=false;m.escortMeter=null;const a=A2();a.vault=true;if(!a.leader)a.leader='escaped';if(m.captured){a.selviTrust++;m.reward+=3000;toast('BONUS','Gang leader captured alive · +₹3,000',2.5)}}),
     stTalk(m=>m.captured?'m13_end':'m13_vault','m13_selvi')]}},
@@ -264,9 +259,8 @@ STORY.push(
       m.boss=spawnGoon(POD.x+2,POD.z+5,null,true,{boss:true,hp:1400,shirt:'#111',band:'#c1121f',wep:'rifle'});m.boss.mission=m;m.left++;spawnSquad(MC.x,MC.z,guards,m,{rx:9,rz:8,aggro:true,weps:['smg','rifle']});
       for(const o of m.crowd)if(o!==m.dev)o.h.g.visible=false;m.dev.h.g.visible=false;panic(MC.x,MC.z,40);toast('KANAL KANNAN','Devarajan\'s enforcer',2.4)},
     upd(m){m.txt=`Take down Kanal Kannan (gold shirt) · guards left: ${Math.max(0,m.left-(m.boss.dead?0:1))}`;m.meters=[];marker.visible=false;return m.boss.dead},auto(m){m.boss.dead=true;killSquad(m)}},
-   {init(m){const a=A2();m.escortActive=false;m.escortMeter=null;say2('m14_run');let pts=[{x:-100,z:-3.5},{x:80,z:-3.5},{x:345,z:-3.5},{x:ox(590),z:-3.5},{x:ox(608.5),z:8},{x:ox(608.5),z:188},{x:ox(640),z:200}];
-      if(REALMAP){const[ax,az]=W(-100,-3.5),[bx,bz]=W(ox(640),200),r=navRoute(ax,az,bx,bz,false);pts=(r?r.pts:[[ax,az],[bx,bz]]).map(q=>({x:q[0],z:q[1]}))}/* real map: road route from the mall to the lakeside jetty */
-      const R={pts,i:0,speed:26,hold:0,reckless:true};const v=spawnVehicle('suv',pts[0].x,pts[0].z,REALMAP?Math.atan2(pts[1].x-pts[0].x,pts[1].z-pts[0].z):Math.PI/2,'#f2f2f2');v.keep=true;v.hp=1e6;v.script=routeDrive(R);m.dv=v;m.R=R;m.cleanup.push(()=>removeVehicle(v));
+   {init(m){const a=A2();m.escortActive=false;m.escortMeter=null;say2('m14_run');const[ax,az]=W(-100,-3.5),[bx,bz]=W(ox(640),200),rt=navRoute(ax,az,bx,bz,false),pts=(rt?rt.pts:[[ax,az],[bx,bz]]).map(q=>({x:q[0],z:q[1]}));/* road route from the mall to the lakeside jetty */
+      const R={pts,i:0,speed:26,hold:0,reckless:true};const v=spawnVehicle('suv',pts[0].x,pts[0].z,Math.atan2(pts[1].x-pts[0].x,pts[1].z-pts[0].z),'#f2f2f2');v.keep=true;v.hp=1e6;v.script=routeDrive(R);m.dv=v;m.R=R;m.cleanup.push(()=>removeVehicle(v));
       if(a.kathir==='forgiven'){const k=spawnVehicle('sport',...W(-118,-4),Math.PI/2,'#ff3b30');k.keep=true;say2('a_kathir')}
       if(a.inspector==='neutral'){wanted=Math.max(wanted,2);say2('a_neutral')}else if(a.inspector==='coerced'&&Math.random()<0.5){wanted=Math.max(wanted,2);say2('a_betray')}},
     upd(m){const v=m.dv,d=farFrom(v.pos.x,v.pos.z);mk(v.pos.x,v.pos.z);m.txt='Chase Devarajan';if(d>380)return'Devarajan got away';return m.R.done},auto(m){m.R.done=true;const q=W(ox(640),200);m.dv.pos.set(q[0],0,q[1]);testNear(m.dv.pos,10)}},
@@ -274,7 +268,7 @@ STORY.push(
     upd(m,dt){const d=m.dev,P=playerP();
       if(!m.boat){const J=W(ox(778),200);d.moving=true;walkTo(d,J[0],J[1],4.6,dt);npcIdle(d,dt,false);mk(d.x,d.z);m.txt='Stop Devarajan before he reaches his boat';
         if(Math.hypot(P.x-d.x,P.z-d.z)<3.2)return true;
-        if(Math.hypot(d.x-J[0],d.z-J[1])<3){const b=spawnVehicle('speedboat',...W(ox(790),200),siteHeading(REALMAP&&SITE('jetty'),Math.PI/2));b.keep=true;b.hp=250;b.script=(v,dt)=>{v.speed=Math.min(v.speed+4*dt,9);v.heading+=Math.sin(time*0.3)*0.2*dt};m.boat=b;d.h.g.visible=false;m.cleanup.push(()=>removeVehicle(b));floatMsg('He\'s on the boat. Disable it!')}}
+        if(Math.hypot(d.x-J[0],d.z-J[1])<3){const b=spawnVehicle('speedboat',...W(ox(790),200),siteHeading(SITE('jetty'),Math.PI/2));b.keep=true;b.hp=250;b.script=(v,dt)=>{v.speed=Math.min(v.speed+4*dt,9);v.heading+=Math.sin(time*0.3)*0.2*dt};m.boat=b;d.h.g.visible=false;m.cleanup.push(()=>removeVehicle(b));floatMsg('He\'s on the boat. Disable it!')}}
       else{const b=m.boat;mk(b.pos.x,b.pos.z);m.txt='Disable Devarajan\'s boat';if(b.wrecked||b.hp<=0){d.x=b.pos.x;d.z=b.pos.z;return true}}return false},
     auto(m){const d=m.dev;player.pos.set(d.x+1,player.pos.y,d.z)}},
    {init(m){const d=m.dev;if(player.vehicle)exitVehicle();d.h.g.visible=true;d.moving=false;if(m.boat){[d.x,d.z]=W(ox(773),200);const q=W(ox(770),200);player.pos.set(q[0],1.6,q[1])}m.ticks.push((m,dt)=>npcIdle(d,dt,true))},upd(){return true}},

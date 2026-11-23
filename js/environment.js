@@ -6,21 +6,6 @@
 
 /* --- street lamps, light pools, headlight beams --- */
 let lampHeadMat,poolMat,beamMat,spot;
-function buildLamps(){const pos=[];for(let k=-NB;k<=NB;k++)for(let m=-NB;m<NB;m++)for(const off of[-18,18])for(const side of[-1,1]){const s=m*CELL+CELL/2+off;
-    pos.push({x:s,z:k*CELL+side*8.3,dx:0,dz:-side});pos.push({x:k*CELL+side*8.3,z:s,dx:-side,dz:0})}
-  for(let x=FLY.x1+10;x<FLY.x2;x+=24)pos.push({x,z:0,dx:0,dz:1,y:FLY.H,both:true});
-  const n=pos.length;const pole=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.09,0.13,7,6).translate(0,3.5,0),M('#5d6166'),n);
-  const arm=new THREE.InstancedMesh(new THREE.BoxGeometry(0.1,0.1,1.8).translate(0,0,0.9),M('#5d6166'),n);
-  lampHeadMat=new THREE.MeshBasicMaterial({color:0x777777});const head=new THREE.InstancedMesh(new THREE.BoxGeometry(0.55,0.14,0.32),lampHeadMat,n);
-  poolMat=new THREE.MeshBasicMaterial({color:0xffc277,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
-  const pool=new THREE.InstancedMesh(new THREE.CircleGeometry(5,18).rotateX(-Math.PI/2),poolMat,n);const o=new THREE.Object3D();
-  pos.forEach((p,i)=>{const y=p.y||0;o.rotation.set(0,Math.atan2(p.dx,p.dz),0);o.scale.set(1,1,1);o.position.set(p.x,y,p.z);o.updateMatrix();pole.setMatrixAt(i,o.matrix);
-    o.position.set(p.x,y+6.9,p.z);o.updateMatrix();arm.setMatrixAt(i,o.matrix);o.position.set(p.x+p.dx*1.8,y+6.85,p.z+p.dz*1.8);o.updateMatrix();head.setMatrixAt(i,o.matrix);
-    o.position.set(p.x+p.dx*2.6,y+0.08,p.z+p.dz*2.6);o.rotation.set(0,0,0);o.updateMatrix();pool.setMatrixAt(i,o.matrix);
-    if(!p.y)addCollider(p.x-0.15,p.z-0.15,p.x+0.15,p.z+0.15,7)});
-  for(const m of[pole,arm,head,pool]){m.frustumCulled=false;scene.add(m)}pole.castShadow=true;
-  beamMat=new THREE.MeshBasicMaterial({color:0xfff2c8,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});beamMat.userData.shared=true;
-  spot=new THREE.SpotLight(0xfff2d0,0,70,0.55,0.5,1.2);scene.add(spot);scene.add(spot.target)}
 const beamGeo2=new THREE.PlaneGeometry(2.8,10).rotateX(-Math.PI/2);
 function addBeam(v){if(v.s.boat||v.type==='tank'||!beamMat)return;const b=new THREE.Mesh(beamGeo2,beamMat);b.position.set(0,0.09,v.s.len/2+5.2);if(v.s.two)b.scale.set(0.6,1,0.8);v.mesh.add(b)}
 

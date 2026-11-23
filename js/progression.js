@@ -10,12 +10,8 @@ const SAVE_KEY='kovaiSave1';
 const PROG={story:0,reels:[],jumps:[],ramp:[],house:false,garage:[],outfit:0,tut:0,lastLv:1};
 const respectLv=()=>1+Math.floor(rep/3);
 const JOB_LV={deliver:1,race:1,fare:1,amb:1,gang:2,chase:2,boss:3};
-const AREA={hills:{lv:2,story:3,name:'The Western Ghats'},coast:{lv:3,story:4,name:'Kovai Reservoir'}};
-const areaOpen=k=>respectLv()>=AREA[k].lv||PROG.story>=AREA[k].story;
-const placeOpen=x=>(x>ox(-552)||areaOpen('hills'))&&(x<ox(590)||areaOpen('coast'));
 function lvUnlocks(lv){const a=[];for(const it of SHOPITEMS)if(it.lv===lv)a.push(it.armor?'armour':WEAPONS[WI(it.w)].name.toLowerCase());
-  const j=Object.keys(JOB_LV).filter(k=>JOB_LV[k]===lv).map(k=>JOBT[k].name.toLowerCase());let s='';if(a.length)s+='Shop: '+a.join(', ');if(j.length)s+=(s?' · ':'')+'Jobs: '+j.join(', ');
-  for(const k in AREA)if(AREA[k].lv===lv)s+=(s?' · ':'')+'New area: '+AREA[k].name;return s}
+  const j=Object.keys(JOB_LV).filter(k=>JOB_LV[k]===lv).map(k=>JOBT[k].name.toLowerCase());let s='';if(a.length)s+='Shop: '+a.join(', ');if(j.length)s+=(s?' · ':'')+'Jobs: '+j.join(', ');return s}
 
 /* ---------- saving: versioned envelope, checksum, backup, recovery, migration ----------
    Storage keys (all in localStorage):
@@ -76,8 +72,7 @@ function deleteAllSaves(){for(const k of[SAVE_KEY,SAVE_BAK,SAVE_BAD,SAVE_PREV])l
 addEventListener('beforeunload',()=>saveGame());
 
 /* ---------- safehouse & garage ---------- */
-const HOUSE=(()=>{const p=W(ox(-439),15),a=W(ox(-424),14),b=W(ox(-410),28);return{px:p[0],pz:p[1],price:5000,gx0:a[0],gx1:b[0],gz0:a[1],gz1:b[1]}})();/* W: real-map position in ?world=geo */
-function extraExcluded(x,z){if(x>ox(-456)&&x<ox(-402)&&z>8&&z<38)return true;return a2Excluded(x,z)}
+const HOUSE=(()=>{const p=W(ox(-439),15),a=W(ox(-424),14),b=W(ox(-410),28);return{px:p[0],pz:p[1],price:5000,gx0:a[0],gx1:b[0],gz0:a[1],gz1:b[1]}})();/* W: grid-world position converted to the real map */
 function buildSafehouse(){const{gx0,gx1,gz0,gz1}=HOUSE;
   building(...W(ox(-439),24),14,12,7,'#f3c6c0',{noShop:true,noSign:true,noTank:true,style:0});addG(B_PLAIN,GEO.cone4,W(ox(-439),24)[0],8.7,W(ox(-439),24)[1],'#a8432f',Math.PI/4,0,0,10.6,3.4,9.2);
   addBox(B_PLAIN,1.5,2.5,0.12,W(ox(-439),17.97)[0],1.25,W(ox(-439),17.97)[1],'#6d4c41');addBox(B_PLAIN,3,0.15,1.6,W(ox(-439),17.1)[0],0.08,W(ox(-439),17.1)[1],'#cfc6b2');
@@ -111,13 +106,3 @@ function houseTalk(){const t={kind:'house',obj:{x:HOUSE.px,z:HOUSE.pz},line:PROG
 
 
 /* ---------- gated areas ---------- */
-const GATES={hills:{x:ox(-552),open:false,cols:[],grp:null,msgT:0},coast:{x:ox(578),open:false,cols:[],grp:null,msgT:0}};
-function buildGates(){for(const k in GATES){const G=GATES[k],x=G.x,s=k==='hills'?1:-1;G.cols.push(addCollider(x-1,-BOUND,x+1,BOUND,400,-50));
-  const g=new THREE.Group();const box=(w,h,d,c,px,py,pz)=>{const m=new THREE.Mesh(GEO.box,M(c));m.scale.set(w,h,d);m.position.set(px,py,pz);m.castShadow=true;g.add(m)};
-  box(0.5,1.2,0.5,'#dddddd',x,0.6,-7.5);box(0.5,1.2,0.5,'#dddddd',x,0.6,7.5);for(let i=0;i<8;i++)box(0.25,0.25,1.85,i%2?'#ffffff':'#e63946',x,1.1,-6.5+i*1.85);
-  box(2.4,2.6,2.4,k==='hills'?'#3f5130':'#1d3557',x+s*2.5,1.3,-10.5);box(2.8,0.2,2.8,'#c1121f',x+s*2.5,2.7,-10.5);
-  const sg=textPlane(k==='hills'?'FOREST CHECKPOINT · RESPECT LV 2':'RESERVOIR ROAD CLOSED · RESPECT LV 3',9,1.1,'#f2d13a','#111');sg.position.set(x+s*0.3,3.2,0);sg.rotation.y=s*Math.PI/2;g.add(sg);scene.add(g);G.grp=g}}
-function openGate(k,announce){const G=GATES[k];if(G.open)return;G.open=true;for(const b of G.cols){b.h=-100;b.y0=-200}if(G.grp)G.grp.visible=false;if(announce)toast('NEW AREA OPEN',AREA[k].name+' is now open to explore',3.5)}
-function updateGates(dt){if(REALMAP)return;/* the hills and reservoir gates belong to the grid world */for(const k in GATES){const G=GATES[k];if(!G.open&&areaOpen(k))openGate(k,true);if(G.open)continue;G.msgT-=dt;const P=playerP();
-  if(Math.abs(P.x-G.x)<9&&G.msgT<=0){G.msgT=4;floatMsg(k==='hills'?'Forest checkpoint: closed until Respect LV 2 or story mission 3':'Reservoir road: closed until Respect LV 3 or story mission 4')}}}
-function buildPlayExtras(){buildSafehouse();buildRamps();buildGates();buildAct2World()}

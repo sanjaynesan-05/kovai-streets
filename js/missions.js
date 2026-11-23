@@ -16,12 +16,11 @@ const marker=new THREE.Group();
 {const beam=new THREE.Mesh(beamGeo,new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0.3,depthWrite:false,side:THREE.DoubleSide}));marker.add(beam);
  const ring=new THREE.Mesh(new THREE.RingGeometry(2.3,3.1,32),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0.85,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.3;marker.add(ring);
  marker.visible=false;scene.add(marker)}
-function roadPoint(nx,nz,minD,maxD){if(REALMAP)return geoRoadPoint(nx,nz,minD,maxD);let p=null;for(let t=0;t<300;t++){const i=RI(-NB,NB),j=RI(-NB,NB);const[dx,dz]=rpick(DIRS);if(!inGrid(i+dx,j+dz))continue;const tt=RR(18,56);
-  const q={x:i*CELL+dx*tt+dz*5.2,z:j*CELL+dz*tt-dx*5.2};const d=Math.hypot(q.x-nx,q.z-nz);p=q;if(d>=minD&&d<=maxD)return q}return p}
+function roadPoint(nx,nz,minD,maxD){return geoRoadPoint(nx,nz,minD,maxD)}
 const r50=n=>Math.round(n/50)*50;
 function addOffer(){const pool=Object.keys(JOBT).filter(t=>!offers.some(o=>o.type===t)&&respectLv()>=(JOB_LV[t]||1));const t=rpick(pool);const P=playerP();
   let A;for(let k=0;k<10;k++){A=roadPoint(P.x,P.z,70,360);if(!offers.some(o=>Math.hypot(o.x-A.x,o.z-A.z)<60))break}offers.push({type:t,x:A.x,z:A.z,born:time})}
-function updateOffers(dt){if(REALMAP&&!GEO_SITES_READY)return;/* real map: wait for the road graph */
+function updateOffers(dt){if(!GEO_SITES_READY)return;/* real map: wait for the road graph */
   if(mission){offerBeams.forEach(b=>b.visible=false);return}
   if(offers.length<3){offerT-=dt;if(offerT<=0){offerT=0.5;addOffer()}}
   offerBeams.forEach((b,i)=>{const o=offers[i];b.visible=!!o;if(o){b.position.set(o.x,groundH(o.x,o.z),o.z);b.material.color.set(JOBT[o.type].c)}});
@@ -33,19 +32,12 @@ function updateOffers(dt){if(REALMAP&&!GEO_SITES_READY)return;/* real map: wait 
 function startMission(o){const T=JOBT[o.type],mult=1+rep*0.08;let m={type:o.type,title:T.name,step:0,timer:null,steps:[]};
   if(o.type==='deliver'){const B=roadPoint(o.x,o.z,250,560);const goods=rpick(GOODS);const dist=Math.hypot(B.x-o.x,B.z-o.z);
     Object.assign(m,{reward:r50((dist*4+600)*mult),steps:[{...B,txt:`Rush the ${goods} to ${district(B.x,B.z)}`}],timer:Math.round(dist/12+22)});toast('PICKED UP',goodsCap(goods),2)}
-  else if(o.type==='race'&&REALMAP){const r=geoRaceSteps(o);m.steps=r.steps;Object.assign(m,{reward:r50(2000*mult),timer:Math.round(r.len/17+8)});toast('GO!','Hit every checkpoint',1.5)}
-  else if(o.type==='race'){let i=Math.round(o.x/CELL),j=Math.round(o.z/CELL),pd=null,len=0,px=o.x,pz=o.z;
-    for(let k=0;k<7;k++){const opts=DIRS.filter(d=>inGrid(i+d[0],j+d[1])&&!(pd&&d[0]===-pd[0]&&d[1]===-pd[1]));const d=rpick(opts.length?opts:DIRS);pd=d;i+=d[0];j+=d[1];
-      const q={x:i*CELL,z:j*CELL};len+=Math.hypot(q.x-px,q.z-pz);px=q.x;pz=q.z;m.steps.push({...q,txt:`Checkpoint ${m.steps.length+1} of 7`})}
-    Object.assign(m,{reward:r50(2000*mult),timer:Math.round(len/17+8)});toast('GO!','Hit every checkpoint',1.5)}
+  else if(o.type==='race'){const r=geoRaceSteps(o);m.steps=r.steps;Object.assign(m,{reward:r50(2000*mult),timer:Math.round(r.len/17+8)});toast('GO!','Hit every checkpoint',1.5)}
   else if(o.type==='gang'){m.left=0;for(let k=0;k<6;k++){const g=spawnGoon(o.x+RR(-9,9),o.z+RR(-9,9),null,true);g.mission=true;m.left++}m.reward=r50(2500*mult);toast('TAKE THEM OUT','6 goons',1.8)}
   else if(o.type==='boss'){const name=rpick(BOSSES);m.left=0;m.boss=spawnGoon(o.x,o.z,null,true,{boss:true});m.boss.mission=true;m.left++;
     for(let k=0;k<4;k++){const g=spawnGoon(o.x+RR(-7,7),o.z+RR(-7,7),null,true,{wep:rpick(['smg','rifle'])});g.mission=true;m.left++}
     Object.assign(m,{reward:r50(6000*mult),bossName:name,title:'Take down '+name});toast(name.toUpperCase(),'The boss wears white. Bring him down.',2.4)}
-  else if(o.type==='chase'&&REALMAP){const v=geoFleeCar('car',o.x,o.z,'#151515',25);v.hp=800;v.keep=true;Object.assign(m,{target:v,reward:r50(3500*mult),timer:150});toast('STOP THAT CAR!','The black getaway car — wreck it',2.2)}
-  else if(o.type==='chase'){let i=clamp(Math.round(o.x/CELL),-NB,NB),j=clamp(Math.round(o.z/CELL),-NB,NB);let dir=rpick(DIRS.filter(d=>inGrid(i-d[0],j-d[1])));
-    const p=laneWP(i,j,dir[0],dir[1],-22);const v=spawnVehicle('car',p.x,p.z,Math.atan2(dir[0],dir[1]),'#151515');makeAI(v,i,j,dir[0],dir[1],25);v.ai.reckless=true;v.ai.flee=true;v.hp=800;v.keep=true;
-    Object.assign(m,{target:v,reward:r50(3500*mult),timer:150});toast('STOP THAT CAR!','The black getaway car — wreck it',2.2)}
+  else if(o.type==='chase'){const v=geoFleeCar('car',o.x,o.z,'#151515',25);v.hp=800;v.keep=true;Object.assign(m,{target:v,reward:r50(3500*mult),timer:150});toast('STOP THAT CAR!','The black getaway car — wreck it',2.2)}
   else if(o.type==='fare'){const B=roadPoint(o.x,o.z,200,520);const dist=Math.hypot(B.x-o.x,B.z-o.z);const p=o.ped;const nm=p?p.name:rpick(NAMES_F.concat(NAMES_M));
     if(p){p.hidden=true;p.talk=false;p.h.g.visible=false}m.ped=p;
     Object.assign(m,{reward:r50((dist*2.5+300)*mult),steps:[{...B,txt:`Drop ${nm} at ${district(B.x,B.z)}`}],timer:Math.round(dist/12+28),title:'Passenger fare: '+nm});toast('PASSENGER ON BOARD',`${nm}: "${district(B.x,B.z)}, please. Quick!"`,2.4)}
@@ -70,7 +62,7 @@ function updateMission(dt){if(!mission)return;if(mission.custom){mission.custom(
 
 
 /* ---------- story: the Black Scorpions ---------- */
-const GIVER=WO(283,-100);/* WO: real-map position in ?world=geo (geosites.js) */let giverH=null,giverBeam=null;
+const GIVER=WO(283,-100);/* WO: grid-world position converted to the real map (geosites.js) */let giverH=null,giverBeam=null;
 function mk(x,z){marker.visible=true;marker.position.set(x,groundH(x,z),z);marker.children[1].rotation.z+=0.02}
 function findOpen(x,z,rx,rz){for(let t=0;t<30;t++){const px=x+RR(-rx,rx),pz=z+RR(-rz,rz);_pp.x=px;_pp.z=pz;if(!pushCircle(_pp,0.6,0))return[px,pz]}return[x,z]}
 function spawnSquad(x,z,n,m,opt){for(let k=0;k<n;k++){const[px,pz]=findOpen(x,z,opt.rx||8,opt.rz||8);const g=spawnGoon(px,pz,null,!!opt.aggro,{wep:rpick(opt.weps||['pistol','smg','pistol','rifle']),band:'#111'});g.mission=m;m.left++}}
@@ -83,9 +75,8 @@ function stBoss(x,z,name,guards,hp,sub){return{auto(m){if(m.boss&&!m.boss.dead){
   upd(m){const P=playerP();if(Math.hypot(P.x-x,P.z-z)>40)mk(x,z);else marker.visible=false;m.txt=`Take down ${name} (gold shirt) · guards left: ${Math.max(0,m.left-(m.boss.dead?0:1))}`;return m.boss.dead}}}
 function stWreck(make,txt,opt){opt=opt||{};return{auto(m){if(m.tgt)m.tgt.wrecked=true},timer:opt.timer,init(m){m.tgt=make();m.tgt.keep=true},upd(m,dt){const v=m.tgt;if(!vehicles.includes(v)||v.wrecked||v===player.vehicle)return true;
   mk(v.pos.x,v.pos.z);m.txt=txt;if(opt.tick)opt.tick(v,dt);const P=playerP();if(Math.hypot(v.pos.x-P.x,v.pos.z-P.z)>(opt.far||420))return'They got away';return false}}}
-function courierCar(){if(REALMAP){const v=geoFleeCar('suv',GIVER.x,GIVER.z,'#151515',22);v.hp=900;return v}let i=clamp(Math.round(GIVER.x/CELL),-NB,NB),j=clamp(Math.round(GIVER.z/CELL),-NB,NB);const dir=rpick(DIRS.filter(d=>inGrid(i-d[0],j-d[1])));
-  const p=laneWP(i,j,dir[0],dir[1],-22);const v=spawnVehicle('suv',p.x,p.z,Math.atan2(dir[0],dir[1]),'#151515');makeAI(v,i,j,dir[0],dir[1],22);v.ai.reckless=true;v.ai.flee=true;v.hp=900;return v}
-function scorpionBoat(){const v=spawnVehicle('speedboat',...W(ox(820),170),siteHeading(REALMAP&&SITE('jetty'),0));v.hp=600;return v}
+function courierCar(){const v=geoFleeCar('suv',GIVER.x,GIVER.z,'#151515',22);v.hp=900;return v}
+function scorpionBoat(){const v=spawnVehicle('speedboat',...W(ox(820),170),siteHeading(SITE('jetty'),0));v.hp=600;return v}
 const STORY=[
   {title:'Smoke Over the Mills',reward:2000,intro:'Vanakkam, thambi. I ran the looms at Podanur for thirty years. Now the Black Scorpions squeeze my workers for money every week. Will you help?',
    make:()=>[stTalk('a1_m1_go'),stKill(...W(182,259),5,'Clear the Black Scorpions out of the Podanur mill',{rx:16,rz:3}),stTalk('a1_m1_end')]},
@@ -94,9 +85,9 @@ const STORY=[
   {title:'Burning Looms',reward:4000,intro:'Kathir was right. The Scorpions are attacking the Singanallur mill to teach us a lesson!',
    make:()=>[stTalk('a1_m3_go'),stKill(...W(330,111),5,'Defend the Singanallur mill',{rx:16,rz:3,aggro:true,waves:1,timer:240}),stTalk('a1_m3_end')]},
   {title:'Ghat Road Deal',reward:5000,intro:'Vettu Velu is meeting gun runners at the old quarry yard. Without those guns, Sundaram is weak.',
-   make:()=>{const T=REALMAP?SITE('dealyard'):GHAT_TOP;return[stGo(T.x,T.z,REALMAP?'Go to the quarry yard where the gun deal is happening':'Drive up the ghat road to the hilltop viewpoint',{r:40}),stBoss(T.x+6,T.z+4,'Vettu Velu',4,900,'Sundaram\'s right-hand man'),stTalk('a1_m4_end')]}},
+   make:()=>{const T=SITE('dealyard');return[stGo(T.x,T.z,'Go to the quarry yard where the gun deal is happening',{r:40}),stBoss(T.x+6,T.z+4,'Vettu Velu',4,900,'Sundaram\'s right-hand man'),stTalk('a1_m4_end')]}},
   {title:'The Jetty Shipment',reward:6000,intro:'Sundaram\'s last shipment arrives by speedboat at an old jetty on Ukkadam Lake. Stop it.',
-   make:()=>[stGo(...W(ox(650),200),REALMAP?'Go to the old jetty on Ukkadam Lake':'Go to the jetty on Kovai Reservoir',{r:14}),stKill(...W(ox(725),200),4,'Take out the smugglers on the jetty',REALMAP&&SITE('jetty').rot%2?{rx:1.4,rz:24}:{rx:24,rz:1.4}),
+   make:()=>[stGo(...W(ox(650),200),'Go to the old jetty on Ukkadam Lake',{r:14}),stKill(...W(ox(725),200),4,'Take out the smugglers on the jetty',SITE('jetty').rot%2?{rx:1.4,rz:24}:{rx:24,rz:1.4}),
      stWreck(scorpionBoat,'Sink the smugglers\' speedboat (take a boat, or shoot it from the jetty)',{far:700,tick:(v,dt)=>{if(v!==player.vehicle){v.heading+=0.35*dt;v.speed=13}}}),
      stTalk('a1_m5_end')]},
   {title:'Silk Sundaram',reward:25000,intro:'This is it. Sundaram and every Scorpion left are holed up in the old Kovai Mills. End it tonight.',

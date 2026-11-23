@@ -1,8 +1,8 @@
 # 🛺 Kovai Streets
 
-**A 3D open-world sandbox game set in a city inspired by Coimbatore (Kovai), Tamil Nadu. It runs in any web browser, on a computer or a phone.**
+**A 3D open-world sandbox game set on the real streets of central Coimbatore (Kovai), Tamil Nadu. It runs in any web browser, on a computer or a phone.**
 
-Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, swim in Kovai Reservoir, grab a tea at a street-corner kadai and take on the gangs of Ukkadam.
+Drive autos down Avinashi Road, cross the Gandhipuram Flyover, take a boat out on Ukkadam Lake and take on the gangs of Ukkadam. The map is built from OpenStreetMap at real scale: a 6 × 6 km area around Victoria Town Hall.
 
 ![Kovai Streets title screen](screenshots/00-title.jpg)
 
@@ -36,6 +36,8 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 ---
 
 ## 📸 Screenshots
+
+*These screenshots show the earlier grid-based city. The game now uses the real Coimbatore street map; new screenshots are still to come.*
 
 ### The city
 
@@ -95,20 +97,21 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 ## ✨ Features
 
 ### 🏙️ A living city
-- **10 × 10 city blocks** with procedurally generated buildings in four styles: painted residential, brick, glass office and old commercial.
+- **Real streets:** 4,781 roads and about 30,000 building outlines from OpenStreetMap, at 1:1 scale, with real flyovers, lakes, railway lines and land use. The map streams in 1 km pieces as you move.
 - **Shopfronts on every street**: Sri Lakshmi Stores, Kovai Textiles, Raj Medicals, Hotel Arul and more, with shelves of goods and roll-down shutters.
 - Balconies, rooftop water tanks, AC units and satellite dishes.
 - Textured asphalt, paved sidewalks, **black-and-yellow kerbs** and zebra crossings.
-- **Traffic keeps to the left**, Indian-style. Two-wheelers weave between cars, and cars honk when blocked.
+- **Traffic keeps to the left**, Indian-style, follows one-way streets and stops at the 36 real signalled junctions. Two-wheelers weave between cars, and cars honk when blocked.
+- **GPS:** open the map (M), click a destination and follow the purple route along real roads.
+- **Busier where the city is busier:** traffic and crowds follow how built-up each area is. Main roads have parked cars, street-vendor carts with vendors, and bus stops with people waiting; buses and autos are more common on main roads, and small lanes get two-wheelers instead of buses.
 
 ### 🌅 Day, night and weather
-- A full **day–night cycle** (one game day ≈ 16 real minutes), with the sun setting behind the Western Ghats.
-- At night: **lit windows, glowing shop signs, street lights, headlights**, stars and the moon.
+- A full **day–night cycle** (one game day ≈ 16 real minutes).
+- At night: **street lamps along the main roads, headlights**, stars and the moon.
 - **Monsoon rain** comes and goes on its own: wet shiny roads, umbrellas, thunder and lightning, and slipperier driving.
 
-### ⛰️ Mountains and 🌊 the reservoir
-- **Western Ghats terrain** you can drive or walk up, with tea-estate slopes, forest, a hill village, a roadside waterfall and a summit viewpoint.
-- **Kovai Reservoir**, a made-up reservoir east of the city, with grassy banks, shacks, a watchtower, a jetty and hills on the far shore.
+### 🌊 Water
+- **Real lakes:** swim in Ukkadam (Periyakulam) and Valankulam lakes, or take a boat out from the fictional lakeside jetty.
 - **Animated water.** Boats bob and tilt on gentle waves.
 - **Water physics:** wade in the shallows, swim in deep water, and watch cars float for a moment before they sink.
 
@@ -196,26 +199,21 @@ Press **Enter** while playing, type a code and press **Enter** again. You can al
 
 ## 🗺️ The map
 
-The map is loosely based on Coimbatore's real layout, with some creative licence.
+The map is the real street layout of central Coimbatore, built from OpenStreetMap at 1:1 scale: about 6 × 6 km around Victoria Town Hall, from Ukkadam Lake in the south-west to Peelamedu in the north-east. Real landmarks keep their real names and places. The game's own places (the mills, the mall, the godown, the police station, the safehouse and the hideouts) are fictional, and are placed on ordinary plots away from real landmarks.
 
 | Area | What's there |
 |---|---|
-| **Gandhipuram** | Where you start. The bus stand and busy shopping streets |
-| **Town Hall** | Clock tower, Kovai Market, gun shop |
-| **R.S. Puram** | Kovai Central mall and the park |
-| **Race Course** | Walking track. Meena's hangout |
-| **Peelamedu** | The Avinashi Road flyover, textile mills, the IT park (Divya), the college campus |
-| **Ukkadam** | Lake (swim or take the rowboat) and a gang hangout |
-| **Singanallur** | Lake and mills |
-| **Podanur** | Kovai Junction railway station and the train line |
-| **Velliangiri Foothills** | The hill statue |
-| **Marudhamalai Foothills** | Temple with a walk-in shrine |
-| **Ghat Road / Hilltop Viewpoint** | Hairpin climb into the Western Ghats, waterfall, hill village |
-| **Kovai Reservoir / Watchtower Point** | Reservoir banks, jetty, boats, watchtower |
+| **Town Hall** | Victoria Town Hall, the clock tower, Koniamman Temple, the Town Hall rally spot, the gun shop |
+| **Ukkadam** | Ukkadam (Periyakulam) Lake, the bus stand, the fictional lakeside jetty |
+| **Gandhipuram** | The central and town bus stands, 100 Feet Road, Cross Cut Road, the Gandhipuram Flyover |
+| **R.S. Puram** | Residential streets around DB Road; the safehouse is nearby |
+| **Race Course** | The walking track, VOC Park, Valankulam Lake; Meena's home |
+| **Lakshmi Mills / Peelamedu** | Avinashi Road and its flyover; Paramasivam Anna; Divya's home; the Kovai Central mall is towards VOC Park |
+| **Ramanathapuram** | Trichy Road (Tiruchi Road) and its flyover |
 
-**Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · ♥ friends · ☕ tea stalls · coloured letters = jobs · gold **S** = story · green house = safehouse · skull = rampage
+**Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · P police station · B bus stand · ♥ friends · coloured letters = jobs · gold **S** = story · green house = safehouse · skull = rampage
 
-The **Western Ghats** and **Kovai Reservoir** start closed. See [Progress, unlocks and saving](#-progress-unlocks-and-saving).
+**Not in the map yet:** the Western Ghats, Marudhamalai, Singanallur and the airport are outside the current 6 × 6 km area. The ground is flat until real elevation data is added. Data © OpenStreetMap contributors (ODbL); see `geodata/README.md`.
 
 ---
 
@@ -285,7 +283,7 @@ Visit **Paramasivam Anna**, a retired mill foreman, at the Peelamedu mills (gold
 | 1 | Smoke Over the Mills | Clear the gang out of the Podanur mill | ₹2,000 |
 | 2 | The Courier | Wreck or steal the courier's black SUV before it escapes | ₹3,000 |
 | 3 | Burning Looms | Defend the Singanallur mill from two waves | ₹4,000 |
-| 4 | Ghat Road Deal | Drive up the ghat road and take down Vettu Velu | ₹5,000 |
+| 4 | Ghat Road Deal | Find the gun deal at the old quarry yard and take down Vettu Velu | ₹5,000 |
 | 5 | The Jetty Shipment | Clear the jetty and sink the smugglers' speedboat | ₹6,000 |
 | 6 | Silk Sundaram | Storm the old Kovai Mills and beat the final boss | ₹25,000 |
 
@@ -314,9 +312,8 @@ Your choices change free-roam police behaviour and the finale. Act 2 ends with a
 
 - **Saving is automatic:** every 30 seconds, after jobs and purchases, and when you pause or close the page. Saves stay in your browser on this device. The start screen then shows **Continue** and **New game**.
 - Saved: cash, weapons and ammo, armour, Respect, friendships, story progress, collectibles, the safehouse, garage cars, your outfit and the time of day.
-- **Safehouse** on Perur Road, west of the city (₹5,000). Once you own it you start there, you can save, change outfit and sleep until morning, and up to **3 vehicles** parked inside its garage are kept.
+- **Safehouse** near R.S. Puram (₹5,000). Once you own it you start there, you can save, change outfit and sleep until morning, and up to **3 vehicles** parked inside its garage are kept.
 - **Outfits:** teal shirt & jeans, white veshti, checked lungi, black tee & cargos, cricket jersey and office formals. Change them at the safehouse or in the pause menu.
-- **New areas:** the forest checkpoint to the **Western Ghats** opens at Respect **LV 2** (or after story mission 3). The reservoir road to **Kovai Reservoir** opens at **LV 3** (or after story mission 4).
 - The **pause menu** shows your progress and has settings for mouse/swipe sensitivity, invert look, master and radio volume, outfit, the tutorial, and saving or deleting your save.
 - New players get a **short tutorial** (skippable), and the loading and knock-out screens show tips.
 
@@ -326,7 +323,7 @@ Your choices change free-roam police behaviour and the finale. Act 2 ends with a
 
 | What | How many | Reward |
 |---|---|---|
-| **Film reels** (spinning gold reels) | 20, hidden around the city, mall, station, flyover, hills and reservoir | ₹250 each, ₹25,000 for all |
+| **Film reels** (spinning gold reels) | 20, hidden on sidewalks across the city, plus the quarry yard and the hideout | ₹250 each, ₹25,000 for all |
 | **Stunt jumps** (yellow ramps on the outer roads and the reservoir bank) | 5 | ₹1,000 for each first jump, ₹10,000 for all. Slow motion while you're in the air |
 | **Rampages** (skull icons) | 4: rocket, SMG, cricket bat, grenade | Take out the target number in 60 seconds: ₹2,500 the first time |
 
@@ -384,13 +381,18 @@ Opening `index.html` directly as a file still starts the game, but the start scr
 kovai-streets/
 ├── index.html            ← page markup and script order
 ├── css/style.css         ← all styles
-├── js/                   ← game code: 18 classic scripts, loaded in order by index.html
+├── js/                   ← game code: classic scripts, loaded in order by index.html
 │   ├── core.js           ← utilities, renderer, scene, collision, geometry helpers, settings
+│   ├── geosites_data.js  ← real-map positions of the mission sites (generated by tools/geo/place_sites.py)
+│   ├── geosites.js       ← converts mission positions to the real map; mission-site builders
 │   ├── textures.js       ← procedural textures and materials
 │   ├── models.js         ← character models and map icons
 │   ├── vehicles.js       ← vehicle types, traffic AI, meshes, physics, damage, passenger seats
-│   ├── world.js          ← map: roads, blocks, terrain, reservoir, landmarks, flyover
-│   ├── environment.js    ← street lamps, sky, day/night, weather
+│   ├── world.js          ← shared builders: buildings, water, surfaces, signs, mill and mall
+│   ├── geoworld.js       ← the real Coimbatore map: chunk streaming, roads, flyovers, lakes, buildings, collisions, minimap
+│   ├── geonav.js         ← road graph: traffic, signals, pedestrians, GPS, police routes
+│   ├── geolife.js        ← density by area, vehicle mix, street lamps, parked cars, vendors, bus stops, night lighting
+│   ├── environment.js    ← sky, day/night, weather
 │   ├── actors.js         ← player state, pedestrians, gangs
 │   ├── combat.js         ← weapons, melee, effects, pickups, lock-on
 │   ├── gameplay.js       ← police, shop, hospital, friends, cheats, respawn
@@ -400,13 +402,14 @@ kovai-streets/
 │   ├── hud.js            ← HUD, maps, tutorial
 │   ├── audio.js          ← all sound
 │   ├── input.js          ← keyboard, mouse, touch, pause
-│   ├── progression.js    ← Respect, save system, safehouse, area gates
+│   ├── progression.js    ← Respect, save system, safehouse
 │   ├── ui.js             ← pause menu, settings, tips
 │   └── main.js           ← main loop and start-up
 ├── three.min.js          ← Three.js r128 (3D engine)
 ├── THREE-LICENSE.txt     ← Three.js MIT licence
 ├── start-server.bat      ← one-click local server for Windows
 ├── tools/regression-test.js ← automated in-browser tests (see below)
+├── tools/geo/ and geodata/ ← OpenStreetMap data, processing scripts and validation reports for the real map
 └── screenshots/
 ```
 
@@ -473,21 +476,21 @@ Some of the techniques used:
 - **Geometry batching:** thousands of static buildings and props are merged into a handful of meshes for performance.
 - **Procedural facade textures** with lit and unlit window maps that glow at night.
 - **Extruded side profiles** for curved car bodies. People are merged into about 7 meshes each, with jointed limbs.
-- **Heightmap terrain** with a Catmull-Rom ghat road carved into it.
+- **A real-geography pipeline** (`tools/geo/`): OpenStreetMap is projected to UTM 43N at 1:1 and split into 1 km chunks that stream in and out around the player.
 - **A custom GLSL water shader** with wave displacement, foam, a Fresnel sky reflection and fog. The same wave formula runs in JavaScript so boats and swimmers stay in sync.
-- **A spatial-hash collision grid** with height-aware colliders, so you can drive under the flyover and walk under mall floors.
+- **A spatial-hash collision grid** with height-aware colliders built from real building outlines, so you can drive over and under real flyovers and walk under mall floors.
 - **Vehicle physics** with mass, lateral grip, impulse collisions, spin, slopes and buoyancy.
-- **Traffic AI** that follows the road grid, keeps left and yields to the vehicle ahead.
+- **Traffic AI** on the real road graph: keeps left, follows one-way streets, stops at red lights and yields to the vehicle ahead. GPS and police use the same graph.
 
 ---
 
 ## ⚠️ Known limitations
 
 - **Visual style:** it's stylised and low-poly. Everything is generated by code without hand-made 3D models, so characters and vehicles are simple up close.
-- **Traffic:** AI traffic stays inside the city grid. The ghat road and reservoir road have no AI cars.
+- **Map size:** only a 6 × 6 km pilot area of central Coimbatore so far, and the ground is flat (no elevation data yet).
 - **Saves are per browser:** progress is stored in your browser's local storage, so it doesn't follow you to another device or browser, and clearing site data erases it. Progress partway through a mission isn't saved.
 - **Performance:** older phones should use **Low** quality. High quality is meant for desktop GPUs.
-- **Geography:** Kovai Reservoir is fictional and sits east of the city. Coimbatore's real reservoirs (Siruvani, Pilloor) are in the west.
+- **Geography:** the map comes from OpenStreetMap and has not been checked against official maps. The game's mission sites are fictional. See `geodata/validation/g7_validation.md`.
 
 ---
 

@@ -59,11 +59,12 @@ def chunk_rect(i, j):
     return (i * SIZE, j * SIZE, (i + 1) * SIZE, (j + 1) * SIZE)
 
 
-def split_line(p, R):
-    """Cut a polyline to the pilot rectangle R and at chunk borders. Returns {(i,j): [piece, ...]}."""
-    out = defaultdict(list)
+def split_line(p, R, starts=None):
+    """Cut a polyline to the pilot rectangle R and at chunk borders. Returns {(i,j): [piece, ...]}.
+    starts, if given, maps id(piece) -> distance (m) along the original polyline where the piece begins."""
+    out = defaultdict(list); run = 0.0
     for k in range(1, len(p)):
-        a, b = p[k - 1], p[k]
+        a, b = p[k - 1], p[k]; seg = math.hypot(b[0] - a[0], b[1] - a[1]); base = run; run += seg
         c = clip_seg(a, b, R)
         if not c: continue
         A, B = lerp(a, b, c[0]), lerp(a, b, c[1])
@@ -83,7 +84,9 @@ def split_line(p, R):
             key = chunk_of((P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2)
             pieces = out[key]
             if pieces and pieces[-1][-1] == P: pieces[-1].append(Q)
-            else: pieces.append([P, Q])
+            else:
+                pieces.append([P, Q])
+                if starts is not None: starts[id(pieces[-1])] = round(base + t0 * seg, 2)
     return out
 
 
@@ -119,8 +122,12 @@ def main():
 
     def lines(items, kind, keep):
         for idx, it in enumerate(items):
-            for key, pieces in split_line(it["pts"], R).items():
-                for pc in pieces: chunks[key][kind].append(dict({k: it[k] for k in keep if k in it}, src=idx, pts=pc))
+            st = {}; L = round(sum(math.hypot(it["pts"][k][0] - it["pts"][k - 1][0], it["pts"][k][1] - it["pts"][k - 1][1]) for k in range(1, len(it["pts"]))), 2)
+            for key, pieces in split_line(it["pts"], R, st).items():
+                for pc in pieces:
+                    o = dict({k: it[k] for k in keep if k in it}, src=idx, pts=pc)
+                    if kind == "roads" and it.get("bridge"): o["s0"], o["L"] = st[id(pc)], L   # where this piece sits along the whole bridge (for ramp heights)
+                    chunks[key][kind].append(o)
     lines(roads["roads"], "roads", ("id", "cls", "name", "oneway", "bridge", "tunnel", "layer", "width"))
     lines(paths["paths"], "paths", ("id", "cls", "name"))
     lines(rail["rail"], "rail", ("id", "kind", "service", "bridge"))

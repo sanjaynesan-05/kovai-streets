@@ -69,7 +69,7 @@ function initAmbience(){const n=AC.sampleRate*2,b=AC.createBuffer(1,n,AC.sampleR
   const mk2=(type,freq,off)=>{const s=AC.createBufferSource();s.buffer=b;s.loop=true;const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;const g=AC.createGain();g.gain.value=0;s.connect(f);f.connect(g);g.connect(OUT);s.start(0,off);return g};
   amb={city:mk2('lowpass',700,0),sea:mk2('bandpass',500,0.7),hornT:3,birdT:2}}
 function updateAmbience(dt){if(!AC||!OUT)return;if(!amb)initAmbience();const t=AC.currentTime,P=playerP();
-  const inCity=Math.abs(P.x)<LIM+20&&Math.abs(P.z)<LIM+20?1:0.25,hills=!REALMAP&&P.x<ox(-552)?1:0,coast=REALMAP?0:clamp((P.x-ox(560))/80,0,1);
+  const inCity=1,hills=0,coast=0;/* the whole real map is city */
   amb.city.gain.setTargetAtTime(0.05*inCity*(1-hills)*(1-coast*0.8)*(0.6+0.4*dayF),t,0.5);amb.sea.gain.setTargetAtTime(coast*0.09*(0.6+0.4*Math.sin(time*0.6)),t,0.3);
   amb.hornT-=dt;if(amb.hornT<=0){amb.hornT=RR(2,7);if(inCity>0.5&&!hills){const vv=RR(0.006,0.016)*(0.5+dayF*0.5),dur=RR(0.25,0.5);for(const f of rpick([[392,494],[440,554],[330,415]]))tone(f,t+0.02,dur,'square',vv,OUT,0.02,1600)}}
   amb.birdT-=dt;if(amb.birdT<=0){amb.birdT=RR(0.8,3.5);if((hills||inCity<1||coast>0.3)&&dayF>0.4)for(let k=0;k<RI(2,4);k++){const st=t+0.01+k*0.13,o=AC.createOscillator();o.frequency.setValueAtTime(RR(2600,3400),st);o.frequency.exponentialRampToValueAtTime(RR(3600,4400),st+0.07);

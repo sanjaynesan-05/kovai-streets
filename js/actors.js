@@ -31,11 +31,10 @@ function setGun(){const g=player.human.gun;const w=WEAPONS[player.weapon];g.scal
 
 /* ================= NPCs ================= */
 const peds=[],goons=[];
-const PL=55,PP=220;
-function pedPos(p){if(REALMAP)return geoPedPos(p);const H=27.5+p.off;let s=((p.s%PP)+PP)%PP;const seg=Math.floor(s/PL),u=(s-seg*PL)/PL*2*H;
-  if(seg===0)return[p.cx-H+u,p.cz-H];if(seg===1)return[p.cx+H,p.cz-H+u];if(seg===2)return[p.cx+H-u,p.cz+H];return[p.cx-H,p.cz+H-u]}
-function placePed(p,minD){if(!REALMAP)for(let t=0;t<60;t++){const b=rpick(pedBlocks);const P=playerP(),d=Math.hypot(b.cx-P.x,b.cz-P.z);if((minD&&d<minD)||(d>300&&t<59))continue;/* D2: stay within 300 m of the player */p.cx=b.cx;p.cz=b.cz;break}
-  if(REALMAP)geoPlacePed(p,minD);else{p.s=RR(0,PP);p.dir=Math.random()<0.5?1:-1}p.off=RR(-1.2,1.2);p.dead=false;p.fly=null;p.flee=0;p.talk=false;p.hp=50;p.fight=false;p.stagger=0;p.punchCD=1;p.punchT=0;p.hidden=false;p.inV=null;p.h.g.rotation.x=0;p.h.g.rotation.z=0;p.h.g.visible=true;[p.x,p.z]=pedPos(p)}
+
+function pedPos(p){return geoPedPos(p)}
+function placePed(p,minD){
+  geoPlacePed(p,minD);p.off=RR(-1.2,1.2);p.dead=false;p.fly=null;p.flee=0;p.talk=false;p.hp=50;p.fight=false;p.stagger=0;p.punchCD=1;p.punchT=0;p.hidden=false;p.inV=null;p.h.g.rotation.x=0;p.h.g.rotation.z=0;p.h.g.visible=true;[p.x,p.z]=pedPos(p)}
 const NAMES_F=['Lakshmi','Priya','Anitha','Kavitha','Saranya','Revathi','Nandhini','Shalini'],NAMES_M=['Murugan','Karthik','Senthil','Ravi','Prakash','Arun','Ganesh','Vignesh'];
 function spawnPed(){const female=Math.random()<0.48;const shirt=rpick(SHIRTS);const lower=female?rpick(['saree','saree','kurta','kurta','pants']):rpick(['pants','pants','pants','veshti','lungi','lungi']);
   const h=makeHuman({shirt,pants:lower==='saree'?shirt:lower==='lungi'?rpick(LUNGI):lower==='kurta'?rpick(['#f4f1e8','#fefae0','#2b2d42','#e9d8a6']):lower==='veshti'?'#f4f1e8':rpick(PANTS),lower,skin:rpick(SKIN),hair:Math.random()<0.15?'#c9c9c9':'#1b1410',long:female,
@@ -111,13 +110,4 @@ function updateGoons(dt){const P=playerP();
 
 /* ================= wanderers & static people ================= */
 const WCLOTH={market:()=>({}),beach:()=>({shirt:rpick(['#f1faee','#8ecae6','#ffb703','#e63946','#06d6a0']),pants:rpick(['#264653','#1d3557','#f4f1e8'])}),college:()=>({shirt:rpick(SHIRTS),pants:rpick(['#1d3557','#2b2d42','#3d405b']),sleeve:'short'}),stadium:()=>({shirt:rpick(['#ffffff','#1d4ed8','#c1121f']),pants:'#111'})};
-function spawnWanderers(){for(const zn of WZONES){const n=Math.round(zn.n*(QL==='low'?0.5:QL==='high'?1.3:1));for(let k=0;k<n;k++){const fem=Math.random()<0.45,base=WCLOTH[zn.kind]?WCLOTH[zn.kind]():{};const sh=base.shirt||rpick(SHIRTS);
-    const h=makeHuman(Object.assign({skin:rpick(SKIN),long:fem,shirt:sh,pants:base.pants||(fem&&Math.random()<0.5?sh:rpick(PANTS))},base));const x=zn.cx+RR(-zn.rx,zn.rx),z=zn.cz+RR(-zn.rz,zn.rz);
-    WANDER.push({h,zn,x,z,y:0,tx:x,tz:z,wait:RR(0,3),phase:0,yaw:RR(0,6),sp:zn.kind==='stadium'?RR(2.5,4):RR(0.9,1.4)})}}
-  for(const s of STATICS){const fem=Math.random()<0.5,sh=rpick(SHIRTS);const h=makeHuman({skin:rpick(SKIN),long:fem,shirt:sh,pants:fem?sh:rpick(PANTS)});const y=surfaceH(s.x,s.z,0);
-    h.g.position.set(s.x,y,s.z);h.g.rotation.y=s.yaw;if(s.lie){h.g.rotation.x=-Math.PI/2;h.g.position.y=y+0.15;h.armL.rotation.x=h.armR.rotation.x=-2.9}else if(s.vendor)h.armR.rotation.x=-0.6;s.h=h}}
-function updateWanderers(dt){const P=playerP();for(const w of WANDER){const far=Math.abs(w.x-P.x)>150||Math.abs(w.z-P.z)>150;w.h.g.visible=!far;if(far)continue;
-  if(w.wait>0){w.wait-=dt;animHuman(w.h,0,0,false)}else{const dx=w.tx-w.x,dz=w.tz-w.z,d=Math.hypot(dx,dz);if(d<0.4){w.wait=RR(1,5);w.tx=w.zn.cx+RR(-w.zn.rx,w.zn.rx);w.tz=w.zn.cz+RR(-w.zn.rz,w.zn.rz)}
-    else{const st=Math.min(d,w.sp*dt);_pp.x=w.x+dx/d*st;_pp.z=w.z+dz/d*st;if(pushCircle(_pp,0.3,w.y)){w.tx=w.zn.cx+RR(-w.zn.rx,w.zn.rx);w.tz=w.zn.cz+RR(-w.zn.rz,w.zn.rz)}w.x=_pp.x;w.z=_pp.z;w.yaw=Math.atan2(dx,dz);w.phase+=dt*w.sp*3.2;animHuman(w.h,w.phase,w.sp>2?1.2:0.8,false)}}
-  w.y=humanY(w.x,w.z,w.y);w.h.g.position.set(w.x,w.y,w.z);w.h.g.rotation.y=w.yaw;if(w.h.umb)w.h.umb.visible=false}}
-function updateWorldFX(dt){waterU.time.value+=dt;if(FALLS)FALLS.m.material.map.offset.y-=dt*1.6;updateWanderers(dt)}
+function updateWorldFX(dt){waterU.time.value+=dt}

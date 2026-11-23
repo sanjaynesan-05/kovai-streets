@@ -30,11 +30,22 @@ This document covers all the content in **Kovai Streets**: the full storyline, e
 
 ## 1. Setting
 
-The game is set in a stylised version of **Coimbatore (Kovai)**, Tamil Nadu. The city is a 10 × 10 grid of blocks with real neighbourhood names: Gandhipuram, R.S. Puram, Town Hall, Race Course, Peelamedu, Ukkadam, Singanallur, Saibaba Colony, Saravanampatti and Podanur. Around the city are three larger areas:
+The game is set on the **real streets of central Coimbatore (Kovai)**, Tamil Nadu, built from OpenStreetMap at real scale: a 6 × 6 km area around Victoria Town Hall, from Ukkadam Lake to Peelamedu. Real places keep their real names and positions: Town Hall, Ukkadam and Valankulam lakes, the Gandhipuram bus stands and flyover, Race Course, VOC Park, Avinashi Road and Trichy Road.
 
-- **The foothills** (Marudhamalai and Velliangiri): the temple and the hill statue.
-- **The Western Ghats** (west): a winding ghat road, a hill village, a waterfall and a hilltop viewpoint. *Locked at the start.*
-- **Kovai Reservoir** (east): a made-up reservoir with grassy banks, a jetty, boats and a watchtower, with hills on the far shore. It is fictional; Coimbatore's real reservoirs are in the west. *Locked at the start.*
+The story's own places are **fictional** and sit on ordinary plots, never on a real landmark (see `geodata/validation/sites_report.md`):
+
+| Fictional place | Used in |
+|---|---|
+| Podanur, Singanallur and old Kovai mills | Missions 1, 3, 6, 7 and 9 |
+| Old quarry yard | Mission 4 (the gun deal, which used to be at a hilltop viewpoint) |
+| Old jetty on Ukkadam Lake | Mission 5 and the finale's boat escape |
+| Thendral Builders godown | Mission 10 |
+| Kovai Central Police Station | Mission 11 |
+| Ghat Wolves' walled compound | Mission 13 (the gang is from the hills; their hideout is in the city) |
+| Kovai Central mall | Mission 14 |
+| Safehouse, gun shop, Meena's and Divya's homes | Free roam |
+
+The Western Ghats, Marudhamalai, Singanallur and the airport are outside the current map.
 
 The game's central theme is Kovai's **textile mills**. Its story is about a gang trying to take them over.
 

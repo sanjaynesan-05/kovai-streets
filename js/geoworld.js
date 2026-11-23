@@ -1,7 +1,7 @@
 /* Kovai Streets: geoworld.js
  * Real-geography world (step G2): draws the 6 x 6 km Coimbatore pilot from geodata/processed/pilot/chunks (1 x 1 km chunks,
  * game metres from tools/geo/geo.py, 1:1, origin Victoria Town Hall) and streams chunks in and out around the player.
- * Active only with index.html?world=geo (REALMAP in core.js). Until step G7 the grid world stays the default.
+ * Since step G7 this is the game's only world.
  * Not done yet: collisions (G3), traffic and pedestrians on the road graph (G4), GPS (G5), missions (G6), elevation (needs DEM).
  * Classic script, loaded after world.js. Shares top-level declarations with the other game scripts.
  */
@@ -20,7 +20,7 @@ const GW_BLD={apartments:[14,26],commercial:[9,18],retail:[7,12],industrial:[7,1
 const DS=THREE.DoubleSide;/* outline direction varies in OSM data, so flat surfaces are double-sided */
 const gwMat={bld:new THREE.MeshLambertMaterial({vertexColors:true,side:DS}),flat:new THREE.MeshLambertMaterial({vertexColors:true,side:DS}),
   road:new THREE.MeshPhongMaterial({map:TX.asphalt,shininess:30,specular:0x000000,side:DS}),line:new THREE.MeshBasicMaterial({color:0xece6d2,side:DS}),
-  rail:new THREE.MeshLambertMaterial({color:0x4e535a,side:DS}),ballast:new THREE.MeshLambertMaterial({color:0x6e655a,side:DS}),pier:new THREE.MeshLambertMaterial({color:0x9a9a96}),water:null};
+  rail:new THREE.MeshLambertMaterial({color:0x4e535a,side:DS}),ballast:new THREE.MeshLambertMaterial({color:0x6e655a,side:DS}),pier:new THREE.MeshLambertMaterial({color:0x9a9a96}),parapet:new THREE.MeshLambertMaterial({color:0xb8b4aa,side:DS}),water:null};
 const gwUp=pos=>{const n=new Array(pos.length);for(let k=0;k<pos.length;k+=3){n[k]=0;n[k+1]=1;n[k+2]=0}return n};
 function gwHash(n){n=Math.imul((n|0)^0x9e3779b9,0x85ebca6b);n^=n>>>13;n=Math.imul(n,0xc2b2ae35);return((n^(n>>>16))>>>0)/4294967296}
 
@@ -32,7 +32,7 @@ function gwTri(ring){const c=ring.map(p=>new THREE.Vector2(p[0],p[1]));if(c.leng
 /* flat polygon (lake or land use) at height y */
 function gwFlat(ring,y,pos,nor,col,color){const t=gwTri(ring);if(!t)return;_gwc.set(color);for(const f of t.f)for(const k of[f[0],f[2],f[1]]){pos.push(t.c[k].x,y,t.c[k].y);nor.push(0,1,0);if(col)col.push(_gwc.r,_gwc.g,_gwc.b)}}
 /* height of a bridge point: ramps up over the first and last 40 m of the bridge way */
-function gwBridgeY(r,d,L){return r.bridge?Math.max(0.4,(r.layer>0?r.layer:1)*6.5)*Math.min(1,d/40,(L-d)/40):0}
+function gwBridgeY(r,d,L){if(r.L){d+=r.s0;L=r.L}/* position along the whole bridge, not just this chunk's piece (G7 fix) */return r.bridge?Math.max(0.4,(r.layer>0?r.layer:1)*6.5)*Math.min(1,d/40,(L-d)/40):0}
 /* road ribbon with mitred joins; returns the road's points with heights for piers */
 function gwRibbon(r,pos,uv,line){const p=r.pts,n=p.length,W=r.width/2,base=GW_ROADY[r.cls]||0.05;if(n<2)return;
   const cum=[0];for(let k=1;k<n;k++)cum.push(cum[k-1]+Math.hypot(p[k][0]-p[k-1][0],p[k][1]-p[k-1][1]));const L=cum[n-1];
@@ -77,30 +77,36 @@ function gwBuild(key,full){const d=GWLD.data.get(key),g=new THREE.Group();g.user
     if(pos.length)g.add(new THREE.Mesh(gwGeom(pos,nor,null,col),gwMat.flat))}
   {const pos=[],nor=[];for(const w of d.water||[])gwFlat(w.pts,0.08,pos,nor,null,'#000');
     if(pos.length){if(!gwMat.water){gwMat.water=waterMaterial(true);gwMat.water.side=DS}g.add(new THREE.Mesh(gwGeom(pos,nor),gwMat.water))}}
-  {const pos=[],uv=[],line=[],piers=[];for(const r of d.roads||[]){const o=gwRibbon(r,pos,uv,line);if(o&&r.bridge){for(let k=0;k<r.pts.length;k++)if(o.Y[k]>2.5&&k%2===0)piers.push([r.pts[k][0],o.Y[k],r.pts[k][1]]);
-      if(full)for(let k=1;k<r.pts.length;k++)gwAddDeck({ax:r.pts[k-1][0],az:r.pts[k-1][1],bx:r.pts[k][0],bz:r.pts[k][1],ya:o.Y[k-1],yb:o.Y[k],w:r.width/2+0.3},key)}}
+  {const pos=[],uv=[],line=[],piers=[],par=[];for(const r of d.roads||[]){const o=gwRibbon(r,pos,uv,line);if(o&&r.bridge){for(let k=0;k<r.pts.length;k++)if(o.Y[k]>2.5&&k%2===0)piers.push([r.pts[k][0],o.Y[k],r.pts[k][1]]);
+      if(full)for(let k=1;k<r.pts.length;k++)gwAddDeck({ax:r.pts[k-1][0],az:r.pts[k-1][1],bx:r.pts[k][0],bz:r.pts[k][1],ya:o.Y[k-1],yb:o.Y[k],w:r.width/2+0.3},key)
+      /* G7: parapets on raised deck sections: a low wall you can see, and collision posts every 2 m at deck height only (traffic underneath is not blocked) */
+      for(const side of[-1,1]){const e=r.pts.map((q,k)=>gwOffset(r.pts,k,side*(r.width/2+0.15)));for(let k=1;k<e.length;k++){const ya=o.Y[k-1],yb=o.Y[k];if(Math.min(ya,yb)<2)continue;
+        par.push(e[k-1][0],ya,e[k-1][1],e[k][0],yb,e[k][1],e[k][0],yb+0.9,e[k][1],e[k-1][0],ya,e[k-1][1],e[k][0],yb+0.9,e[k][1],e[k-1][0],ya+0.9,e[k-1][1]);
+        if(full){const L=Math.hypot(e[k][0]-e[k-1][0],e[k][1]-e[k-1][1]);for(let d=0;d<L;d+=2){const t=d/L,x=e[k-1][0]+(e[k][0]-e[k-1][0])*t,z=e[k-1][1]+(e[k][1]-e[k-1][1])*t,y=ya+(yb-ya)*t;cols.push(addCollider(x-0.35,z-0.35,x+0.35,z+0.35,y+1.0,y-0.3))}}}}}}
     if(full)for(const[x,y,z]of piers)cols.push(addCollider(x-0.6,z-0.6,x+0.6,z+0.6,y-0.5));/* pillars stop at the deck underside */
     if(pos.length){const m=new THREE.Mesh(gwGeom(pos,gwUp(pos),uv),gwMat.road);m.receiveShadow=true;g.add(m)}if(line.length)g.add(new THREE.Mesh(gwGeom(line,gwUp(line)),gwMat.line));
+    if(par.length)g.add(new THREE.Mesh(gwGeom(par),gwMat.parapet));
     if(piers.length){const im=new THREE.InstancedMesh(GEO.box,gwMat.pier,piers.length),o=new THREE.Object3D();piers.forEach(([x,y,z],i)=>{o.position.set(x,y/2,z);o.scale.set(1.2,y,1.2);o.updateMatrix();im.setMatrixAt(i,o.matrix)});g.add(im)}}
   {const pos=[],uv=[],rails=[];for(const r of d.rail||[]){gwRibbon({pts:r.pts,width:3.2,cls:'track'},pos,uv,null);for(const off of[-0.72,0.72])gwRibbon({pts:r.pts.map((q,k)=>gwOffset(r.pts,k,off)),width:0.12,cls:'track'},rails,[],null)}
     if(pos.length)g.add(new THREE.Mesh(gwGeom(pos,gwUp(pos)),gwMat.ballast));if(rails.length){for(let k=1;k<rails.length;k+=3)rails[k]+=0.12;g.add(new THREE.Mesh(gwGeom(rails,gwUp(rails)),gwMat.rail))}}
   if(full){const pos=[],nor=[],col=[];for(const b of d.buildings||[]){if(gwCleared(b))continue;/* G6: cleared for a mission site */gwBuilding(b,pos,nor,col);gwFootprintBoxes(b.pts,gwBldH(b),cols)}
     if(pos.length){const m=new THREE.Mesh(gwGeom(pos,nor,null,col),gwMat.bld);m.castShadow=QS.shadow>0;m.receiveShadow=true;g.add(m)}}
+  if(full)gwLife(d,key,g,cols);/* D7: lamps, parked cars, vendor carts, bus stops (geolife.js) */
   scene.add(g);return g}
 function gwOffset(p,k,off){const a=p[Math.max(0,k-1)],b=p[Math.min(p.length-1,k+1)],dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1;return[p[k][0]-dz/l*off,p[k][1]+dx/l*off]}
 function ringArea(r){let s=0;for(let k=0;k<r.length;k++){const a=r[k],b=r[(k+1)%r.length];s+=a[0]*b[1]-b[0]*a[1]}return Math.abs(s)/2}
-function gwFree(g){removeColliders(g.userData.cols);if(g.userData.full)gwDropDecks(g.userData.key);scene.remove(g);g.traverse(o=>{if(o.geometry&&o.geometry!==GEO.box)o.geometry.dispose()})}
+function gwFree(g){removeColliders(g.userData.cols);if(g.userData.full)gwDropDecks(g.userData.key);scene.remove(g);g.traverse(o=>{if(o.geometry&&o.geometry!==GEO.box&&!o.geometry.userData.shared)o.geometry.dispose()});LIFE_SPOTS.delete(g.userData.key)}
 
 /* ---------- streaming ---------- */
 function initGeoWorld(){GWLD.started=true;PLACES.length=0;/* grid-world place names; real landmarks are added below */
   const gt=TX.grass.clone();gt.needsUpdate=true;gt.wrapS=gt.wrapT=THREE.RepeatWrapping;gt.repeat.set(860,860);
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(12000,12000),new THREE.MeshLambertMaterial({color:0xa39e82,map:gt}));ground.rotation.x=-Math.PI/2;ground.position.set(1500,0,-1300);ground.receiveShadow=true;scene.add(ground);
-  fetch(GW_DIR+'index.json').then(r=>r.json()).then(ix=>{GWLD.index=ix;geoMinimapBase()}).catch(e=>{console.error(e);toast('MAP DATA MISSING','Run the game through start-server.bat',6)});
-  fetch('geodata/processed/pilot/landmarks.json').then(r=>r.json()).then(j=>{DISTRICTS.length=0;for(const L of j.landmarks)if(L.in_pilot&&(L.category==='district'||L.id==='town_hall'))DISTRICTS.push({n:L.name.replace('Victoria ',''),x:L.x,z:L.z});
+  fetch(GW_DIR+'index.json',{cache:'no-cache'}).then(r=>r.json()).then(ix=>{GWLD.index=ix;geoMinimapBase()}).catch(e=>{console.error(e);toast('MAP DATA MISSING','Run the game through start-server.bat',6)});
+  fetch('geodata/processed/pilot/landmarks.json',{cache:'no-cache'}).then(r=>r.json()).then(j=>{DISTRICTS.length=0;for(const L of j.landmarks)if(L.in_pilot&&(L.category==='district'||L.id==='town_hall'))DISTRICTS.push({n:L.name.replace('Victoria ',''),x:L.x,z:L.z});
     for(const L of j.landmarks)if(L.in_pilot&&L.category!=='district')PLACES.push({n:L.name,x:L.x,z:L.z})}/* real places for friends' hangouts */).catch(()=>{})}
 function updateGeoWorld(){if(!GWLD.index)return;const P=playerP(),S=GWLD.index.size_m;
   for(const c of GWLD.index.chunks){const key=c.i+','+c.j,d=Math.hypot(P.x-(c.i+0.5)*S,P.z-(c.j+0.5)*S),want=d<GW_NEAR?2:d<GW_FAR?1:0,live=GWLD.live.get(key);
-    if(want&&!GWLD.data.has(key)){if(!GWLD.pending.has(key)){GWLD.pending.add(key);fetch(GW_DIR+c.file).then(r=>r.json()).then(j=>{GWLD.data.set(key,j);GWLD.pending.delete(key);gwMapChunk(j)}).catch(e=>console.error(e))}continue}
+    if(want&&!GWLD.data.has(key)){if(!GWLD.pending.has(key)){GWLD.pending.add(key);fetch(GW_DIR+c.file,{cache:'no-cache'}).then(r=>r.json()).then(j=>{GWLD.data.set(key,j);GWLD.pending.delete(key);gwMapChunk(j)}).catch(e=>{console.warn('chunk '+key+' failed to load, retrying',e);setTimeout(()=>GWLD.pending.delete(key),2000)})}continue}/* G7: a failed download is retried instead of leaving a hole in the map */
     if(want&&(!live||live.userData.full!==(want===2))){if(!GWLD.queue.includes(key))GWLD.queue.push(key)}
     else if(!want&&live&&d>GW_FAR+GW_DROP){gwFree(live);GWLD.live.delete(key)}}
   const key=GWLD.queue.shift();if(key){const c=GWLD.index.chunks.find(c=>c.i+','+c.j===key),d=Math.hypot(P.x-(c.i+0.5)*S,P.z-(c.j+0.5)*S),old=GWLD.live.get(key);
@@ -119,7 +125,7 @@ const GW_MS=0.25;
 function geoMinimapBase(){const R=GWLD.index.rect;MX0=R[0]-200;MZ0=R[1]-200;MX1=R[2]+200;MZ1=R[3]+200;OMS=GW_MS;
   offMap=document.createElement('canvas');offMap.width=Math.ceil((MX1-MX0)*GW_MS);offMap.height=Math.ceil((MZ1-MZ0)*GW_MS);const o=offMap.getContext('2d');o.fillStyle='#b9b39a';o.fillRect(0,0,offMap.width,offMap.height);
   GWLD.mapReady=true;for(const d of GWLD.data.values())gwMapChunk(d);
-  Promise.all(['landuse','water','roads'].map(n=>fetch('geodata/processed/pilot/'+n+'.json').then(r=>r.json()))).then(([lu,wa,rd])=>gwMapChunk({landuse:lu.landuse,water:wa.water,roads:rd.roads})).catch(()=>{})}/* G5: whole pilot on the map from the start; buildings fill in by chunk */
+  Promise.all(['landuse','water','roads'].map(n=>fetch('geodata/processed/pilot/'+n+'.json',{cache:'no-cache'}).then(r=>r.json()))).then(([lu,wa,rd])=>gwMapChunk({landuse:lu.landuse,water:wa.water,roads:rd.roads})).catch(()=>{})}/* G5: whole pilot on the map from the start; buildings fill in by chunk */
 function gwMapChunk(d){if(!GWLD.mapReady)return;const o=offMap.getContext('2d'),X=v=>(v-MX0)*GW_MS,Z=v=>(v-MZ0)*GW_MS;
   const poly=(r,c)=>{o.fillStyle=c;o.beginPath();r.forEach((q,k)=>k?o.lineTo(X(q[0]),Z(q[1])):o.moveTo(X(q[0]),Z(q[1])));o.closePath();o.fill()};
   for(const a of d.landuse||[])poly(a.pts,GW_LAND[a.kind]||'#b3aa8e');for(const w of d.water||[])poly(w.pts,'#4f93c4');

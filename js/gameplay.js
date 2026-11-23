@@ -21,10 +21,7 @@ function updateReports(dt){for(let i=reports.length-1;i>=0;i--){const r=reports[
 function policeGoal(pa){if(policeSeen){pa.st=null;return playerP()}
   if(!pa.st)pa.st={x:lastSeen.x,z:lastSeen.z};return pa.st}
 let starFlashT=0;
-function spawnPolice(){if(REALMAP)return geoSpawnPolice();const P=playerP();
-  for(let t=0;t<60;t++){const i=RI(-NB,NB),j=RI(-NB,NB);const x=i*CELL,z=j*CELL;const d=Math.hypot(x-P.x,z-P.z);if(d<110||d>220)continue;
-    if(vehicles.some(v=>Math.abs(v.pos.x-x)<6&&Math.abs(v.pos.z-z)<6))continue;
-    const v=spawnVehicle('police',x,z,Math.atan2(P.x-x,P.z-z));v.speed=14;v.policeAI={shootT:2,stuck:0,reverse:0,revSteer:1,leaving:false,leaveT:0};return v}}
+function spawnPolice(){return geoSpawnPolice()}
 function updPolice(v,dt){const pa=v.policeAI;const T=policeGoal(pa);const dx=T.x-v.pos.x,dz=T.z-v.pos.z,d=Math.hypot(dx,dz);
   if(!policeSeen&&d<18)pa.st={x:lastSeen.x+RR(-30,30),z:lastSeen.z+RR(-30,30)};/* reached the search point: check another spot nearby */
   if(wanted===0||player.dead)pa.leaving=true;
@@ -32,7 +29,7 @@ function updPolice(v,dt){const pa=v.policeAI;const T=policeGoal(pa);const dx=T.x
   if(d>300){removeVehicle(v);return}
   if(pa.block&&!pa.broke&&d>22){v.speed*=Math.max(0,1-4*dt);pa.shootT-=dt;if(policeSeen&&d<34&&pa.shootT<=0){pa.shootT=RR(1,1.6);enemyShoot(v.pos.x,1.5,v.pos.z,clamp(0.55-d/80,0.15,0.45),6)}return}pa.broke=true;
   if(pa.reverse>0){pa.reverse-=dt;v.speed+=clamp(-8-v.speed,-v.s.brake*dt,v.s.acc*dt);v.heading+=pa.revSteer*dt*1.3;return}
-  const aim=REALMAP&&d>40?geoPoliceAim(v,pa,T,dt):null;/* real map: follow roads when far away */const diff=angDiff(v.heading,aim?Math.atan2(aim.x-v.pos.x,aim.z-v.pos.z):Math.atan2(dx,dz));
+  const aim=d>40?geoPoliceAim(v,pa,T,dt):null;/* follow the roads when far away */const diff=angDiff(v.heading,aim?Math.atan2(aim.x-v.pos.x,aim.z-v.pos.z):Math.atan2(dx,dz));
   let target=d>18?Math.min(v.s.max,12+d*0.5):(player.vehicle?9:0);if(Math.abs(diff)>1.2&&d>18)target=Math.min(target,11);
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);
   const rate=v.s.steer*1.4*Math.min(1,Math.abs(v.speed)/3);v.heading+=clamp(diff,-rate*dt,rate*dt);
@@ -48,9 +45,8 @@ function updateWanted(dt){if(starFlashT>0){starFlashT-=dt;if(starFlashT<=0)$('st
     if(seen)wantedCool=0;else{wantedCool+=dt;if(wantedCool>(10+wanted*3)*heatMult()){wanted--;wantedCool=0;if(wanted===0)toast('Lost the cops','The heat is off',2.2)}}}}
 
 /* ================= places, hospital, shop ================= */
-let SHOP=WO(9.5,83.5);/* WO: real-map position in ?world=geo (geosites.js), unchanged otherwise */
-const PLACES=[{n:'the reservoir bank',x:ox(640),z:40},{n:'the Race Course walking track',x:185,z:8.6},{n:'VOC Park',x:111,z:-65.4},{n:'the Saibaba Colony temple',x:-333,z:-301},{n:'Ukkadam lake',x:-111,z:229},
-  {n:'the Town Hall clock tower',x:-37,z:81},{n:'the Podanur pond',x:259,z:303},{n:'Singanallur lake',x:481,z:144},{n:'the Singanallur bus stand',x:481,z:70},{n:'the Ukkadam bus stand',x:-37,z:218},{n:'Marudhamalai temple',x:-703,z:-152},{n:'the Gandhipuram bus stand',x:37,z:-155},{n:'R.S. Puram park',x:-185,z:7.5}];
+let SHOP=WO(9.5,83.5);/* WO: grid-world position converted to the real map (geosites.js) */
+const PLACES=[];   /* real landmarks, added at start-up (geoworld.js) */
 function updateZones(dt){const healEl=$('heal');let healing=false;
   if(!player.dead&&!player.vehicle){const dh=Math.hypot(player.pos.x-HOSP.x,player.pos.z-HOSP.z);
     if(dh<3.6&&(player.hp<100)){player.hp=Math.min(100,player.hp+45*dt);healing=true}
@@ -112,7 +108,7 @@ function friendOpts(f){const o=[];
 function addFriend(f,n){const b=f.fr;f.fr=Math.min(100,f.fr+n);floatMsg(`${f.name} ♥ +${n}`);
   if(b<30&&f.fr>=30)toast(f.name.toUpperCase()+' TRUSTS YOU','She can now watch your back in fights',3);
   if(b<100&&f.fr>=100&&!f.perkDone){f.perkDone=true;if(f.perk==='car'){const v=spawnVehicle('sport',f.home.x+8,f.home.z+4.5,Math.PI/2);v.keep=true;toast('BEST FRIENDS!','Meena gave you her Kovai Racer sports car',4)}else toast('BEST FRIENDS!','Divya will give you armour whenever you visit',4)}}
-function startHangout(f){const opts=PLACES.filter(p=>Math.hypot(p.x-f.home.x,p.z-f.home.z)>150&&placeOpen(p.x));const pl=rpick(opts);
+function startHangout(f){const opts=PLACES.filter(p=>Math.hypot(p.x-f.home.x,p.z-f.home.z)>150);const pl=rpick(opts);
   f.comp=true;f.armed=false;f.h.gun.visible=false;mission={type:'hang',friend:f,title:'Hang out with '+f.name,reward:0,steps:[{x:pl.x,z:pl.z,txt:`Take ${f.name} to ${pl.n}`}],step:0,timer:null};
   toast('HANG OUT',`${f.name}: "Let's go to ${pl.n}!"`,2.8)}
 function sendHome(f){if(f.inCar)alightPassenger(f);f.comp=false;f.armed=false;f.inCar=false;f.h.gun.visible=false;f.awayT=0;f.goingHome=true;if(mission&&mission.type==='hang'&&mission.friend===f){mission=null;offerT=3}floatMsg(f.name+': See you later!')}
@@ -185,12 +181,7 @@ function updatePoliceExtra(dt){const P=playerP();
     if(wanted>=3){roadblockT-=dt;if(roadblockT<=0){roadblockT=RR(22,32);if(player.vehicle&&Math.abs(player.vehicle.speed)>8)spawnRoadblock()}}}
   heliCD-=dt;if(wanted>=heliStars()&&!player.dead&&(!heli||(!heli.alive&&!heli.falling))&&heliCD<=0)spawnHeli();
   if(heli)updateHeli(dt)}
-function spawnRoadblock(){if(REALMAP)return geoRoadblock();const v=player.vehicle;const fx=Math.sin(v.heading),fz=Math.cos(v.heading);let best=null,bd=1e9;
-  for(let i=-NB;i<=NB;i++)for(let j=-NB;j<=NB;j++){const nx=i*CELL,nz=j*CELL,dx=nx-v.pos.x,dz=nz-v.pos.z,ahead=dx*fx+dz*fz,lat=Math.abs(dx*fz-dz*fx);if(ahead<70||ahead>190||lat>14)continue;if(ahead<bd){bd=ahead;best={nx,nz}}}
-  if(!best)return;const alongX=Math.abs(fx)>Math.abs(fz),sg=alongX?Math.sign(fx):Math.sign(fz);const cx=alongX?best.nx-sg*12:best.nx,cz=alongX?best.nz:best.nz-sg*12;
-  for(const o of[-3.4,3.4]){const x=alongX?cx:cx+o,z=alongX?cz+o:cz;if(vehicles.some(u=>Math.abs(u.pos.x-x)<3&&Math.abs(u.pos.z-z)<3))continue;
-    const pv=spawnVehicle('police',x,z,alongX?0:Math.PI/2);pv.speed=0;pv.vx=pv.vz=0;pv.policeAI={shootT:1,stuck:0,reverse:0,revSteer:1,leaving:false,leaveT:0,block:true,out:true}}
-  for(const o of[-1,1]){const x=alongX?cx+sg*3:cx+o*6,z=alongX?cz+o*6:cz+sg*3;spawnGoon(x,z,null,true,{cop:true,wep:rpick(['pistol','smg'])})}floatMsg('Police roadblock ahead!')}
+function spawnRoadblock(){return geoRoadblock()}
 function buildHeliMesh(){const g=new THREE.Group();const B=GB();
   gb(B,GEO.sph16,0,0,0,'#1d3557',0,0,0,1.3,1.1,2.4);gb(B,GEO.sph16,0,0.15,1.35,'#9fd3e8',0,0,0,0.95,0.75,1.1);gbBox(B,2.66,0.3,2.6,0,-0.3,0.1,'#f4f4f4');
   gbBox(B,0.35,0.35,4.5,0,0.25,-3.6,'#1d3557');gbBox(B,0.12,1.2,0.7,0,0.8,-5.7,'#f4f4f4');gbBox(B,1.6,0.08,0.5,0,0.3,-5.5,'#1d3557');

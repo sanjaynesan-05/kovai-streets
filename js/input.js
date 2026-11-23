@@ -24,7 +24,7 @@ addEventListener('keydown',e=>{if(consoleOpen)return;if(cineHold&&started&&!paus
   else if(e.code==='KeyR')startReload();
   else if(e.code==='KeyC')toggleCrouch();
   else if(e.code==='KeyN')radioNext();
-  else if(e.code==='KeyM'){bigMapOpen=!bigMapOpen;$('bigmap').classList.toggle('hidden',!bigMapOpen);if(REALMAP&&bigMapOpen&&document.pointerLockElement)try{document.exitPointerLock()}catch(e){}/* free the mouse to click a GPS destination */}
+  else if(e.code==='KeyM'){bigMapOpen=!bigMapOpen;$('bigmap').classList.toggle('hidden',!bigMapOpen);if(bigMapOpen&&document.pointerLockElement)try{document.exitPointerLock()}catch(e){}/* free the mouse to click a GPS destination */}
   else if(e.code==='KeyH'){if(player.vehicle){horn(1);panic(player.vehicle.pos.x,player.vehicle.pos.z,25)}}
   else if(e.code==='KeyP'||(e.code==='Escape'&&!locked))pause()});
 addEventListener('keyup',e=>{K[e.code]=false;if(e.code==='Tab'&&wheelOpen&&wheelMode==='hold')closeWheel(true)});
@@ -76,7 +76,7 @@ function setupTouch(){if(!isTouch)return;document.body.classList.add('touch');
   btn('bMap',()=>{bigMapOpen=!bigMapOpen;$('bigmap').classList.toggle('hidden',!bigMapOpen)});
   btn('bCheat',()=>{openConsole()});
   btn('bPause',()=>{pause()});
-  $('bigmap').addEventListener('pointerdown',e=>{if(REALMAP&&e.target.id==='bigmapC'){geoMapClick(e);return}bigMapOpen=false;$('bigmap').classList.add('hidden')});
+  $('bigmap').addEventListener('pointerdown',e=>{if(e.target.id==='bigmapC'){geoMapClick(e);return}bigMapOpen=false;$('bigmap').classList.add('hidden')});
   // lighter settings for phones
   
   document.addEventListener('gesturestart',e=>e.preventDefault());}
