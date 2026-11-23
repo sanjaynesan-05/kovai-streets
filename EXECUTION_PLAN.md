@@ -23,6 +23,7 @@ Phases are kept small, so each one is a single focused change followed by one co
 | Critical bugs | Flyover underpass, two-wheeler pillion, stunt-jump launch |
 | Story | Act 1 (missions 1–6), Act 2 "Threads of Kovai" (missions 7–14), open ending |
 | Presentation | Cinematic main menu |
+| Voice (Phase G) | Tamil-first voice system: 83 lines voiced in Tamil and English (AI4Bharat Indic Parler-TTS), Tamil subtitles with small English, voice/subtitle/dialogue-volume settings |
 
 ---
 
@@ -159,7 +160,15 @@ Phases are kept small, so each one is a single focused change followed by one co
 
 ---
 
-## Phase G: Dialogue and voice system (TODO §8)
+## Phase G: Dialogue and voice system (TODO §8)  *✓ done*
+
+**Status:** done. All 83 story lines have Tamil and English recordings in `assets/voice/`, generated with `tools/voice/generate.py`. Still open:
+
+- a native speaker should review the Tamil text;
+- key lines (`m12_caught`, `m12_why`, `m14_*`) could be re-recorded by actors later;
+- in-game check of every line by you.
+
+New lines added in later phases need a line ID in `js/lines.js`, then a run of `generate.py` for both languages.
 
 **Goal:** recordings can be added later without code changes.
 
@@ -264,7 +273,7 @@ Phases are kept small, so each one is a single focused change followed by one co
 | 4 | D: Population and traffic | Large |
 | 5 | E: Meena and Divya | Large |
 | 6 | F: Economy | Large (6 sub-commits) |
-| 7 | G: Voice system | Small |
+| 7 | G: Voice system | Done |
 | 8 | H: Ghats environment | Medium |
 | 9 | I: Characters | Large |
 | 10 | J: Presentation | Large |
