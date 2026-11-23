@@ -32,10 +32,10 @@ function setGun(){const g=player.human.gun;const w=WEAPONS[player.weapon];g.scal
 /* ================= NPCs ================= */
 const peds=[],goons=[];
 const PL=55,PP=220;
-function pedPos(p){const H=27.5+p.off;let s=((p.s%PP)+PP)%PP;const seg=Math.floor(s/PL),u=(s-seg*PL)/PL*2*H;
+function pedPos(p){if(REALMAP)return geoPedPos(p);const H=27.5+p.off;let s=((p.s%PP)+PP)%PP;const seg=Math.floor(s/PL),u=(s-seg*PL)/PL*2*H;
   if(seg===0)return[p.cx-H+u,p.cz-H];if(seg===1)return[p.cx+H,p.cz-H+u];if(seg===2)return[p.cx+H-u,p.cz+H];return[p.cx-H,p.cz+H-u]}
-function placePed(p,minD){for(let t=0;t<60;t++){const b=rpick(pedBlocks);const P=playerP(),d=Math.hypot(b.cx-P.x,b.cz-P.z);if((minD&&d<minD)||(d>300&&t<59))continue;/* D2: stay within 300 m of the player */p.cx=b.cx;p.cz=b.cz;break}
-  p.s=RR(0,PP);p.dir=Math.random()<0.5?1:-1;p.off=RR(-1.2,1.2);p.dead=false;p.fly=null;p.flee=0;p.talk=false;p.hp=50;p.fight=false;p.stagger=0;p.punchCD=1;p.punchT=0;p.hidden=false;p.inV=null;p.h.g.rotation.x=0;p.h.g.rotation.z=0;p.h.g.visible=true;[p.x,p.z]=pedPos(p)}
+function placePed(p,minD){if(!REALMAP)for(let t=0;t<60;t++){const b=rpick(pedBlocks);const P=playerP(),d=Math.hypot(b.cx-P.x,b.cz-P.z);if((minD&&d<minD)||(d>300&&t<59))continue;/* D2: stay within 300 m of the player */p.cx=b.cx;p.cz=b.cz;break}
+  if(REALMAP)geoPlacePed(p,minD);else{p.s=RR(0,PP);p.dir=Math.random()<0.5?1:-1}p.off=RR(-1.2,1.2);p.dead=false;p.fly=null;p.flee=0;p.talk=false;p.hp=50;p.fight=false;p.stagger=0;p.punchCD=1;p.punchT=0;p.hidden=false;p.inV=null;p.h.g.rotation.x=0;p.h.g.rotation.z=0;p.h.g.visible=true;[p.x,p.z]=pedPos(p)}
 const NAMES_F=['Lakshmi','Priya','Anitha','Kavitha','Saranya','Revathi','Nandhini','Shalini'],NAMES_M=['Murugan','Karthik','Senthil','Ravi','Prakash','Arun','Ganesh','Vignesh'];
 function spawnPed(){const female=Math.random()<0.48;const shirt=rpick(SHIRTS);const lower=female?rpick(['saree','saree','kurta','kurta','pants']):rpick(['pants','pants','pants','veshti','lungi','lungi']);
   const h=makeHuman({shirt,pants:lower==='saree'?shirt:lower==='lungi'?rpick(LUNGI):lower==='kurta'?rpick(['#f4f1e8','#fefae0','#2b2d42','#e9d8a6']):lower==='veshti'?'#f4f1e8':rpick(PANTS),lower,skin:rpick(SKIN),hair:Math.random()<0.15?'#c9c9c9':'#1b1410',long:female,

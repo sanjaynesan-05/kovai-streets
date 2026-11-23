@@ -29,14 +29,14 @@ function removeVehicle(v){const i=vehicles.indexOf(v);if(i>=0)vehicles.splice(i,
 const inGrid=(i,j)=>i>=-NB&&i<=NB&&j>=-NB&&j<=NB;
 const laneWP=(i,j,dx,dz,off,ln)=>{ln=ln||LANE;return{x:i*CELL+dx*off+dz*ln,z:j*CELL+dz*off-dx*ln}};
 const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
-function aiNext(v){const a=v.ai;const opts=[];
+function aiNext(v){if(v.ai.geo)return geoAINext(v);/* real road graph (geonav.js) */const a=v.ai;const opts=[];
   for(const[dx,dz,w]of[[a.dx,a.dz,0.5],[a.dz,-a.dx,0.25],[-a.dz,a.dx,0.25]])if(inGrid(a.i+dx,a.j+dz))opts.push([dx,dz,w]);
   let ch;if(!opts.length)ch=[-a.dx,-a.dz];else{let tot=0;for(const o of opts)tot+=o[2];let r=Math.random()*tot;ch=opts[opts.length-1];for(const o of opts){r-=o[2];if(r<=0){ch=o;break}}}
   if(a.flee&&opts.length){const P=playerP();let best=-1e9;for(const o of opts){const nx=(a.i+o[0])*CELL,nz=(a.j+o[1])*CELL;const d=Math.hypot(nx-P.x,nz-P.z)+Math.random()*60;if(d>best){best=d;ch=o}}}
   if(v.y>2.5&&inGrid(a.i+a.dx,a.j+a.dz))ch=[a.dx,a.dz];const nx=ch[0],nz=ch[1];const exit=laneWP(a.i,a.j,nx,nz,8,a.lane);a.i+=nx;a.j+=nz;a.dx=nx;a.dz=nz;a.wps=[exit,laneWP(a.i,a.j,nx,nz,-9,a.lane)];a.turnWp=exit}
 function playerP(){return player.vehicle?player.vehicle.pos:player.pos}
 function makeAI(v,i,j,dx,dz,cruise){const lane=v.s.cycle?RR(5.0,5.6):v.s.two?RR(2.0,5.4):LANE;v.ai={lane,i,j,dx,dz,wps:[laneWP(i,j,dx,dz,-9,lane)],turnWp:null,cruise,blockT:0,stuck:0,hitT:0};v.speed=cruise*0.6;v.vx=Math.sin(v.heading)*v.speed;v.vz=Math.cos(v.heading)*v.speed}
-function spawnAI(type,minDist){if(REALMAP)return null;/* traffic on the real road graph comes in step G4 */
+function spawnAI(type,minDist){if(REALMAP)return geoSpawnAI(type,minDist);/* real road graph (geonav.js) */
   const P0=playerP(),pi=Math.round(P0.x/CELL),pj=Math.round(P0.z/CELL);/* D2: spawn within 5 blocks of the player */
   for(let t=0;t<80;t++){const i=clamp(pi+RI(-5,5),-NB,NB),j=clamp(pj+RI(-5,5),-NB,NB);const[dx,dz]=rpick(DIRS);if(!inGrid(i-dx,j-dz))continue;
     const p=laneWP(i,j,dx,dz,-RR(12,58));const P=playerP();if(Math.hypot(p.x-P.x,p.z-P.z)<minDist)continue;
@@ -59,7 +59,7 @@ function updAI(v,dt){const a=v.ai;if(!a.wps.length)aiNext(v);let wp=a.wps[0];
   if(d<3.4){a.wps.shift();if(!a.wps.length)aiNext(v);wp=a.wps[0];dx=wp.x-v.pos.x;dz=wp.z-v.pos.z;d=Math.hypot(dx,dz)}
   const diff=angDiff(v.heading,Math.atan2(dx,dz));
   let target=a.cruise;const slow=a.reckless?13:7.5;if(wp===a.turnWp||(a.wps.length===1&&d<16))target=Math.min(target,slow);if(Math.abs(diff)>0.6)target=Math.min(target,a.reckless?9:5);
-  const blocked=!a.reckless&&blockedAhead(v);
+  const blocked=!a.reckless&&(blockedAhead(v)||(a.geo&&geoRed(v)));/* geo: stop at red lights */
   if(blocked){a.blockT+=dt;target=0}else a.blockT=0;
   if(a.hitT>0){a.hitT-=dt;target=0}
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);
