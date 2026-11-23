@@ -21,7 +21,7 @@ function updateReports(dt){for(let i=reports.length-1;i>=0;i--){const r=reports[
 function policeGoal(pa){if(policeSeen){pa.st=null;return playerP()}
   if(!pa.st)pa.st={x:lastSeen.x,z:lastSeen.z};return pa.st}
 let starFlashT=0;
-function spawnPolice(){const P=playerP();
+function spawnPolice(){if(REALMAP)return geoSpawnPolice();const P=playerP();
   for(let t=0;t<60;t++){const i=RI(-NB,NB),j=RI(-NB,NB);const x=i*CELL,z=j*CELL;const d=Math.hypot(x-P.x,z-P.z);if(d<110||d>220)continue;
     if(vehicles.some(v=>Math.abs(v.pos.x-x)<6&&Math.abs(v.pos.z-z)<6))continue;
     const v=spawnVehicle('police',x,z,Math.atan2(P.x-x,P.z-z));v.speed=14;v.policeAI={shootT:2,stuck:0,reverse:0,revSteer:1,leaving:false,leaveT:0};return v}}
@@ -32,7 +32,7 @@ function updPolice(v,dt){const pa=v.policeAI;const T=policeGoal(pa);const dx=T.x
   if(d>300){removeVehicle(v);return}
   if(pa.block&&!pa.broke&&d>22){v.speed*=Math.max(0,1-4*dt);pa.shootT-=dt;if(policeSeen&&d<34&&pa.shootT<=0){pa.shootT=RR(1,1.6);enemyShoot(v.pos.x,1.5,v.pos.z,clamp(0.55-d/80,0.15,0.45),6)}return}pa.broke=true;
   if(pa.reverse>0){pa.reverse-=dt;v.speed+=clamp(-8-v.speed,-v.s.brake*dt,v.s.acc*dt);v.heading+=pa.revSteer*dt*1.3;return}
-  const diff=angDiff(v.heading,Math.atan2(dx,dz));
+  const aim=REALMAP&&d>40?geoPoliceAim(v,pa,T,dt):null;/* real map: follow roads when far away */const diff=angDiff(v.heading,aim?Math.atan2(aim.x-v.pos.x,aim.z-v.pos.z):Math.atan2(dx,dz));
   let target=d>18?Math.min(v.s.max,12+d*0.5):(player.vehicle?9:0);if(Math.abs(diff)>1.2&&d>18)target=Math.min(target,11);
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);
   const rate=v.s.steer*1.4*Math.min(1,Math.abs(v.speed)/3);v.heading+=clamp(diff,-rate*dt,rate*dt);
@@ -185,7 +185,7 @@ function updatePoliceExtra(dt){const P=playerP();
     if(wanted>=3){roadblockT-=dt;if(roadblockT<=0){roadblockT=RR(22,32);if(player.vehicle&&Math.abs(player.vehicle.speed)>8)spawnRoadblock()}}}
   heliCD-=dt;if(wanted>=heliStars()&&!player.dead&&(!heli||(!heli.alive&&!heli.falling))&&heliCD<=0)spawnHeli();
   if(heli)updateHeli(dt)}
-function spawnRoadblock(){const v=player.vehicle;const fx=Math.sin(v.heading),fz=Math.cos(v.heading);let best=null,bd=1e9;
+function spawnRoadblock(){if(REALMAP)return geoRoadblock();const v=player.vehicle;const fx=Math.sin(v.heading),fz=Math.cos(v.heading);let best=null,bd=1e9;
   for(let i=-NB;i<=NB;i++)for(let j=-NB;j<=NB;j++){const nx=i*CELL,nz=j*CELL,dx=nx-v.pos.x,dz=nz-v.pos.z,ahead=dx*fx+dz*fz,lat=Math.abs(dx*fz-dz*fx);if(ahead<70||ahead>190||lat>14)continue;if(ahead<bd){bd=ahead;best={nx,nz}}}
   if(!best)return;const alongX=Math.abs(fx)>Math.abs(fz),sg=alongX?Math.sign(fx):Math.sign(fz);const cx=alongX?best.nx-sg*12:best.nx,cz=alongX?best.nz:best.nz-sg*12;
   for(const o of[-3.4,3.4]){const x=alongX?cx:cx+o,z=alongX?cz+o:cz;if(vehicles.some(u=>Math.abs(u.pos.x-x)<3&&Math.abs(u.pos.z-z)<3))continue;

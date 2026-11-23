@@ -10,6 +10,7 @@ Writes  geodata/processed/pilot/roads.json      drivable roads: class, name, one
         geodata/processed/pilot/buildings.json  building footprints with height
         geodata/processed/pilot/graph.json      road navigation graph (nodes, directed edges)
         geodata/processed/pilot/landmarks.json  landmark registry at 1:1
+        geodata/processed/pilot/pois.json       hospitals, police stations and bus stands (map icons)
         geodata/validation/pilot_report.md      counts, connectivity, landmark coverage
 All coordinates are game metres from tools/geo/geo.py (the only transform). Run:  python tools/geo/build_pilot.py
 """
@@ -55,10 +56,14 @@ def main():
     feats = json.load(open(os.path.join(RAW, "pilot_features.json"), encoding="utf-8"))["elements"]
     blds = json.load(open(os.path.join(RAW, "pilot_buildings.json"), encoding="utf-8"))["elements"]
     roads, paths, rail, stations, water, waterways, landuse = [], [], [], [], [], [], []
-    signals, crossings = [], []
+    signals, crossings, pois = [], [], []
 
+    POI_KINDS = ("hospital", "police", "bus_station")
     for e in feats:
         t = e.get("tags", {})
+        if t.get("amenity") in POI_KINDS:
+            c = (e["lat"], e["lon"]) if e["type"] == "node" else ((e["bounds"]["minlat"] + e["bounds"]["maxlat"]) / 2, (e["bounds"]["minlon"] + e["bounds"]["maxlon"]) / 2) if "bounds" in e else None
+            if c: x, z = to_game(*c); pois.append({"kind": t["amenity"], "name": t.get("name"), "x": x, "z": z, "osm": e["type"][0] + str(e["id"])})
         if e["type"] == "node":
             if t.get("highway") == "traffic_signals": signals.append(list(to_game(e["lat"], e["lon"])))
             elif t.get("railway") in ("station", "halt"): stations.append({"name": t.get("name"), "p": list(to_game(e["lat"], e["lon"]))})
@@ -151,7 +156,7 @@ def main():
     w("water.json", {"meta": meta, "water": water, "waterways": waterways}); w("landuse.json", {"meta": meta, "landuse": landuse})
     w("buildings.json", {"meta": meta, "buildings": buildings})
     w("graph.json", {"meta": meta, "nodes": nodes, "edges": edges, "edge_fields": ["from", "to", "length_m", "road_index", "pt_from", "pt_to"]})
-    w("landmarks.json", {"meta": meta, "landmarks": landmarks})
+    w("landmarks.json", {"meta": meta, "landmarks": landmarks}); w("pois.json", {"meta": meta, "pois": pois})
 
     # ---- validation report ----
     xs = [q[0] for r in roads for q in r["pts"]]; zs = [q[1] for r in roads for q in r["pts"]]

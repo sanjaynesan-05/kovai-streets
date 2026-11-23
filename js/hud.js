@@ -21,12 +21,13 @@ function buildMinimapBase(){if(REALMAP)return;/* geoworld.js draws its own map *
   o.fillStyle='#6d655a';o.fillRect(X(-BOUND),Z(TRACKZ-2.5),2*BOUND*MS,5*MS);o.fillStyle='#a64b2a';o.fillRect(X(70),Z(380+GX),80*MS,14*MS);o.fillStyle='#bdb5a3';o.fillRect(X(50),Z(394.2+GX),120*MS,7.4*MS);
   o.fillStyle='#9a9a96';o.fillRect(X(FLY.xa),Z(-FLY.hw),(FLY.xb-FLY.xa)*MS,FLY.hw*2*MS);o.fillStyle='#cfc6b2';o.fillRect(X(STATUE.x-22),Z(STATUE.z-22),44*MS,44*MS);o.fillRect(X(STATUE.x-2),Z(STATUE.z),4*MS,190*MS);
   o.fillStyle='#262a2f';o.fillRect(X(STATUE.x-6),Z(STATUE.z-8),12*MS,10*MS);o.fillStyle='#8b6b4a';o.fillRect(X(648+GX),Z(197.5),132*MS,5*MS)}
-function mapIcons(){const a=[{x:HOSP.x,z:HOSP.z,img:ICON.hosp,edge:true},{x:SHOP.x,z:SHOP.z,img:ICON.gun,edge:true}];
+function mapIcons(){if(REALMAP)return geoIcons();const a=[{x:HOSP.x,z:HOSP.z,img:ICON.hosp,edge:true},{x:SHOP.x,z:SHOP.z,img:ICON.gun,edge:true}];
   for(const f of FRIENDS)if(!f.comp&&!f.goingHome)a.push({x:f.home.x,z:f.home.z,img:ICON.heart,edge:true});for(const st of STALLS)a.push({x:st.cx,z:st.cz,img:ICON.tea,edge:false});extraIcons(a);return a}
 function drawMinimap(){const P=playerP();const c=mctx;c.save();c.clearRect(0,0,180,180);c.beginPath();c.arc(90,90,90,0,Math.PI*2);c.clip();c.fillStyle='#8f9a66';c.fillRect(0,0,180,180);
   const th=camYaw+Math.PI,cs=Math.cos(th),sn=Math.sin(th);
   if(offMap){c.save();c.translate(90,90);c.rotate(th);c.drawImage(offMap,-(P.x-MX0)*MS,-(P.z-MZ0)*MS,offMap.width*MS/OMS,offMap.height*MS/OMS);c.restore()}
   const pt=(x,z)=>{const dx=(x-P.x)*MS,dz=(z-P.z)*MS;return[dx*cs-dz*sn,dx*sn+dz*cs]};
+  drawRoute(c,(x,z)=>{const[a,b]=pt(x,z);return[90+a,90+b]});/* GPS route (real-geography mode) */
   const dot=(x,z,col,r)=>{const[a,b]=pt(x,z);if(a*a+b*b>88*88)return;c.fillStyle=col;c.beginPath();c.arc(90+a,90+b,r,0,7);c.fill()};
   const edgeP=(x,z,lim)=>{let[a,b]=pt(x,z);const l=Math.hypot(a,b);if(l>lim){a*=lim/l;b*=lim/l}return[90+a,90+b]};
   for(const g of goons)if(!g.dead)dot(g.x,g.z,g.boss?'#c86bfa':'#ff3b3b',g.boss?4.5:3);
@@ -45,7 +46,8 @@ let bigMapOpen=false;
 function drawBigMap(){const cv=$('bigmapC'),c=cv.getContext('2d'),S=cv.width,k=S/(MX1-MX0),Hh=(MZ1-MZ0)*k,oy=(S-Hh)/2,X=v=>(v-MX0)*k,Z=v=>oy+(v-MZ0)*k;
   c.fillStyle='#0b0f14';c.fillRect(0,0,S,S);c.drawImage(offMap,0,oy,S,Hh);c.textAlign='center';c.textBaseline='middle';c.font='600 11px Rajdhani,sans-serif';
   for(const d of DISTRICTS){if(d.x<MX0||d.x>MX1||d.z<MZ0||d.z>MZ1)continue;c.fillStyle='rgba(0,0,0,.6)';c.fillText(d.n.toUpperCase(),X(d.x),Z(d.z)-10)}
-  for(const ic of mapIcons()){if(!ic.edge)continue;c.drawImage(ic.img,X(ic.x)-8,Z(ic.z)-8,16,16)}
+  drawRoute(c,(x,z)=>[X(x),Z(z)],true);
+  for(const ic of mapIcons()){if(!ic.edge&&!ic.near)continue;c.drawImage(ic.img,X(ic.x)-8,Z(ic.z)-8,16,16)}
   if(!mission)for(const o of offers){c.fillStyle=JOBT[o.type].c;c.strokeStyle='#000';c.lineWidth=2;c.beginPath();c.arc(X(o.x),Z(o.z),8,0,7);c.fill();c.stroke();c.fillStyle='#111';c.font='bold 12px Rajdhani,sans-serif';c.fillText(JOBT[o.type].L,X(o.x),Z(o.z)+1)}
   if(mission&&marker.visible){c.fillStyle='#ffd23f';c.beginPath();c.arc(X(marker.position.x),Z(marker.position.z),7,0,7);c.fill();c.stroke()}
   const P=playerP(),yaw=player.vehicle?player.vehicle.heading:player.yaw;c.save();c.translate(X(P.x),Z(P.z));c.rotate(-yaw+Math.PI);c.fillStyle='#fff';c.strokeStyle='#000';c.lineWidth=2;c.beginPath();c.moveTo(0,-9);c.lineTo(7,7);c.lineTo(0,3);c.lineTo(-7,7);c.closePath();c.fill();c.stroke();c.restore()}
@@ -64,7 +66,7 @@ function updateHUD(dt){setTxt(hud.cash,'₹'+Math.max(0,Math.floor(player.cash))
   else{hud.vhpw.classList.add('hidden');const w=WEAPONS[player.weapon];setTxt(hud.weapon,w.name);const r=player.res[player.weapon];
     setTxt(hud.ammo,w.melee?(w.id==='fists'?'COMBO x'+(combo+1):'MELEE'):player.reloading>0?'RELOADING':w.thrown?String(player.mags[player.weapon]+player.res[player.weapon]):player.mags[player.weapon]+' / '+(r===Infinity?'∞':r));setHTML(hud.speed,'');hud.cross.style.display=player.dead||scoped()?'none':'';
     setHTML(hud.wstrip,'<span class="own" style="font-size:14px;letter-spacing:1.5px">SCROLL · TAB · Q = WEAPON WHEEL</span>')}
-  areaT-=dt;if(areaT<=0){areaT=0.4;const P=playerP();const rn=roadName(P.x,P.z);setTxt(hud.area,(rn?rn+' · ':'')+district(P.x,P.z));setTxt($('clock'),clockText())}
+  areaT-=dt;if(areaT<=0){areaT=0.4;const P=playerP();const rn=roadName(P.x,P.z);setTxt(hud.area,(rn?rn+' · ':'')+district(P.x,P.z)+gpsText());setTxt($('clock'),clockText())}
   let mh='';if(mission){const st=mission.steps[mission.step];let txt=mission.txt?mission.txt:st?st.txt:mission.type==='gang'?`Goons left: ${mission.left}`:mission.type==='boss'?`Kill ${mission.bossName} (white shirt). Guards: ${Math.max(0,mission.left-(mission.boss.dead?0:1))}`:mission.type==='chase'?'Wreck the black getaway car!':'';
     mh=`<div class="mT">${esc(mission.title)}${mission.reward?' · ₹'+mission.reward.toLocaleString('en-IN'):''}</div><div class="mX">${esc(txt)}</div>`;
     for(const mt of(mission.meters||[]).concat([mission.searchMeter,mission.detMeter,mission.escortMeter])){if(!mt)continue;mh+=`<div class="mM"><span>${esc(mt.label)}</span><div class="mB"><div style="width:${Math.round(clamp(mt.v,0,1)*50)*2}%;background:${mt.col}"></div></div></div>`}

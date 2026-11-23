@@ -35,7 +35,7 @@ function updatePlay(dt){
 
 
 /* ================= main loop ================= */
-function sim(dt){if(REALMAP){updateGeoWorld();updateGeoSignals(dt)}updateWorldFX(dt);updateTrain(dt);updateGrenades(dt);updateVehicles(dt);updatePeds(dt);updateGoons(dt);updateFriends(dt);updateRockets(dt);updateFx(dt)}
+function sim(dt){if(REALMAP){updateGeoWorld();updateGeoSignals(dt);updateGPS(dt)}updateWorldFX(dt);updateTrain(dt);updateGrenades(dt);updateVehicles(dt);updatePeds(dt);updateGoons(dt);updateFriends(dt);updateRockets(dt);updateFx(dt)}
 function update(dt){dt*=slowMo();if(wheelOpen){if(wheelMode==='scroll'&&performance.now()>wheelT)closeWheel(true);dt*=0.3}time+=dt;hornCD-=dt;player.tankCD-=dt;
   if(!player.dead){lookKeys(dt);if(!player.vehicle)updateFoot(dt);else if(mouseL&&player.vehicle.type==='tank')fire();
     if(time-player.lastDmg>6&&player.hp<100)player.hp=Math.min(100,player.hp+4*dt)}
@@ -77,9 +77,9 @@ function init(){buildWheel();setupTouch();if(REALMAP){initGeo();return}buildWorl
   initPlay();$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');
   requestAnimationFrame(loop)}
 /* real-geography pilot (step G2): world, sky, player and a car to drive; traffic, people, gangs and missions follow in G4-G6 */
-function initGeo(){initGeoWorld();initGeoNav();buildSky();buildRain();
+function initGeo(){initGeoWorld();initGeoNav();initGeoPois();$('bigmap').querySelector('.k').textContent='Click the map to set a GPS destination (click it again to clear) · + hospital · P police · B bus stand · press M to close';buildSky();buildRain();
   player.human=makeHuman({shirt:'#2a9d8f',pants:'#22223b',skin:'#8d5524',gun:true});player.human.g.position.copy(player.pos);setGun();
   initPlay();GW.starters.push(spawnVehicle('car',player.pos.x+4,player.pos.z+3,0,'#b3202a'),spawnVehicle('bike',player.pos.x+7,player.pos.z+3,0));
-  toast('REAL COIMBATORE · PILOT','Test build: no missions or GPS yet',6);$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');requestAnimationFrame(loop)}
+  toast('REAL COIMBATORE · PILOT','Test build: no missions yet · M = map and GPS',6);$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');requestAnimationFrame(loop)}
 setTimeout(()=>{try{const t0=performance.now();init();window.__initMs=performance.now()-t0}catch(e){console.error(e);$('loading').textContent='Something went wrong while building the city: '+e.message}},30);
 window.__game={step:(dt,n)=>{for(let i=0;i<(n||1);i++)update(dt)},storyAuto:()=>{const m=mission;if(m&&m.stages){const s=m.stages[m.stage];if(s&&s.auto)s.auto(m)}},cineSkip,get cineHold(){return cineHold},a2Epilogue:startEpilogue,damageGoon,setTod:v=>{tod=v},STORY,saveApi:{parseSave,sanitizeSave,saveSum,SAVE_VERSION,get blocked(){return saveBlocked},get notice(){return saveNotice}},abortMission:()=>{if(mission)missionFail('test')},markerPos:()=>marker.visible?marker.position.clone():null,PROG,startStory,startRampage,RAMPAGES,saveGame,loadGame,toggleCrouch,get heli(){return heli},get respect(){return respectLv()},set rep(v){rep=v},get paused(){return paused},GHAT:()=>GHAT,spawnVehicle,FALLS:()=>FALLS,train,setRain:v=>{rainF=v;rainOn=v>0.5},exitV:()=>exitVehicle(),get tod(){return tod},openWheel:m=>openWheel(m),renderer,raycastAll,camera,player,vehicles,goons,peds,FRIENDS,CHEATS,get mission(){return mission},get offers(){return offers},get wanted(){return wanted},set wanted(v){wanted=v},enterVehicle,startMission,K,setCam:(y,p)=>{camYaw=y;camPitch=p},openTalk,chooseTalk,get talk(){return talk},buyItem};

@@ -117,7 +117,8 @@ function geoRoadName(x,z){const S=GW.index?GW.index.size_m:1000,d=GW.data.get(Ma
 const GW_MS=0.25;
 function geoMinimapBase(){const R=GW.index.rect;MX0=R[0]-200;MZ0=R[1]-200;MX1=R[2]+200;MZ1=R[3]+200;OMS=GW_MS;
   offMap=document.createElement('canvas');offMap.width=Math.ceil((MX1-MX0)*GW_MS);offMap.height=Math.ceil((MZ1-MZ0)*GW_MS);const o=offMap.getContext('2d');o.fillStyle='#b9b39a';o.fillRect(0,0,offMap.width,offMap.height);
-  GW.mapReady=true;for(const d of GW.data.values())gwMapChunk(d)}
+  GW.mapReady=true;for(const d of GW.data.values())gwMapChunk(d);
+  Promise.all(['landuse','water','roads'].map(n=>fetch('geodata/processed/pilot/'+n+'.json').then(r=>r.json()))).then(([lu,wa,rd])=>gwMapChunk({landuse:lu.landuse,water:wa.water,roads:rd.roads})).catch(()=>{})}/* G5: whole pilot on the map from the start; buildings fill in by chunk */
 function gwMapChunk(d){if(!GW.mapReady)return;const o=offMap.getContext('2d'),X=v=>(v-MX0)*GW_MS,Z=v=>(v-MZ0)*GW_MS;
   const poly=(r,c)=>{o.fillStyle=c;o.beginPath();r.forEach((q,k)=>k?o.lineTo(X(q[0]),Z(q[1])):o.moveTo(X(q[0]),Z(q[1])));o.closePath();o.fill()};
   for(const a of d.landuse||[])poly(a.pts,GW_LAND[a.kind]||'#b3aa8e');for(const w of d.water||[])poly(w.pts,'#4f93c4');
