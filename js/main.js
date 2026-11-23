@@ -14,7 +14,7 @@ function initPlay(){
   for(const r of RAMPAGES){r.sp=iconSprite('skull',r.x,1.6,r.z,1.5)}
   const loaded=loadGame();
   const rg=(()=>{const B=GB();gb(B,CY(0.38,0.38,0.08,20),0,0,0,'#e8b923',Math.PI/2,0,0);for(let k=0;k<5;k++){const a=k/5*Math.PI*2;gb(B,CY(0.08,0.08,0.1,10),Math.cos(a)*0.2,Math.sin(a)*0.2,0,'#3a2a10',Math.PI/2,0,0)}gb(B,CY(0.06,0.06,0.12,8),0,0,0,'#111',Math.PI/2,0,0);return gbGeo(B)})();
-  REELS.forEach((e,id)=>{let x,z,hi=0;if(e[0]==='hill'){x=GHAT_TOP.x-12;z=GHAT_TOP.z+4}else if(e[0]==='falls'){const p=PLACES.find(q=>q.n==='the hill falls')||{x:-700,z:110};x=p.x;z=p.z}else{x=e[0];z=e[1];hi=e[2]}
+  if(!REALMAP)REELS.forEach((e,id)=>{/* film reels get real-street spots in step G6 */let x,z,hi=0;if(e[0]==='hill'){x=GHAT_TOP.x-12;z=GHAT_TOP.z+4}else if(e[0]==='falls'){const p=PLACES.find(q=>q.n==='the hill falls')||{x:-700,z:110};x=p.x;z=p.z}else{x=e[0];z=e[1];hi=e[2]}
     const y=surfaceH(x,z,hi?99:0)+0.9;const m=new THREE.Mesh(rg,VCB);m.position.set(x,y,z);scene.add(m);reelObjs.push({id,x,z,y,m,got:PROG.reels.includes(id)});if(PROG.reels.includes(id))m.visible=false});
   setOutfit(PROG.outfit||0);
   if(loaded){if(PROG.house){player.pos.set(HOUSE.px,0,HOUSE.pz-3);camYaw=Math.PI;player.yaw=Math.PI}spawnGarage();
@@ -35,7 +35,7 @@ function updatePlay(dt){
 
 
 /* ================= main loop ================= */
-function sim(dt){updateWorldFX(dt);updateTrain(dt);updateGrenades(dt);updateVehicles(dt);updatePeds(dt);updateGoons(dt);updateFriends(dt);updateRockets(dt);updateFx(dt)}
+function sim(dt){if(REALMAP)updateGeoWorld();updateWorldFX(dt);updateTrain(dt);updateGrenades(dt);updateVehicles(dt);updatePeds(dt);updateGoons(dt);updateFriends(dt);updateRockets(dt);updateFx(dt)}
 function update(dt){dt*=slowMo();if(wheelOpen){if(wheelMode==='scroll'&&performance.now()>wheelT)closeWheel(true);dt*=0.3}time+=dt;hornCD-=dt;player.tankCD-=dt;
   if(!player.dead){lookKeys(dt);if(!player.vehicle)updateFoot(dt);else if(mouseL&&player.vehicle.type==='tank')fire();
     if(time-player.lastDmg>6&&player.hp<100)player.hp=Math.min(100,player.hp+4*dt)}
@@ -54,7 +54,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,Math.max(0
   renderer.render(scene,camera)}
 
 /* ================= init ================= */
-function init(){buildWheel();setupTouch();buildWorld();buildTrees();spawnWanderers();
+function init(){buildWheel();setupTouch();if(REALMAP){initGeo();return}buildWorld();buildTrees();spawnWanderers();
   for(const p of PARKED){const v=spawnVehicle(p.type,p.x,p.z,p.h);v.keep=true}
   spawnVehicle('rowboat',-111,240,0);spawnVehicle('cruiser',-44,-154.4,Math.PI/2);spawnVehicle('cycle',-48,-154.6,Math.PI/2);spawnVehicle('suv',BC(5)+20,BC(2)+31,-Math.PI/2);buildSky();buildLamps();buildTrain();buildRain();buildMinimapBase();
   for(const st of STALLS){const h=makeHuman({shirt:rpick(['#f4f1e8','#8ecae6','#ffd166']),pants:'#f4f1e8',skin:rpick(SKIN)});h.g.position.set(st.cx,0.16,st.cz-st.fz*0.85);h.g.rotation.y=st.fz>0?0:Math.PI;h.armR.rotation.x=-0.8}
@@ -76,5 +76,10 @@ function init(){buildWheel();setupTouch();buildWorld();buildTrees();spawnWandere
   for(const sp of gangSpots)spawnGang(sp);
   initPlay();$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');
   requestAnimationFrame(loop)}
+/* real-geography pilot (step G2): world, sky, player and a car to drive; traffic, people, gangs and missions follow in G4-G6 */
+function initGeo(){initGeoWorld();buildSky();buildRain();
+  player.human=makeHuman({shirt:'#2a9d8f',pants:'#22223b',skin:'#8d5524',gun:true});player.human.g.position.copy(player.pos);setGun();
+  initPlay();GW.starters.push(spawnVehicle('car',player.pos.x+4,player.pos.z+3,0,'#b3202a'),spawnVehicle('bike',player.pos.x+7,player.pos.z+3,0));
+  toast('REAL COIMBATORE · PILOT','Test build: no traffic or missions yet',6);$('loading').classList.add('hidden');$('playBtn').classList.remove('hidden');requestAnimationFrame(loop)}
 setTimeout(()=>{try{const t0=performance.now();init();window.__initMs=performance.now()-t0}catch(e){console.error(e);$('loading').textContent='Something went wrong while building the city: '+e.message}},30);
 window.__game={step:(dt,n)=>{for(let i=0;i<(n||1);i++)update(dt)},storyAuto:()=>{const m=mission;if(m&&m.stages){const s=m.stages[m.stage];if(s&&s.auto)s.auto(m)}},cineSkip,get cineHold(){return cineHold},a2Epilogue:startEpilogue,damageGoon,setTod:v=>{tod=v},STORY,saveApi:{parseSave,sanitizeSave,saveSum,SAVE_VERSION,get blocked(){return saveBlocked},get notice(){return saveNotice}},abortMission:()=>{if(mission)missionFail('test')},markerPos:()=>marker.visible?marker.position.clone():null,PROG,startStory,startRampage,RAMPAGES,saveGame,loadGame,toggleCrouch,get heli(){return heli},get respect(){return respectLv()},set rep(v){rep=v},get paused(){return paused},GHAT:()=>GHAT,spawnVehicle,FALLS:()=>FALLS,train,setRain:v=>{rainF=v;rainOn=v>0.5},exitV:()=>exitVehicle(),get tod(){return tod},openWheel:m=>openWheel(m),renderer,raycastAll,camera,player,vehicles,goons,peds,FRIENDS,CHEATS,get mission(){return mission},get offers(){return offers},get wanted(){return wanted},set wanted(v){wanted=v},enterVehicle,startMission,K,setCam:(y,p)=>{camYaw=y;camPitch=p},openTalk,chooseTalk,get talk(){return talk},buyItem};

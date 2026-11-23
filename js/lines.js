@@ -57,8 +57,8 @@ const DIALOGUE={
  "a1_m4_end": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "வேலு கதை முடிஞ்சது! அவங்க கடைசி துப்பாக்கிகள் கடல் வழியா வருது. கடற்கரை ரோடு இப்போ உனக்கு திறந்திருக்கு.",
-  "en": "Velu is finished! Their last guns come by sea. The coast road is open to you now.",
+  "ta": "வேலு கதை முடிஞ்சது! அவங்க கடைசி துப்பாக்கிகள் நீர்த்தேக்கம் வழியா படகுல வருது. நீர்த்தேக்க ரோடு இப்போ உனக்கு திறந்திருக்கு.",
+  "en": "Velu is finished! Their last guns come across the reservoir by boat. The reservoir road is open to you now.",
   "mood": "pleased",
   "whoTa": "பரமசிவம் அண்ணா"
  },
@@ -417,8 +417,8 @@ const DIALOGUE={
  "m14_run": {
   "spk": "player",
   "who": "YOU",
-  "ta": "அவன் தப்பிக்கிறான். கடற்கரை பக்கம் போறான்!",
-  "en": "He's getting away. He's heading for the coast!",
+  "ta": "அவன் தப்பிக்கிறான். நீர்த்தேக்கம் பக்கம் போறான்!",
+  "en": "He's getting away. He's heading for the reservoir!",
   "mood": "urgent",
   "whoTa": "நீ"
  },
@@ -569,8 +569,8 @@ const DIALOGUE={
  "intro_5": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "சுந்தரத்தோட கடைசி சரக்கு கோவை கடற்கரை ஜெட்டிக்கு ஸ்பீட்போட்டுல வருது. அதை நிறுத்து.",
-  "en": "Sundaram's last shipment arrives by speedboat at the jetty on Kovai Coast. Stop it.",
+  "ta": "சுந்தரத்தோட கடைசி சரக்கு கோவை நீர்த்தேக்க ஜெட்டிக்கு ஸ்பீட்போட்டுல வருது. அதை நிறுத்து.",
+  "en": "Sundaram's last shipment arrives by speedboat at the jetty on Kovai Reservoir. Stop it.",
   "mood": "warm",
   "whoTa": "பரமசிவம் அண்ணா"
  },

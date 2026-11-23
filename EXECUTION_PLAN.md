@@ -106,6 +106,8 @@ Phases are kept small, so each one is a single focused change followed by one co
 
 ## Phase D: Coimbatore city map, then population and traffic (TODO §12)
 
+> **Superseded (2026-11-23):** the grid city is being replaced by real Coimbatore geography at 1:1, starting with a 6 × 6 km pilot. Steps D6–D8 below are replaced by the G0–G8 plan in `geodata/README.md`. D1–D5 stay in the game until step G7 removes the grid world.
+
 **Goal:** a map that people from Coimbatore recognise, then a busier city on top of it.
 
 **Your decisions (settled):**
@@ -130,8 +132,8 @@ Phases are kept small, so each one is a single focused change followed by one co
 | D1 ✓ | `tools/map/`: a landmark registry (name, latitude/longitude, category) and one `geoToGame()` transform. A report compares real positions with today's game positions. Uses OpenStreetMap coordinates, downloaded once (ODbL, attribution added to the credits and README). | Report lists every landmark with its real direction and distance from Town Hall, and whether the game position matches |
 | D2 ✓ (needs your playtest) | Grow the grid to 20 × 20. The current city stays in the middle with unchanged coordinates. Ghats, reservoir and edge features move outward with the map edge, and mission coordinates in those areas shift by the same amount. | All Act 1 and Act 2 regression tests pass; saves load; minimap covers the new area |
 | D3 ✓ (needs your playtest; Podanur Junction stays on the south line) | Place districts and landmarks from the registry: bus stands, Town Hall, Koniamman Temple, the railway junction, the lakes (Valankulam, Ukkadam/Periyakulam, Singanallur), Race Course, VOC Park, Lakshmi Mills, Hope College, the airport edge, and Marudhamalai temple in the hills. New blocks get district-specific buildings. | Each landmark is within one block of its registry position; missions near moved landmarks still complete |
-| D4 | Arterial roads as angled, named roads joining the grid at the real junctions: Avinashi, Trichy, Mettupalayam, Sathy, Palakkad and Pollachi Roads. Cross Cut Road, DB Road, Race Course Road and 100 Feet Road become named grid streets. The flyover becomes the Avinashi Road flyover. | Cars drive each arterial end to end without getting stuck; flyover and underpass tests pass |
-| D5 | The coast becomes the reservoir: water, a jetty, and the hill road. Missions 5 and 14 are reworded. | Missions 5 and 14 complete; nothing still refers to a beach or the sea |
+| D4 ✓ (needs your playtest; AI traffic still drives only on the grid, so the angled stretches carry no traffic until D6/D7) | Arterial roads as angled, named roads joining the grid at the real junctions: Avinashi, Trichy, Mettupalayam, Sathy, Palakkad and Pollachi Roads. Cross Cut Road, DB Road, Race Course Road and 100 Feet Road become named grid streets. The flyover becomes the Avinashi Road flyover. | Cars drive each arterial end to end without getting stuck; flyover and underpass tests pass |
+| D5 ✓ (needs your playtest and 3 voice lines regenerated) | The coast becomes the reservoir: water, a jetty, and the hill road. Missions 5 and 14 are reworded. | Missions 5 and 14 complete; nothing still refers to a beach or the sea |
 | D6 | Road graph and GPS: a navigation graph built from the grid and the arterials, a route line on the minimap, distance to the destination, and landmark, shop and police markers. | GPS route avoids buildings between any two districts |
 | D7 | Population and traffic (the original Phase D scope below): density by district, local vehicle mix (town buses, autos, two-wheelers), parked cars, traffic signals at the named junctions. | Counts differ by district; frame time within 10% of the baseline |
 | D8 | Validation report: landmark and junction positions against the registry, connectivity, frame rate in dense and hill areas, and a list of what still needs manual checking. | Report written; open items listed |

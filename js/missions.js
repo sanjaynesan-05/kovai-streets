@@ -21,7 +21,7 @@ function roadPoint(nx,nz,minD,maxD){let p=null;for(let t=0;t<300;t++){const i=RI
 const r50=n=>Math.round(n/50)*50;
 function addOffer(){const pool=Object.keys(JOBT).filter(t=>!offers.some(o=>o.type===t)&&respectLv()>=(JOB_LV[t]||1));const t=rpick(pool);const P=playerP();
   let A;for(let k=0;k<10;k++){A=roadPoint(P.x,P.z,70,360);if(!offers.some(o=>Math.hypot(o.x-A.x,o.z-A.z)<60))break}offers.push({type:t,x:A.x,z:A.z,born:time})}
-function updateOffers(dt){
+function updateOffers(dt){if(REALMAP)return;/* job offers need real-street positions (step G6) */
   if(mission){offerBeams.forEach(b=>b.visible=false);return}
   if(offers.length<3){offerT-=dt;if(offerT<=0){offerT=0.5;addOffer()}}
   offerBeams.forEach((b,i)=>{const o=offers[i];b.visible=!!o;if(o){b.position.set(o.x,groundH(o.x,o.z),o.z);b.material.color.set(JOBT[o.type].c)}});
@@ -93,8 +93,8 @@ const STORY=[
    make:()=>[stTalk('a1_m3_go'),stKill(330,111,5,'Defend the Singanallur mill',{rx:16,rz:3,aggro:true,waves:1,timer:240}),stTalk('a1_m3_end')]},
   {title:'Ghat Road Deal',reward:5000,intro:'Vettu Velu is meeting gun runners at the hilltop viewpoint. Without those guns, Sundaram is weak.',
    make:()=>[stGo(GHAT_TOP.x,GHAT_TOP.z,'Drive up the ghat road to the hilltop viewpoint',{r:40}),stBoss(GHAT_TOP.x+6,GHAT_TOP.z+4,'Vettu Velu',4,900,'Sundaram\'s right-hand man'),stTalk('a1_m4_end')]},
-  {title:'The Jetty Shipment',reward:6000,intro:'Sundaram\'s last shipment arrives by speedboat at the jetty on Kovai Coast. Stop it.',
-   make:()=>[stGo(ox(650),200,'Go to the jetty on Kovai Coast',{r:14}),stKill(ox(725),200,4,'Take out the smugglers on the jetty',{rx:24,rz:1.4}),
+  {title:'The Jetty Shipment',reward:6000,intro:'Sundaram\'s last shipment arrives by speedboat at the jetty on Kovai Reservoir. Stop it.',
+   make:()=>[stGo(ox(650),200,'Go to the jetty on Kovai Reservoir',{r:14}),stKill(ox(725),200,4,'Take out the smugglers on the jetty',{rx:24,rz:1.4}),
      stWreck(scorpionBoat,'Sink the smugglers\' speedboat (take a boat, or shoot it from the jetty)',{far:700,tick:(v,dt)=>{if(v!==player.vehicle){v.heading+=0.35*dt;v.speed=13}}}),
      stTalk('a1_m5_end')]},
   {title:'Silk Sundaram',reward:25000,intro:'This is it. Sundaram and every Scorpion left are holed up in the old Kovai Mills. End it tonight.',

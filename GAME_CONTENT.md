@@ -34,7 +34,7 @@ The game is set in a stylised version of **Coimbatore (Kovai)**, Tamil Nadu. The
 
 - **The foothills** (Marudhamalai and Velliangiri): the temple and the hill statue.
 - **The Western Ghats** (west): a winding ghat road, a hill village, a waterfall and a hilltop viewpoint. *Locked at the start.*
-- **Kovai Coast** (east): a made-up beach, a jetty, boats and a lighthouse. Coimbatore has no real coastline. *Locked at the start.*
+- **Kovai Reservoir** (east): a made-up reservoir with grassy banks, a jetty, boats and a watchtower, with hills on the far shore. It is fictional; Coimbatore's real reservoirs are in the west. *Locked at the start.*
 
 The game's central theme is Kovai's **textile mills**. Its story is about a gang trying to take them over.
 
@@ -69,7 +69,7 @@ The game's central theme is Kovai's **textile mills**. Its story is about a gang
 - If you fail (timer runs out, the target escapes or you get knocked out), the mission ends. Talk to Paramasivam again to retry.
 - Mission progress is not saved partway through. Finished missions are saved.
 
-**Total story rewards:** ₹45,000 cash, +12 Respect, full armour at the end, and access to the Western Ghats and Kovai Coast.
+**Total story rewards:** ₹45,000 cash, +12 Respect, full armour at the end, and access to the Western Ghats and Kovai Reservoir.
 
 ---
 
@@ -119,17 +119,17 @@ The game's central theme is Kovai's **textile mills**. Its story is about a gang
 
 1. **Drive up the ghat road to the hilltop viewpoint.** It's a long hairpin climb from the west edge of the city. A jeep is parked at the top if you need a ride back.
 2. **Boss: Vettu Velu**, "Sundaram's right-hand man". He wears a gold shirt, carries a rifle and has **900 health**, guarded by **4 Scorpions** with SMGs and rifles.
-3. Paramasivam: *"Velu is finished! Their last guns come by sea. The coast road is open to you now."*
+3. Paramasivam: *"Velu is finished! Their last guns come across the reservoir by boat. The reservoir road is open to you now."*
 
-**Outcome:** **Kovai Coast unlocks.** Like every boss, Velu drops a rocket launcher and a large cash bundle (₹1,500–2,500).
+**Outcome:** **Kovai Reservoir unlocks.** Like every boss, Velu drops a rocket launcher and a large cash bundle (₹1,500–2,500).
 
 ---
 
 ### Mission 5: The Jetty Shipment (₹6,000)
 
-**Brief:** *"Sundaram's last shipment arrives by speedboat at the jetty on Kovai Coast. Stop it."*
+**Brief:** *"Sundaram's last shipment arrives by speedboat at the jetty on Kovai Reservoir. Stop it."*
 
-1. **Go to the jetty on Kovai Coast.**
+1. **Go to the jetty on Kovai Reservoir.**
 2. **Take out the smugglers on the jetty:** 4 armed gang members spread along the wooden pier.
 3. **Sink the smugglers' speedboat.** It circles in deep water off the end of the jetty and has 600 health. Either:
    - shoot it from the end of the jetty (a sniper rifle or rocket launcher helps), or
@@ -250,11 +250,11 @@ Five **yellow ramps** with black edges sit on open roads outside the city where 
 
 | # | Location |
 |---|---|
-| 1 | East main road, beyond the city towards the coast road |
+| 1 | East main road, beyond the city towards the reservoir road |
 | 2 | West main road, towards the Ghats forest checkpoint |
 | 3 | North road, past Saravanampatti |
 | 4 | South road, past the railway line |
-| 5 | Kovai Coast beach, running along the sand *(needs the coast unlocked)* |
+| 5 | Kovai Reservoir bank *(needs the reservoir unlocked)* |
 
 - **Counts as a stunt jump:** at least 0.8 s in the air and more than 14 m travelled. The game shows the distance and air time.
 - **Rewards:** ₹1,000 the first time for each ramp ("UNIQUE STUNT JUMP!"), ₹150 for repeats, and a **₹10,000 bonus** for all 5.
@@ -278,9 +278,9 @@ Five **yellow ramps** with black edges sit on open roads outside the city where 
 | 8 | In front of the hill statue | Velliangiri foothills |
 | 9 | Hilltop viewpoint, by the small shrine | *Needs the Ghats unlocked* |
 | 10 | The waterfall on the ghat road | *Needs the Ghats unlocked* |
-| 11 | Base of the lighthouse | *Needs the coast unlocked* |
-| 12 | End of the jetty | *Needs the coast unlocked* |
-| 13 | Beside the beach lifeguard tower | *Needs the coast unlocked* |
+| 11 | Base of the watchtower | *Needs the reservoir unlocked* |
+| 12 | End of the jetty | *Needs the reservoir unlocked* |
+| 13 | Beside the reservoir lifeguard tower | *Needs the reservoir unlocked* |
 | 14 | Centre of the Kovai Stadium field | |
 | 15 | College campus courtyard | |
 | 16 | Between the stalls at Kovai Market | |
@@ -301,7 +301,7 @@ Five **yellow ramps** with black edges sit on open roads outside the city where 
 | 100% reward | Gives you her **Kovai Racer** sports car | **Free armour vest** every time you ask |
 
 **What you can do (press T near them):**
-- **Let's hang out:** she picks a place at least 150 m from her home, such as the beach, lighthouse, jetty, hilltop viewpoint, waterfall, temple gate, lakes, Town Hall clock tower, bus stand, R.S. Puram park, Kovai Market, college, stadium, station, mall or hill statue. Places in locked areas aren't picked. Take her there for **+12 friendship**.
+- **Let's hang out:** she picks a place at least 150 m from her home, such as the reservoir bank, watchtower, jetty, hilltop viewpoint, waterfall, temple gate, lakes, Town Hall clock tower, bus stand, R.S. Puram park, Kovai Market, college, stadium, station, mall or hill statue. Places in locked areas aren't picked. Take her there for **+12 friendship**.
 - **Gift jasmine flowers (₹100):** +6 friendship, once every 45 seconds.
 - **Watch my back** (30%+ friendship): she follows you with a pistol and shoots gang members and police.
 - **Head home:** sends her back.
@@ -413,10 +413,10 @@ Seven gang hangouts around the city each hold a group of 4 armed goons. Get clos
 |---|---|
 | LV 1 | Delivery, street race, passenger fare and emergency run jobs. Bat, knife, revolver, SMG and armour at the shop |
 | LV 2 | Gang clean-up and getaway chase jobs. Shotgun and grenades. **The Western Ghats** |
-| LV 3 | Gang boss jobs. Assault rifle and sniper rifle. **Kovai Coast** |
+| LV 3 | Gang boss jobs. Assault rifle and sniper rifle. **Kovai Reservoir** |
 | LV 4 | Rocket launcher at the shop |
 
-The **Western Ghats** also open after story mission 3, and **Kovai Coast** after story mission 4, whatever your Respect level. Before then, a checkpoint barrier blocks the way.
+The **Western Ghats** also open after story mission 3, and **Kovai Reservoir** after story mission 4, whatever your Respect level. Before then, a checkpoint barrier blocks the way.
 
 **Saving** is automatic: every 30 seconds, after jobs, purchases and collectibles, and when you pause or close the page. It's stored in the browser on your device. Saved: cash, weapons and ammo, armour, Respect, friendships, story progress, reels, jumps, rampages, the safehouse, garage cars, your outfit and the time of day. The start screen then offers **Continue** or **New game**. The pause menu shows a progress summary and has **Save now** and **Delete save**.
 
@@ -450,7 +450,7 @@ It can be skipped or restarted from the pause menu. Tips also show on the loadin
 | Meena at 100% friendship | 1 | Kovai Racer sports car |
 | Divya at 100% friendship | 1 | Free armour on request |
 | Respect LV 4 | — | Every shop item and job type |
-| Both areas unlocked | 2 | Western Ghats, Kovai Coast |
+| Both areas unlocked | 2 | Western Ghats, Kovai Reservoir |
 
 The pause menu tracks story, reels, jumps, rampages, Respect level and the safehouse.
 

@@ -10,7 +10,7 @@ const SAVE_KEY='kovaiSave1';
 const PROG={story:0,reels:[],jumps:[],ramp:[],house:false,garage:[],outfit:0,tut:0,lastLv:1};
 const respectLv=()=>1+Math.floor(rep/3);
 const JOB_LV={deliver:1,race:1,fare:1,amb:1,gang:2,chase:2,boss:3};
-const AREA={hills:{lv:2,story:3,name:'The Western Ghats'},coast:{lv:3,story:4,name:'Kovai Coast'}};
+const AREA={hills:{lv:2,story:3,name:'The Western Ghats'},coast:{lv:3,story:4,name:'Kovai Reservoir'}};
 const areaOpen=k=>respectLv()>=AREA[k].lv||PROG.story>=AREA[k].story;
 const placeOpen=x=>(x>ox(-552)||areaOpen('hills'))&&(x<ox(590)||areaOpen('coast'));
 function lvUnlocks(lv){const a=[];for(const it of SHOPITEMS)if(it.lv===lv)a.push(it.armor?'armour':WEAPONS[WI(it.w)].name.toLowerCase());
@@ -116,8 +116,8 @@ function buildGates(){for(const k in GATES){const G=GATES[k],x=G.x,s=k==='hills'
   const g=new THREE.Group();const box=(w,h,d,c,px,py,pz)=>{const m=new THREE.Mesh(GEO.box,M(c));m.scale.set(w,h,d);m.position.set(px,py,pz);m.castShadow=true;g.add(m)};
   box(0.5,1.2,0.5,'#dddddd',x,0.6,-7.5);box(0.5,1.2,0.5,'#dddddd',x,0.6,7.5);for(let i=0;i<8;i++)box(0.25,0.25,1.85,i%2?'#ffffff':'#e63946',x,1.1,-6.5+i*1.85);
   box(2.4,2.6,2.4,k==='hills'?'#3f5130':'#1d3557',x+s*2.5,1.3,-10.5);box(2.8,0.2,2.8,'#c1121f',x+s*2.5,2.7,-10.5);
-  const sg=textPlane(k==='hills'?'FOREST CHECKPOINT · RESPECT LV 2':'COAST ROAD CLOSED · RESPECT LV 3',9,1.1,'#f2d13a','#111');sg.position.set(x+s*0.3,3.2,0);sg.rotation.y=s*Math.PI/2;g.add(sg);scene.add(g);G.grp=g}}
+  const sg=textPlane(k==='hills'?'FOREST CHECKPOINT · RESPECT LV 2':'RESERVOIR ROAD CLOSED · RESPECT LV 3',9,1.1,'#f2d13a','#111');sg.position.set(x+s*0.3,3.2,0);sg.rotation.y=s*Math.PI/2;g.add(sg);scene.add(g);G.grp=g}}
 function openGate(k,announce){const G=GATES[k];if(G.open)return;G.open=true;for(const b of G.cols){b.h=-100;b.y0=-200}if(G.grp)G.grp.visible=false;if(announce)toast('NEW AREA OPEN',AREA[k].name+' is now open to explore',3.5)}
 function updateGates(dt){for(const k in GATES){const G=GATES[k];if(!G.open&&areaOpen(k))openGate(k,true);if(G.open)continue;G.msgT-=dt;const P=playerP();
-  if(Math.abs(P.x-G.x)<9&&G.msgT<=0){G.msgT=4;floatMsg(k==='hills'?'Forest checkpoint: closed until Respect LV 2 or story mission 3':'Coast road: closed until Respect LV 3 or story mission 4')}}}
+  if(Math.abs(P.x-G.x)<9&&G.msgT<=0){G.msgT=4;floatMsg(k==='hills'?'Forest checkpoint: closed until Respect LV 2 or story mission 3':'Reservoir road: closed until Respect LV 3 or story mission 4')}}}
 function buildPlayExtras(){buildSafehouse();buildRamps();buildGates();buildAct2World()}

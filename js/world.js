@@ -35,9 +35,9 @@ function buildWorld(){
   // outskirts: coconut groves + farmhouses
   for(let n=0;n<420;n++){const a=rng()*Math.PI*2;let x,z;
     x=R(-BOUND+8,BOUND-8);z=R(-BOUND+8,BOUND-8);if(Math.abs(x)<LIM+16&&Math.abs(z)<LIM+16)continue;if(Math.abs(x)<12||Math.abs(z)<12||excluded(x,z))continue;palm(x,z)}
-  for(let n=0;n<40;n++){let x=R(-BOUND+20,BOUND-20),z=R(-BOUND+20,BOUND-20);if(Math.abs(x)<LIM+24&&Math.abs(z)<LIM+24)continue;if(Math.abs(x)<20||Math.abs(z)<20||excluded(x,z))continue;
+  for(let n=0;n<40;n++){let x=R(-BOUND+20,BOUND-20),z=R(-BOUND+20,BOUND-20);if(Math.abs(x)<LIM+24&&Math.abs(z)<LIM+24)continue;if(Math.abs(x)<20||Math.abs(z)<20||excluded(x,z)||onNewRoad(x+4,z,12))continue;/* D4: farmhouse + shed clear of new roads */
     building(x,z,R(7,12),R(7,11),R(3.5,6.5),pick(PAL),{noSign:true});if(rng()<0.5)addBox(B_PLAIN,4,3,4,x+8,1.5,z,'#a0522d')}
-  // boundary (west: top of the Ghats, east: open sea)
+  // boundary (west: top of the Ghats, east: beyond the reservoir)
   addCollider(-1190-GX,-BOUND-6,1020+GX,-BOUND,400,-50);addCollider(-1190-GX,BOUND,1020+GX,BOUND+6,400,-50);
   addCollider(-1190-GX,-BOUND,-1176-GX,BOUND,400,-50);addCollider(1010+GX,-BOUND,1020+GX,BOUND,400,-50);
   // mountains (Western Ghats to the west and north-west)
@@ -125,7 +125,7 @@ function buildPalms(){const n=palms.length;const tg=new THREE.CylinderGeometry(0
 
 
 /* ================= new buildings ================= */
-function building(x,z,w,d,h,color,opts){opts=opts||{};
+function building(x,z,w,d,h,color,opts){opts=opts||{};if(!opts.keep&&onNewRoad(x+BO.x,z+BO.z,Math.max(w,d)/2+1))return;/* D4: keep buildings off the new roads */
   const style=opts.style!==undefined?opts.style:(h>34?2:rng()<0.22?1:rng()<0.3?3:0);const B=B_FAC[style];
   const shop=!opts.noSign&&!opts.noShop&&h>=7&&h<44;
   if(shop){addG(B_SHOP,shopGeo(w,d),x,1.8,z,'#ffffff');addG(B,buildingGeo(w,h-3.6,d),x,3.6+(h-3.6)/2,z,color);addBox(B_PLAIN,w+0.5,0.28,d+0.5,x,3.72,z,shade(color,0.82));
@@ -200,12 +200,12 @@ function buildTrees(){const n=TREES.length;if(!n)return;const tr=new THREE.Insta
     o.position.set(x,y+2.4*s,z);o.scale.set(3*s,6*s,3*s);o.updateMatrix();f1.setMatrixAt(i,o.matrix);o.position.set(x,y+5.4*s,z);o.scale.set(2.1*s,4.5*s,2.1*s);o.updateMatrix();f2.setMatrixAt(i,o.matrix)});
   for(const m of[tr,f1,f2]){m.frustumCulled=false;m.castShadow=QS.shadow>0;scene.add(m)}}
 
-/* ================= coast, sea, water ================= */
+/* ================= Kovai Reservoir (fictional; D5 turned the old coast into a reservoir with hills on the far shore), water ================= */
 const SHORE0=684,SHORE=SHORE0+GX;/* SHORE0: pre-D2 coordinates used inside coastH and buildCoast */
 function coastH(x,z){x-=GX;if(x<598)return 0;let h;if(x<622)h=0.12;else if(x<SHORE0){const t=(SHORE0-x)/(SHORE0-622);h=0.12*t+(vnoise(x*0.08,z*0.05)-0.5)*0.5*t*t}else h=-(x-SHORE0)*0.075-0.02;
   const dl=Math.hypot(x-700,z+420);if(dl<46)h=Math.max(h,7.5*(1-dl/46)*(1-dl/46)*1.4);return Math.max(-9,h)}
 const waterU={time:{value:0},sunDir:{value:new THREE.Vector3(0,1,0)},sunCol:{value:new THREE.Color(1,1,1)},skyCol:{value:new THREE.Color('#9cc6e6')},fogCol:{value:new THREE.Color()},fogNear:{value:200},fogFar:{value:1500},dayF:{value:1}};
-const WV=[[-0.97,0.24,0.09,1.1,0.32],[-0.76,-0.65,0.17,1.7,0.14],[0.29,0.96,0.33,2.3,0.06]];
+const WV=[[-0.97,0.24,0.09,1.1,0.12],[-0.76,-0.65,0.17,1.7,0.06],[0.29,0.96,0.33,2.3,0.03]];/* D5: calm reservoir water (was sea waves) */
 const WV_GLSL=WV.map((w,i)=>`ph=dot(vec2(${w[0].toFixed(3)},${w[1].toFixed(3)}),p)*${w[2].toFixed(3)}+t*${w[3].toFixed(3)};a+=${w[4].toFixed(3)}*sin(ph);g+=${(w[4]*w[2]).toFixed(4)}*cos(ph)*vec2(${w[0].toFixed(3)},${w[1].toFixed(3)});`).join('');
 function waterMaterial(isLake){return new THREE.ShaderMaterial({transparent:true,uniforms:Object.assign({},waterU,{lake:{value:isLake?1:0}}),
   vertexShader:`uniform float time;uniform float lake;varying vec3 vW;varying vec3 vN;varying float vDepth;
@@ -217,17 +217,16 @@ function waterMaterial(isLake){return new THREE.ShaderMaterial({transparent:true
   vec3 deep=mix(vec3(0.02,0.06,0.1),vec3(0.04,0.25,0.36),dayF);vec3 shal=mix(vec3(0.04,0.1,0.12),vec3(0.16,0.5,0.5),dayF);if(lake>0.5){deep=mix(vec3(0.02,0.06,0.08),vec3(0.12,0.32,0.36),dayF);shal=deep;}
   vec3 col=mix(shal,deep,smoothstep(0.0,6.0,vDepth));col=mix(col,skyCol,fres*0.55);vec3 h=normalize(sunDir+v);col+=sunCol*pow(max(dot(n,h),0.0),140.0)*1.3+sunCol*max(dot(n,sunDir),0.0)*0.07;
   float foam=0.0;if(lake<0.5){float s=vW.x-${SHORE}.0;foam=clamp((1.0-smoothstep(-1.0,8.0,s))*(0.5+0.5*sin(s*1.2-time*2.2+sin(vW.z*0.08)*2.0)),0.0,1.0);}
-  col=mix(col,vec3(0.95),foam*0.8*mix(0.3,1.0,dayF));float alpha=lake>0.5?0.94:mix(0.5,0.95,smoothstep(0.0,3.5,vDepth));alpha=max(alpha,foam*0.9);
+  col=mix(col,vec3(0.95),foam*0.3*mix(0.3,1.0,dayF));float alpha=lake>0.5?0.94:mix(0.5,0.95,smoothstep(0.0,3.5,vDepth));alpha=max(alpha,foam*0.9);
   float fd=length(vW-cameraPosition);col=mix(col,fogCol,smoothstep(fogNear,fogFar,fd));gl_FragColor=vec4(col,alpha);}`})}
 function waveY(x,z){const t=waterU.time.value,depth=clamp((x-SHORE)*0.075,0,9),amp=smooth(0,3,depth)*0.9+0.1;let a=0;for(const w of WV)a+=w[4]*Math.sin((w[0]*x+w[1]*z)*w[2]+t*w[3]);return a*amp}
-function seaDepth(x,z){if(x<SHORE-6)return 0;return Math.max(0,waveY(x,z)-coastH(x,z))}
+function seaDepth(x,z){if(REALMAP||x<SHORE-6)return 0;return Math.max(0,waveY(x,z)-coastH(x,z))}
 function isDeep(x,z){return inLake(x,z)||seaDepth(x,z)>1.35}
 function humanY(x,z,y){if(inLake(x,z))return -1.0;if(x>SHORE-6&&seaDepth(x,z)>1.35)return waveY(x,z)-1.12;return surfaceH(x,z,y)}
-const LH={g:null,beam:null};
 function buildCoast(){shifted(GX,0,buildCoast0)}/* built in pre-D2 coordinates, moved east by GX (D2) */
 function buildCoast0(){const x0=592,x1=1012,res=5,nx=Math.round((x1-x0)/res)+1,z0=-1500,nz=Math.round(3000/6)+1;const pos=[],col=[],uv=[],idx=[];const c=new THREE.Color();
   for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const x=x0+ix*res,z=z0+iz*6,h=coastH(x+GX,z);pos.push(x,h,z);uv.push(x/8,z/8);const n=vnoise(x*0.1,z*0.1);
-    if(Math.hypot(x-700,z+420)<44&&h>1.2)c.set(n>0.5?'#7a756c':'#6a665e');else if(x<604)c.set('#9aa36a');else if(h>0.05)c.set(n>0.5?'#e6d3a0':'#dcc793');else if(h>-0.6)c.set('#c9b07a');else c.set(h>-3?'#b09566':'#8a7650');
+    if(Math.hypot(x-700,z+420)<44&&h>1.2)c.set(n>0.5?'#7a756c':'#6a665e');else if(x<604)c.set('#9aa36a');else if(h>0.05)c.set(n>0.5?'#8c9a5e':'#7d8f4e');else if(h>-0.6)c.set('#8a7a5a');else c.set(h>-3?'#6e6650':'#5a5444');/* D5: grassy and muddy reservoir banks */
     c.multiplyScalar(0.94+n*0.12);col.push(c.r,c.g,c.b);if(ix<nx-1&&iz<nz-1){const a=iz*nx+ix;idx.push(a,a+nx,a+1,a+1,a+nx,a+nx+1)}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
   const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true,map:TX.detail}));m.receiveShadow=true;m.position.x=GX;scene.add(m);
@@ -238,22 +237,21 @@ function buildCoast0(){const x0=592,x1=1012,res=5,nx=Math.round((x1-x0)/res)+1,z
   for(let z=-530;z<=530;z+=18){if(Math.abs(z)<12)continue;palm(594,z+R(-2,2));palm(R(618,626),z+R(-4,4))}
   for(let k=0;k<8;k++){const z=-300+k*80+R(-10,10),x=630,cc=pick(['#e63946','#2a9d8f','#f4a261','#457b9d','#ffb703']);addBox(B_PLAIN,4.4,2.6,3.4,x,1.43,z,cc);addBox(B_PLAIN,3.4,1.0,0.6,x,0.65,z+1.9,'#7a5536');
     addG(B_PLAIN,GEO.cone4,x,3.6,z,'#8d6e3c',Math.PI/4,0,0,3.9,1.8,3.2);addCollider(x-2.2,z-1.7,x+2.2,z+1.7,2.8);WZONES.push({cx:x+4+GX,cz:z+4,rx:3,rz:3,n:1,kind:'beach'})}
-  for(let k=0;k<26;k++){const x=R(640,672),z=R(-420,440);if(Math.abs(z-200)<10)continue;addG(B_PLAIN,GEO.cyl8,x,1.15,z,'#ddd',0,0,0,0.04,2.2,0.04);addG(B_PLAIN,GEO.cone8,x,2.3,z,pick(['#e63946','#1d4ed8','#ffb703','#2a9d8f','#f15bb5']),0,0,0,1.5,0.5,1.5);
-    if(Math.random()<0.7)addBox(B_PLAIN,0.7,0.25,1.8,x+1.2,0.25,z,'#f1faee')}
+  /* D5: beach umbrellas removed */
   for(let k=0;k<6;k++){const x=R(660,676),z=-120+k*40+R(-6,6);for(const s of[-0.45,0.45])addG(B_PLAIN,GEO.cyl8,x+s,0.3,z,'#7a5536',Math.PI/2,0,0,0.22,7,0.22);addG(B_PLAIN,GEO.cyl8,x,1.6,z+1,'#6d4c41',0,0,0,0.06,3,0.06)}
   {const x=652,z=120;for(const sx of[-1,1])for(const sz of[-1,1])addBox(B_PLAIN,0.15,3,0.15,x+sx*1,1.5,z+sz*1,'#f4f4f4');addBox(B_PLAIN,2.4,0.2,2.4,x,3.1,z,'#c1121f');addBox(B_PLAIN,2.6,0.15,2.6,x,4.6,z,'#f4f4f4');addCollider(x-1.2,z-1.2,x+1.2,z+1.2,3.2)}
-  // lighthouse on the headland
-  {const x=700,z=-420,y=coastH(700+GX,-420);addG(B_PLAIN,GEO.cyl16,x,y+2,z,'#cfc6b2',0,0,0,4.2,4,4.2);for(let k=0;k<6;k++)addG(B_PLAIN,CY(1,1,1,16),x,y+4+k*4.5+2.25,z,k%2?'#f4f4f4':'#c1121f',0,0,0,3-k*0.13,4.5,3-k*0.13);
-    addG(B_PLAIN,GEO.cyl16,x,y+31.3,z,'#333',0,0,0,2.9,0.4,2.9);addG(B_PLAIN,GEO.cyl16,x,y+32.8,z,'#fff2b0',0,0,0,1.6,2.6,1.6);addG(B_PLAIN,GEO.cone8,x,y+35,z,'#c1121f',0,0,0,2,1.8,2);addCollider(x-4.2,z-4.2,x+4.2,z+4.2,y+36,-10);
-    LH.g=new THREE.Group();LH.g.position.set(x+GX,y+32.8,z);const bm=new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
-    for(const s of[-1,1]){const b=new THREE.Mesh(new THREE.ConeGeometry(14,220,14,1,true).translate(0,-110,0).rotateZ(s*Math.PI/2),bm);LH.g.add(b)}LH.beam=bm;scene.add(LH.g);PLACES.push({n:'the lighthouse',x:676+GX,z:-400})}
+  // watchtower on the headland (was a lighthouse before D5)
+  {const x=700,z=-420,y=coastH(700+GX,-420);addG(B_PLAIN,GEO.cyl16,x,y+2,z,'#cfc6b2',0,0,0,4.2,4,4.2);for(let k=0;k<6;k++)addG(B_PLAIN,CY(1,1,1,16),x,y+4+k*4.5+2.25,z,k%2?'#d9d2c4':'#b8ad97',0,0,0,3-k*0.13,4.5,3-k*0.13);
+    addG(B_PLAIN,GEO.cyl16,x,y+31.3,z,'#333',0,0,0,2.9,0.4,2.9);addG(B_PLAIN,GEO.cyl16,x,y+32.8,z,'#8fb8c8',0,0,0,1.6,2.6,1.6);addG(B_PLAIN,GEO.cone8,x,y+35,z,'#c1121f',0,0,0,2,1.8,2);addCollider(x-4.2,z-4.2,x+4.2,z+4.2,y+36,-10);
+    PLACES.push({n:'the reservoir watchtower',x:676+GX,z:-400})}/* D5: the lighthouse is now a stone watchtower without a beam */
   // jetty
   {const z=200,y=1.4;addBox(B_PLAIN,120,0.25,5,720,y-0.12,z,'#8b6b4a');for(let x=662;x<=780;x+=6)for(const s of[-2.3,2.3])addG(B_PLAIN,GEO.cyl8,x,(y-6)/2,z+s,'#5d4030',0,0,0,0.18,y+6,0.18);
     for(const s of[-1,1]){addBox(B_PLAIN,120,0.1,0.1,720,y+0.9,z+s*2.45,'#6d4c41');addCollider(660,z+s*2.5-0.15,780,z+s*2.5+0.15,y+1,y-0.3)}
     SURF.push({minX:660+GX,maxX:780+GX,minZ:z-2.5,maxZ:z+2.5,h:()=>y});SURF.push({minX:648+GX,maxX:660+GX,minZ:z-2.5,maxZ:z+2.5,h:x=>Math.max(0.1,y*(x-GX-648)/12)});addG(B_PLAIN,GEO.box,654,y/2,z,'#8b6b4a',0,0,Math.atan2(y,12),12.2,0.2,5);
     PARKED.push({type:'speedboat',x:786+GX,z:z-4,h:Math.PI/2},{type:'speedboat',x:786+GX,z:z+4,h:Math.PI/2},{type:'fishboat',x:770+GX,z:z+12,h:Math.PI/2},{type:'fishboat',x:760+GX,z:z-13,h:Math.PI/2});PLACES.push({n:'the jetty',x:650+GX,z:208})}
-  WZONES.push({cx:650+GX,cz:-60,rx:20,rz:180,n:10,kind:'beach'},{cx:650+GX,cz:260,rx:16,rz:120,n:6,kind:'beach'});PLACES.push({n:'Kovai Coast beach',x:640+GX,z:40});
-  for(let k=0;k<8;k++){const x=R(642,672),z=R(-300,380),yaw=R(0,6);STATICS.push({x:x+GX,z,lie:true,yaw});addBox(B_PLAIN,0.9,0.02,2,x,coastH(x+GX,z)+0.03,z,pick(['#e63946','#ffb703','#8ecae6']),yaw)}}
+  WZONES.push({cx:650+GX,cz:-60,rx:20,rz:180,n:10,kind:'beach'},{cx:650+GX,cz:260,rx:16,rz:120,n:6,kind:'beach'});PLACES.push({n:'the reservoir bank',x:640+GX,z:40});
+  for(let n=0;n<26;n++){const h=R(90,220),r=h*R(1.3,2);addG(B_FAR,GEO.cone7,R(1300,1900),h/2-10,R(-1500,1500),pick(['#58705a','#4c6650','#617a5c']),R(0,6),0,0,r,h,r)}/* D5: hills on the far shore */
+  /* D5: sunbathers removed */}
 
 /* ================= new city places ================= */
 const WZONES=[],STATICS=[],PARKED=[],WANDER=[];
@@ -298,18 +296,18 @@ function teaStallAt(x,z,y,fz){addBox(B_PLAIN,2.6,1.0,1.1,x,y+0.5,z,'#2a9d8f');ad
 const TRACKZ=ox(405),STATUE={x:ox(-480),z:-200},FLY={xa:86,x1:126,x2:300,xb:340,H:7,hw:6.5};
 const FLY_CLEAR=3.6; // clearance (m) under the flyover deck that the tallest vehicles need
 const LAKES=[],SURF=[],STALLS=[],MALLPEOPLE=[],CROSS=[],FLAMES=[];
-function excluded(x,z){if(Math.abs(z-TRACKZ)<16)return true;if(extraExcluded(x,z))return true;if(x>30&&x<190&&z>ox(372)&&z<ox(425))return true;
+function excluded(x,z){if(onNewRoad(x,z,4))return true;if(Math.abs(z-TRACKZ)<16)return true;if(extraExcluded(x,z))return true;if(x>30&&x<190&&z>ox(372)&&z<ox(425))return true;
   if(x>ox(-540)&&x<ox(-420)&&z>-262&&z<-140)return true;if(Math.abs(x-STATUE.x)<6&&z>-200&&z<0)return true;return false}
 function flyH(x){return x<FLY.x1?FLY.H*(x-FLY.xa)/(FLY.x1-FLY.xa):x>FLY.x2?FLY.H*(FLY.xb-x)/(FLY.xb-FLY.x2):FLY.H}
-function surfaceH(x,z,y){let best=groundH(x,z);for(const s of SURF){if(x<s.minX||x>s.maxX||z<s.minZ||z>s.maxZ)continue;const hh=s.h(x,z);if(hh>best&&y>=hh-1.6)best=hh}return best}
-function inLake(x,z){for(const L of LAKES)if(Math.abs(x-L.cx)<27.3&&Math.abs(z-L.cz)<27.3)return true;return false}
+function surfaceH(x,z,y){let best=groundH(x,z);if(REALMAP){const h=geoDeckH(x,z,y);if(h>best)best=h}/* flyover and bridge decks */for(const s of SURF){if(x<s.minX||x>s.maxX||z<s.minZ||z>s.maxZ)continue;const hh=s.h(x,z);if(hh>best&&y>=hh-1.6)best=hh}return best}
+function inLake(x,z){if(REALMAP)return geoInWater(x,z);for(const L of LAKES)if(Math.abs(x-L.cx)<27.3&&Math.abs(z-L.cz)<27.3)return true;return false}
 
 function textPlane(txt,w,h,bg,fg,font){const c=document.createElement('canvas');c.width=512;c.height=Math.round(512*h/w);const g=c.getContext('2d');
   g.fillStyle=bg;g.fillRect(0,0,c.width,c.height);g.fillStyle=fg;g.font=font||`bold ${Math.round(c.height*0.62)}px "Bebas Neue",Impact,sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText(txt,c.width/2,c.height/2+2);
   const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)}));scene.add(m);return m}
 function wallW(x,z,w,d,h,y0,col){y0=y0||0;addG(B_WIN,buildingGeo(w,h,d),x,y0+h/2,z,col);addCollider(x-w/2,z-d/2,x+w/2,z+d/2,y0+h,y0>0?y0:-1)}
 
-function buildExtras(){buildKoniamman();buildStreetSigns();buildFlyover();buildRail();buildStatue();buildTeaStalls();buildPlayExtras()}
+function buildExtras(){buildKoniamman();buildStreetSigns();buildArterials();buildFlyover();buildRail();buildStatue();buildTeaStalls();buildPlayExtras()}
 
 /* --- Avinashi Road style flyover (east, over the main road) --- */
 function buildFlyover(){const{xa,x1,x2,xb,H,hw}=FLY,L=Math.hypot(x1-xa,H),a=Math.atan2(H,x1-xa);
@@ -372,10 +370,18 @@ BUILD.mall=function(cx,cz){const H=16.5,F1=5.5,F2=11,G='#a9cfe0';
   const sign=textPlane('KOVAI CENTRAL',22,3,'#1d3557','#ffd23f');sign.position.set(cx,13.2,cz+21.35);
   PLACES.push({n:'Kovai Central mall',x:cx,z:cz+25})};
 
-/* --- green street-name signs at the start and end of each named road --- */
-function buildStreetSigns(){for(const r of ROADS){const ns=r.x1-r.x0<r.z1-r.z0;for(const e of[0,1]){const x=ns?r.x1+2.2:(e?r.x1-4:r.x0+4),z=ns?(e?r.z1-4:r.z0+4):r.z1+2.2;
-  addG(B_PLAIN,GEO.cyl,x,1.6,z,'#7a7a7a',0,0,0,0.08,3.2,0.08);addCollider(x-0.15,z-0.15,x+0.15,z+0.15,3.2);
-  for(const s of[-1,1]){const t=textPlane(r.n.toUpperCase(),3.6,0.5,'#1b6e3a','#ffffff');t.position.set(x+(ns?s*0.02:0),3.3,z+(ns?0:s*0.02));t.rotation.y=(ns?Math.PI/2:0)+(s<0?Math.PI:0)}}}}
+/* --- green street-name signs at both ends of each named road (D3/D4) --- */
+function streetSign(x,z,name,yaw){addG(B_PLAIN,GEO.cyl,x,1.6,z,'#7a7a7a',0,0,0,0.08,3.2,0.08);addCollider(x-0.15,z-0.15,x+0.15,z+0.15,3.2);
+  for(const s of[0,Math.PI]){const t=textPlane(name.toUpperCase(),3.6,0.5,'#1b6e3a','#ffffff');t.rotation.y=yaw+s;t.position.set(x+Math.sin(yaw+s)*0.02,3.3,z+Math.cos(yaw+s)*0.02)}}
+function buildStreetSigns(){for(const r of ROADS)for(const e of[0,1]){const p=e?r.pts[r.pts.length-1]:r.pts[0],q=e?r.pts[r.pts.length-2]:r.pts[1],dx=q[0]-p[0],dz=q[1]-p[1],l=Math.hypot(dx,dz)||1,ux=dx/l,uz=dz/l;
+  const x=p[0]+ux*5-uz*(HR+2.2),z=p[1]+uz*5+ux*(HR+2.2);if(Math.abs(x)>BOUND-10||Math.abs(z)>BOUND-10)continue;streetSign(x,z,r.n,Math.atan2(-uz,ux))}}
+/* --- D4: drawn road segments (angled roads and countryside stretches): asphalt ribbon in 2 m pieces that follow the ground
+   height (so it sits on sidewalks inside blocks and on the road between them), edge lines and a dashed centre line --- */
+function buildArterials(){const W=ROAD_W/2;for(const s of NEWSEGS){const[ax,az]=s.a,[bx,bz]=s.b,L=Math.hypot(bx-ax,bz-az),ux=(bx-ax)/L,uz=(bz-az)/L,px=-uz,pz=ux,n=Math.ceil(L/2);
+  for(let k=0;k<n;k++){const t0=k*L/n,t1=(k+1)*L/n,x0=ax+ux*t0,z0=az+uz*t0,x1=ax+ux*t1,z1=az+uz*t1,cx=(x0+x1)/2,cz=(z0+z1)/2,g=groundH(cx,cz),y=g+(g>0.1?0.035:0.032);
+    quad(B_ROAD,[x0-px*W,y,z0-pz*W],[x0+px*W,y,z0+pz*W],[x1+px*W,y,z1+pz*W],[x1-px*W,y,z1-pz*W],[t0/8,0],[t0/8,1.5],[t1/8,1.5],[t1/8,0]);
+    for(const e of[-1,1])quad(B_PLAIN,[x0+px*e*(W-0.5),y+0.004,z0+pz*e*(W-0.5)],[x0+px*e*(W-0.35),y+0.004,z0+pz*e*(W-0.35)],[x1+px*e*(W-0.35),y+0.004,z1+pz*e*(W-0.35)],[x1+px*e*(W-0.5),y+0.004,z1+pz*e*(W-0.5)],[0,0],[0,0],[0,0],[0,0],'#e8e2c8');
+    if(k%3===0)quad(B_PLAIN,[x0-px*0.08,y+0.004,z0-pz*0.08],[x0+px*0.08,y+0.004,z0+pz*0.08],[x1+px*0.08,y+0.004,z1+pz*0.08],[x1-px*0.08,y+0.004,z1-pz*0.08],[0,0],[0,0],[0,0],[0,0],'#e8e2c8')}}}
 /* --- Koniamman Temple: small gopuram shrine on the east side of the Town Hall block (D3; real temple is about 0.3 km east of Town Hall) --- */
 function buildKoniamman(){const x=-13,z=104,TC=['#f4a6a6','#9fd3e8','#f7e08a','#a7e0a3','#f5b97a'];addBox(B_PLAIN,8,0.3,8,x,0.3,z,'#d8c9a8');addBox(B_PLAIN,6,3.2,6,x,2,z,'#e0d2b4');addCollider(x-3,z-3,x+3,z+3,3.6);
   let y=3.6;for(let t=0;t<5;t++){const w=5.4-t*0.9;addBox(B_PLAIN,w,1.3,w,x,y+0.65,z,TC[t]);y+=1.3}addG(B_PLAIN,GEO.sph,x,y+0.5,z,'#e8b923',0,0,0,0.7,0.9,0.7);

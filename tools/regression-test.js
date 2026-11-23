@@ -41,7 +41,7 @@ groups.missions=async()=>{const g=G();
   for(let i=0;i<6;i++){await t('story mission '+(i+1),()=>{resetPlayer(283,-97);clearMission();g.PROG.story=i;const cash0=g.player.cash;g.startStory(i);const m=g.mission;if(!m)return{pass:false,detail:'did not start'};
       for(let k=0;k<400&&g.mission===m;k++){g.player.hp=100;g.wanted=0;if(/talking/.test(m.txt||'')){S(30);continue}
         if(m.boss&&!m.boss.dead)m.boss.dead=true,m.left--;killMissionGoons(m);if(m.tgt&&!m.tgt.wrecked)m.tgt.wrecked=true;
-        const txt=m.txt||'';if(/hilltop viewpoint/.test(txt)){const top=g.GHAT().slice(-1)[0];g.player.pos.set(top.x,top.h+0.3,top.z)}else if(/jetty on Kovai Coast/.test(txt))g.player.pos.set(1020,0.3,200);S(10)}
+        const txt=m.txt||'';if(/hilltop viewpoint/.test(txt)){const top=g.GHAT().slice(-1)[0];g.player.pos.set(top.x,top.h+0.3,top.z)}else if(/jetty on Kovai Reservoir/.test(txt))g.player.pos.set(1020,0.3,200);S(10)}
       return{pass:g.PROG.story===i+1&&g.player.cash>cash0,detail:'story='+g.PROG.story+' cash +'+(g.player.cash-cash0)}})}
   await t('rampage start and pass',()=>{resetPlayer(0,0);clearMission();const r=g.RAMPAGES[1];r.cd=0;g.player.pos.set(r.x+0.3,0.2,r.z);S(3);const m=g.mission;if(!m||m.type!=='rampage')return{pass:false,detail:'not started'};m.kills=99;S(3);return{pass:!g.mission&&g.PROG.ramp.includes(r.id)}});
   await t('stunt jump 0',()=>{resetPlayer(780,3);clearMission();const v=g.spawnVehicle('car',790,0,Math.PI/2);g.enterVehicle(v);S(25);v.speed=32;v.vx=32;v.vz=0;g.K.KeyW=true;let air=false;for(let i=0;i<420;i++){S(1);if(v.vy>0)air=true}g.K.KeyW=false;g.exitV();S(10);park(v);return{pass:air&&g.PROG.jumps.includes(0),detail:'air '+air+' jumps '+JSON.stringify(g.PROG.jumps)}});

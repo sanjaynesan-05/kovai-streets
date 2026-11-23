@@ -36,7 +36,7 @@ function aiNext(v){const a=v.ai;const opts=[];
   if(v.y>2.5&&inGrid(a.i+a.dx,a.j+a.dz))ch=[a.dx,a.dz];const nx=ch[0],nz=ch[1];const exit=laneWP(a.i,a.j,nx,nz,8,a.lane);a.i+=nx;a.j+=nz;a.dx=nx;a.dz=nz;a.wps=[exit,laneWP(a.i,a.j,nx,nz,-9,a.lane)];a.turnWp=exit}
 function playerP(){return player.vehicle?player.vehicle.pos:player.pos}
 function makeAI(v,i,j,dx,dz,cruise){const lane=v.s.cycle?RR(5.0,5.6):v.s.two?RR(2.0,5.4):LANE;v.ai={lane,i,j,dx,dz,wps:[laneWP(i,j,dx,dz,-9,lane)],turnWp:null,cruise,blockT:0,stuck:0,hitT:0};v.speed=cruise*0.6;v.vx=Math.sin(v.heading)*v.speed;v.vz=Math.cos(v.heading)*v.speed}
-function spawnAI(type,minDist){
+function spawnAI(type,minDist){if(REALMAP)return null;/* traffic on the real road graph comes in step G4 */
   const P0=playerP(),pi=Math.round(P0.x/CELL),pj=Math.round(P0.z/CELL);/* D2: spawn within 5 blocks of the player */
   for(let t=0;t<80;t++){const i=clamp(pi+RI(-5,5),-NB,NB),j=clamp(pj+RI(-5,5),-NB,NB);const[dx,dz]=rpick(DIRS);if(!inGrid(i-dx,j-dz))continue;
     const p=laneWP(i,j,dx,dz,-RR(12,58));const P=playerP();if(Math.hypot(p.x-P.x,p.z-P.z)<minDist)continue;

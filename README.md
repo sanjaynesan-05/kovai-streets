@@ -2,7 +2,7 @@
 
 **A 3D open-world sandbox game set in a city inspired by Coimbatore (Kovai), Tamil Nadu. It runs in any web browser, on a computer or a phone.**
 
-Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, swim off the coast, grab a tea at a street-corner kadai and take on the gangs of Ukkadam.
+Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, swim in Kovai Reservoir, grab a tea at a street-corner kadai and take on the gangs of Ukkadam.
 
 ![Kovai Streets title screen](screenshots/00-title.jpg)
 
@@ -55,14 +55,16 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 | ![The hill statue in the foothills](screenshots/16-hill-statue.jpg) | |
 | **The hill statue** in the Velliangiri foothills. | |
 
-### The coast
+### Kovai Reservoir
+
+*These screenshots were taken before the coast became a reservoir and still show the old beach.*
 
 | | |
 |---|---|
-| ![Kovai Coast beach](screenshots/07-beach.jpg) | ![Speedboat on the open sea](screenshots/08-speedboat.jpg) |
-| **Kovai Coast.** Umbrellas, fishing boats and rolling surf. | **Speedboat** on the open sea. Boats bob with the waves. |
-| ![The lighthouse on the headland](screenshots/09-lighthouse.jpg) | ![Swimming in the sea](screenshots/10-swimming.jpg) |
-| **The lighthouse** on its headland. Its beam sweeps at night. | **Swimming.** Wade in the shallows, swim in the deep. |
+| ![Kovai Reservoir (old beach screenshot)](screenshots/07-beach.jpg) | ![Speedboat on the reservoir](screenshots/08-speedboat.jpg) |
+| **Kovai Reservoir.** Grassy banks, fishing boats and calm water, with hills on the far shore. | **Speedboat** on the reservoir. Boats bob on the water. |
+| ![The watchtower (old lighthouse screenshot)](screenshots/09-lighthouse.jpg) | ![Swimming](screenshots/10-swimming.jpg) |
+| **The watchtower** on its headland. | **Swimming.** Wade in the shallows, swim in the deep. |
 
 ### Places to explore
 
@@ -104,10 +106,10 @@ Drive autos down Avinashi Road, take the ghat road up into the Western Ghats, sw
 - At night: **lit windows, glowing shop signs, street lights, headlights**, stars and the moon.
 - **Monsoon rain** comes and goes on its own: wet shiny roads, umbrellas, thunder and lightning, and slipperier driving.
 
-### ⛰️ Mountains and 🌊 the sea
+### ⛰️ Mountains and 🌊 the reservoir
 - **Western Ghats terrain** you can drive or walk up, with tea-estate slopes, forest, a hill village, a roadside waterfall and a summit viewpoint.
-- A **made-up coastline** (Coimbatore has none in real life!) with a beach, shacks, a lifeguard tower, a lighthouse and a jetty.
-- **Animated waves** with foam at the shoreline. Boats bob and tilt with the swell.
+- **Kovai Reservoir**, a made-up reservoir east of the city, with grassy banks, shacks, a watchtower, a jetty and hills on the far shore.
+- **Animated water.** Boats bob and tilt on gentle waves.
 - **Water physics:** wade in the shallows, swim in deep water, and watch cars float for a moment before they sink.
 
 ### 🎮 Gameplay
@@ -209,11 +211,11 @@ The map is loosely based on Coimbatore's real layout, with some creative licence
 | **Velliangiri Foothills** | The hill statue |
 | **Marudhamalai Foothills** | Temple with a walk-in shrine |
 | **Ghat Road / Hilltop Viewpoint** | Hairpin climb into the Western Ghats, waterfall, hill village |
-| **Kovai Coast / Lighthouse Point** | Beach, jetty, boats, lighthouse |
+| **Kovai Reservoir / Watchtower Point** | Reservoir banks, jetty, boats, watchtower |
 
 **Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · ♥ friends · ☕ tea stalls · coloured letters = jobs · gold **S** = story · green house = safehouse · skull = rampage
 
-The **Western Ghats** and **Kovai Coast** start closed. See [Progress, unlocks and saving](#-progress-unlocks-and-saving).
+The **Western Ghats** and **Kovai Reservoir** start closed. See [Progress, unlocks and saving](#-progress-unlocks-and-saving).
 
 ---
 
@@ -314,7 +316,7 @@ Your choices change free-roam police behaviour and the finale. Act 2 ends with a
 - Saved: cash, weapons and ammo, armour, Respect, friendships, story progress, collectibles, the safehouse, garage cars, your outfit and the time of day.
 - **Safehouse** on Perur Road, west of the city (₹5,000). Once you own it you start there, you can save, change outfit and sleep until morning, and up to **3 vehicles** parked inside its garage are kept.
 - **Outfits:** teal shirt & jeans, white veshti, checked lungi, black tee & cargos, cricket jersey and office formals. Change them at the safehouse or in the pause menu.
-- **New areas:** the forest checkpoint to the **Western Ghats** opens at Respect **LV 2** (or after story mission 3). The coast road to **Kovai Coast** opens at **LV 3** (or after story mission 4).
+- **New areas:** the forest checkpoint to the **Western Ghats** opens at Respect **LV 2** (or after story mission 3). The reservoir road to **Kovai Reservoir** opens at **LV 3** (or after story mission 4).
 - The **pause menu** shows your progress and has settings for mouse/swipe sensitivity, invert look, master and radio volume, outfit, the tutorial, and saving or deleting your save.
 - New players get a **short tutorial** (skippable), and the loading and knock-out screens show tips.
 
@@ -324,8 +326,8 @@ Your choices change free-roam police behaviour and the finale. Act 2 ends with a
 
 | What | How many | Reward |
 |---|---|---|
-| **Film reels** (spinning gold reels) | 20, hidden around the city, mall, station, flyover, hills and coast | ₹250 each, ₹25,000 for all |
-| **Stunt jumps** (yellow ramps on the outer roads and the beach) | 5 | ₹1,000 for each first jump, ₹10,000 for all. Slow motion while you're in the air |
+| **Film reels** (spinning gold reels) | 20, hidden around the city, mall, station, flyover, hills and reservoir | ₹250 each, ₹25,000 for all |
+| **Stunt jumps** (yellow ramps on the outer roads and the reservoir bank) | 5 | ₹1,000 for each first jump, ₹10,000 for all. Slow motion while you're in the air |
 | **Rampages** (skull icons) | 4: rocket, SMG, cricket bat, grenade | Take out the target number in 60 seconds: ₹2,500 the first time |
 
 ---
@@ -387,7 +389,7 @@ kovai-streets/
 │   ├── textures.js       ← procedural textures and materials
 │   ├── models.js         ← character models and map icons
 │   ├── vehicles.js       ← vehicle types, traffic AI, meshes, physics, damage, passenger seats
-│   ├── world.js          ← map: roads, blocks, terrain, coast, landmarks, flyover
+│   ├── world.js          ← map: roads, blocks, terrain, reservoir, landmarks, flyover
 │   ├── environment.js    ← street lamps, sky, day/night, weather
 │   ├── actors.js         ← player state, pedestrians, gangs
 │   ├── combat.js         ← weapons, melee, effects, pickups, lock-on
@@ -464,7 +466,7 @@ The tests change the game state (cash, missions, save), so run them on a throwaw
 | **Engine** | [Three.js](https://threejs.org) r128 (WebGL) |
 | **Code** | `index.html` plus 18 classic JavaScript files in `js/` (~290 KB of generated JavaScript) and `css/style.css` |
 | **Art** | 100% procedural. Every texture is drawn with Canvas 2D at load time; every model is built from code |
-| **Sound** | Generated live with the Web Audio API: per-vehicle engines, per-gun shots, footsteps, city/sea/bird ambience, three procedural radio stations, sirens, rain and the train horn |
+| **Sound** | Generated live with the Web Audio API: per-vehicle engines, per-gun shots, footsteps, city/water/bird ambience, three procedural radio stations, sirens, rain and the train horn |
 | **Load time** | About 3 seconds to build the whole world (measured in Chrome) |
 
 Some of the techniques used:
@@ -482,17 +484,17 @@ Some of the techniques used:
 ## ⚠️ Known limitations
 
 - **Visual style:** it's stylised and low-poly. Everything is generated by code without hand-made 3D models, so characters and vehicles are simple up close.
-- **Traffic:** AI traffic stays inside the city grid. The ghat road and coast road have no AI cars.
+- **Traffic:** AI traffic stays inside the city grid. The ghat road and reservoir road have no AI cars.
 - **Saves are per browser:** progress is stored in your browser's local storage, so it doesn't follow you to another device or browser, and clearing site data erases it. Progress partway through a mission isn't saved.
 - **Performance:** older phones should use **Low** quality. High quality is meant for desktop GPUs.
-- **Geography:** Coimbatore has no coastline in real life. The beach is a fun addition.
+- **Geography:** Kovai Reservoir is fictional and sits east of the city. Coimbatore's real reservoirs (Siruvani, Pilloor) are in the west.
 
 ---
 
 ## 🧭 Roadmap ideas
 
 - [x] Save and load progress
-- [ ] AI traffic on the ghat and coast roads
+- [ ] AI traffic on the ghat and reservoir roads
 - [x] A short storyline with connected missions
 - [x] Police on foot, roadblocks and helicopters at high wanted levels
 - [x] Car radio with original music

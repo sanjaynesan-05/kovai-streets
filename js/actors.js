@@ -120,4 +120,4 @@ function updateWanderers(dt){const P=playerP();for(const w of WANDER){const far=
   if(w.wait>0){w.wait-=dt;animHuman(w.h,0,0,false)}else{const dx=w.tx-w.x,dz=w.tz-w.z,d=Math.hypot(dx,dz);if(d<0.4){w.wait=RR(1,5);w.tx=w.zn.cx+RR(-w.zn.rx,w.zn.rx);w.tz=w.zn.cz+RR(-w.zn.rz,w.zn.rz)}
     else{const st=Math.min(d,w.sp*dt);_pp.x=w.x+dx/d*st;_pp.z=w.z+dz/d*st;if(pushCircle(_pp,0.3,w.y)){w.tx=w.zn.cx+RR(-w.zn.rx,w.zn.rx);w.tz=w.zn.cz+RR(-w.zn.rz,w.zn.rz)}w.x=_pp.x;w.z=_pp.z;w.yaw=Math.atan2(dx,dz);w.phase+=dt*w.sp*3.2;animHuman(w.h,w.phase,w.sp>2?1.2:0.8,false)}}
   w.y=humanY(w.x,w.z,w.y);w.h.g.position.set(w.x,w.y,w.z);w.h.g.rotation.y=w.yaw;if(w.h.umb)w.h.umb.visible=false}}
-function updateWorldFX(dt){waterU.time.value+=dt;if(LH.g){LH.g.rotation.y+=dt*0.6;LH.beam.opacity=0.22*(1-dayF)}if(FALLS)FALLS.m.material.map.offset.y-=dt*1.6;updateWanderers(dt)}
+function updateWorldFX(dt){waterU.time.value+=dt;if(FALLS)FALLS.m.material.map.offset.y-=dt*1.6;updateWanderers(dt)}

@@ -41,6 +41,8 @@ const MB={};function MBasic(c){return MB[c]||(MB[c]=new THREE.MeshBasicMaterial(
 const GEO={box:new THREE.BoxGeometry(1,1,1),cyl:new THREE.CylinderGeometry(1,1,1,12),cone7:new THREE.ConeGeometry(1,1,7),cone4:new THREE.ConeGeometry(1,1,4),cone8:new THREE.ConeGeometry(1,1,8),sph:new THREE.SphereGeometry(1,12,9)};
 
 /* ================= world constants ================= */
+/* Real-geography world (steps G2-G7): open index.html?world=geo. Until G7 the grid world below stays the default. */
+const REALMAP=new URLSearchParams(location.search).get('world')==='geo';
 const CELL=74,NB=10,LIM=NB*CELL,HR=7,LANE=3.5,GX=370,BOUND=560+GX;
 /* Map step D2: the city grew from 10 x 10 to 20 x 20 blocks, so the map edge moved outward by GX. ox() converts an x or z
    coordinate written for the old map: beyond the old city edge (±370) it moves outward by GX; inside the city it is unchanged.
@@ -53,16 +55,38 @@ const PAL=['#f2e6c9','#e8d3a9','#cfe3e8','#f3c6c0','#d7e8c8','#f5f1e6','#efd28a'
 const SIGN=['#d62828','#f77f00','#2a9d8f','#1d4ed8','#7b2cbf','#e9c46a','#2b9348','#c1121f','#118ab2'];
 /* Map step D3: district label points from tools/map/landmarks.json (real direction from Town Hall, see tools/map/REPORT.md),
    shifted so Town Hall sits on the game's Town Hall block at (-37, 111). Saravanampatti, Kuniyamuthur and the hill/coast names are not in the registry yet. */
-const TH={x:-37,z:111};const DISTRICTS=[{n:'Gandhipuram',x:44,z:-196},{n:'R.S. Puram',x:-169,z:-70},{n:'Town Hall',x:-37,z:111},{n:'Race Course',x:168,z:15},{n:'Peelamedu',x:283,z:-187},{n:'Ukkadam',x:-16,z:136},{n:'Singanallur',x:447,z:36},{n:'Saibaba Colony',x:-206,z:-216},{n:'Vadavalli',x:-466,z:-138},{n:'Marudhamalai',x:-703,z:-218},{n:'Ramanathapuram',x:312,z:94},{n:'Uppilipalayam',x:431,z:-33},{n:'Podanur',x:213,z:433},{n:'Perur',x:-442,z:259},{n:'Lakshmi Mills',x:240,z:-109},{n:'Hope College',x:393,z:-145},{n:'Airport',x:497,z:-146},{n:'Saravanampatti',x:150,z:ox(-390)},{n:'Kuniyamuthur',x:-330,z:260},{n:'Velliangiri Foothills',x:ox(-480),z:-170},{n:'Ghat Road',x:ox(-780),z:0},{n:'Hilltop Viewpoint',x:ox(-1000),z:-150},{n:'Kovai Coast',x:ox(660),z:60},{n:'Lighthouse Point',x:ox(690),z:-410},{n:'Open Sea',x:ox(900),z:0}];
+const TH={x:-37,z:111};const DISTRICTS=[{n:'Gandhipuram',x:44,z:-196},{n:'R.S. Puram',x:-169,z:-70},{n:'Town Hall',x:-37,z:111},{n:'Race Course',x:168,z:15},{n:'Peelamedu',x:283,z:-187},{n:'Ukkadam',x:-16,z:136},{n:'Singanallur',x:447,z:36},{n:'Saibaba Colony',x:-206,z:-216},{n:'Vadavalli',x:-466,z:-138},{n:'Marudhamalai',x:-703,z:-218},{n:'Ramanathapuram',x:312,z:94},{n:'Uppilipalayam',x:431,z:-33},{n:'Podanur',x:213,z:433},{n:'Perur',x:-442,z:259},{n:'Lakshmi Mills',x:240,z:-109},{n:'Hope College',x:393,z:-145},{n:'Airport',x:497,z:-146},{n:'Saravanampatti',x:150,z:ox(-390)},{n:'Kuniyamuthur',x:-330,z:260},{n:'Velliangiri Foothills',x:ox(-480),z:-170},{n:'Ghat Road',x:ox(-780),z:0},{n:'Hilltop Viewpoint',x:ox(-1000),z:-150},{n:'Kovai Reservoir',x:ox(660),z:60},{n:'Watchtower Point',x:ox(690),z:-410},{n:'Kovai Reservoir',x:ox(900),z:0}];
 /* Named roads (grid segments). The HUD shows the name while you are on one. Step D4 adds the main roads. Big Bazaar Street's direction still needs checking on a map. */
-const ROADS=[{n:'Big Bazaar Street',x0:-HR,x1:HR,z0:74,z1:148}];
-function roadName(x,z){for(const r of ROADS)if(x>=r.x0&&x<=r.x1&&z>=r.z0&&z<=r.z1)return r.n;return null}
+/* Map step D4: named roads as polylines. Segments on existing grid roads are only named; angled segments and segments beyond
+   the grid (outer ring and countryside) are drawn by buildArterials() in world.js, and buildings/trees are kept off them.
+   Routes follow the real direction of each road from tools/map/landmarks.json; Big Bazaar Street's direction still needs checking. */
+const ROADS=[
+  {n:'Avinashi Road',pts:[[0,0],[370,0],[444,-148],[747,-148],[900,-148]]},        // over the flyover, then past Lakshmi Mills, Hope College and the airport
+  {n:'Trichy Road',pts:[[0,74],[747,74],[900,74]]},                                   // Ramanathapuram, then between Singanallur bus stand and lake
+  {n:'Mettupalayam Road',pts:[[-148,-148],[-148,-370],[-290,-900]]},                 // north-north-west through Saibaba Colony
+  {n:'Sathy Road',pts:[[74,-148],[74,-370],[200,-900]]},                              // north-north-east towards Saravanampatti
+  {n:'Palakkad Road',pts:[[-74,222],[-370,222],[-880,560]]},                          // south-west from Ukkadam
+  {n:'Pollachi Road',pts:[[-74,222],[-74,370],[-20,900]]},                            // south from Ukkadam, over the railway
+  {n:'Perur Road',pts:[[-148,148],[-370,148],[-880,380]]},                            // west-south-west to Perur
+  {n:'Thadagam Road',pts:[[-148,-74],[-370,-74],[-880,-330]]},                        // west-north-west from R.S. Puram
+  {n:'100 Feet Road',pts:[[0,-296],[0,-148]]},{n:'Cross Cut Road',pts:[[-74,-296],[-74,-148]]},
+  {n:'DB Road',pts:[[-148,-74],[-148,0]]},{n:'Race Course Road',pts:[[148,0],[148,74]]},{n:'Big Bazaar Street',pts:[[0,74],[0,148]]}];
+const ROAD_W=12;   // width of the drawn (new) road segments
+function segDist(x,z,a,b){const dx=b[0]-a[0],dz=b[1]-a[1],L=dx*dx+dz*dz;let t=L?((x-a[0])*dx+(z-a[1])*dz)/L:0;t=clamp(t,0,1);return Math.hypot(x-a[0]-dx*t,z-a[1]-dz*t)}
+function drawnSeg(a,b){return(a[0]!==b[0]&&a[1]!==b[1])||Math.max(Math.abs(a[0]),Math.abs(b[0]),Math.abs(a[1]),Math.abs(b[1]))>LIM+HR}
+const NEWSEGS=[];for(const r of ROADS)for(let i=1;i<r.pts.length;i++)if(drawnSeg(r.pts[i-1],r.pts[i]))NEWSEGS.push({n:r.n,a:r.pts[i-1],b:r.pts[i]});
+function onNewRoad(x,z,m){for(const s of NEWSEGS)if(segDist(x,z,s.a,s.b)<ROAD_W/2+(m||0))return true;return false}
+function roadName(x,z){if(REALMAP)return geoRoadName(x,z);for(const r of ROADS)for(let i=1;i<r.pts.length;i++)if(segDist(x,z,r.pts[i-1],r.pts[i])<(drawnSeg(r.pts[i-1],r.pts[i])?ROAD_W/2:HR))return r.n;return null}
 function district(x,z){let b=null,bd=1e18;for(const d of DISTRICTS){const q=(d.x-x)**2+(d.z-z)**2;if(q<bd){bd=q;b=d}}return b.n}
 
 /* ================= colliders ================= */
 const GS=16,grid=new Map(),boxes=[];let stamp=0;
 function addCollider(minX,minZ,maxX,maxZ,h,y0){minX+=BO.x;maxX+=BO.x;minZ+=BO.z;maxZ+=BO.z;const b={minX,minZ,maxX,maxZ,h,y0:y0===undefined?-1:y0,s:0};boxes.push(b);
   for(let ix=Math.floor(minX/GS);ix<=Math.floor(maxX/GS);ix++)for(let iz=Math.floor(minZ/GS);iz<=Math.floor(maxZ/GS);iz++){const k=ix*4099+iz;let l=grid.get(k);if(!l){l=[];grid.set(k,l)}l.push(b)}return b}
+/* remove colliders (used when real-geography chunks unload) */
+function removeColliders(list){if(!list||!list.length)return;const gone=new Set(list);for(const b of list){b.gone=true;
+  for(let ix=Math.floor(b.minX/GS);ix<=Math.floor(b.maxX/GS);ix++)for(let iz=Math.floor(b.minZ/GS);iz<=Math.floor(b.maxZ/GS);iz++){const k=ix*4099+iz,l=grid.get(k);if(!l)continue;const f=l.filter(o=>!gone.has(o));if(f.length)grid.set(k,f);else grid.delete(k)}}
+  for(let i=boxes.length-1;i>=0;i--)if(boxes[i].gone)boxes.splice(i,1)}
 const qOut=[];
 function queryBoxes(x,z,r){qOut.length=0;stamp++;const x0=Math.floor((x-r)/GS),x1=Math.floor((x+r)/GS),z0=Math.floor((z-r)/GS),z1=Math.floor((z+r)/GS);
   for(let ix=x0;ix<=x1;ix++)for(let iz=z0;iz<=z1;iz++){const l=grid.get(ix*4099+iz);if(!l)continue;for(let i=0;i<l.length;i++){const b=l[i];if(b.s!==stamp){b.s=stamp;qOut.push(b)}}}return qOut}
@@ -76,13 +100,19 @@ function pushCircle(p,r,y,ht){y=y||0;ht=ht||1.8;let hit=false;pnx=0;pnz=0;const 
     hit=true}
   return hit}
 const _ray=new THREE.Ray(),_box=new THREE.Box3(),_hp=new THREE.Vector3();
-function rayBoxes(origin,dir,maxD,minT){_ray.origin.copy(origin);_ray.direction.copy(dir);let best=maxD;
-  for(let i=0;i<boxes.length;i++){const b=boxes[i];_box.min.set(b.minX,b.y0,b.minZ);_box.max.set(b.maxX,b.h,b.maxZ);
-    if(_ray.intersectBox(_box,_hp)){const t=_hp.distanceTo(origin);if(t>minT&&t<best)best=t}}
+/* nearest box hit along a ray, walking only the 16 m grid cells the ray crosses (G3: the real map has tens of thousands of boxes) */
+function rayBoxes(origin,dir,maxD,minT){_ray.origin.copy(origin);_ray.direction.copy(dir);let best=maxD;stamp++;
+  let ix=Math.floor(origin.x/GS),iz=Math.floor(origin.z/GS);const dx=dir.x,dz=dir.z,sx=dx>0?1:-1,sz=dz>0?1:-1;
+  let tx=Math.abs(dx)<1e-9?Infinity:((dx>0?(ix+1)*GS:ix*GS)-origin.x)/dx,tz=Math.abs(dz)<1e-9?Infinity:((dz>0?(iz+1)*GS:iz*GS)-origin.z)/dz;
+  const ddx=Math.abs(dx)<1e-9?Infinity:GS/Math.abs(dx),ddz=Math.abs(dz)<1e-9?Infinity:GS/Math.abs(dz);
+  for(let n=0;n<4000;n++){const l=grid.get(ix*4099+iz);
+    if(l)for(let i=0;i<l.length;i++){const b=l[i];if(b.s===stamp)continue;b.s=stamp;_box.min.set(b.minX,b.y0,b.minZ);_box.max.set(b.maxX,b.h,b.maxZ);
+      if(_ray.intersectBox(_box,_hp)){const t=_hp.distanceTo(origin);if(t>minT&&t<best)best=t}}
+    const tn=Math.min(tx,tz);if(tn>best)break;if(tx<tz){ix+=sx;tx+=ddx}else{iz+=sz;tz+=ddz}}
   return best}
 const _la=new THREE.Vector3(),_lb=new THREE.Vector3(),_ld=new THREE.Vector3();
 function los(ax,ay,az,bx,by,bz){_la.set(ax,ay,az);_lb.set(bx,by,bz);_ld.subVectors(_lb,_la);const d=_ld.length();_ld.divideScalar(d);return rayBoxes(_la,_ld,d-0.4,0.3)>=d-0.4}
-function groundH(x,z){if(x<-552-GX)return terrainH(x,z);if(x>596+GX)return coastH(x,z);if(Math.abs(x)>LIM||Math.abs(z)>LIM)return 0;const lx=x-(Math.floor(x/CELL)+0.5)*CELL,lz=z-(Math.floor(z/CELL)+0.5)*CELL;return(Math.abs(lx)<30&&Math.abs(lz)<30)?0.16:0}
+function groundH(x,z){if(REALMAP)return 0;/* the pilot is flat until elevation data is approved */if(x<-552-GX)return terrainH(x,z);if(x>596+GX)return coastH(x,z);if(Math.abs(x)>LIM||Math.abs(z)>LIM)return 0;const lx=x-(Math.floor(x/CELL)+0.5)*CELL,lz=z-(Math.floor(z/CELL)+0.5)*CELL;return(Math.abs(lx)<30&&Math.abs(lz)<30)?0.16:0}
 
 /* ================= static geometry batching ================= */
 function batch(){return{pos:[],nor:[],uv:[],col:[]}}
@@ -113,8 +143,8 @@ const plainMat=new THREE.MeshPhongMaterial({vertexColors:true,shininess:55,specu
 function buildingGeo(w,h,d){const g=new THREE.BoxGeometry(w,h,d);const uv=g.attributes.uv;const fl=h/3.4;
   for(let f=0;f<6;f++)for(let k=0;k<4;k++){const i=f*4+k;if(f===2||f===3){uv.setXY(i,0.01,0.01);continue}
     const horiz=f<2?d:w;uv.setXY(i,uv.getX(i)*Math.max(1,Math.round(horiz/5))/4,uv.getY(i)*fl/4)}return g}
-const palms=[];function palm(x,z,coll){palms.push([x+BO.x,z+BO.z]);if(coll!==false)addCollider(x-0.35,z-0.35,x+0.35,z+0.35,8)}
-function neem(x,z){addG(B_PLAIN,GEO.cyl,x,1.6,z,'#5e4632',0,0,0,0.3,3.2,0.3);addG(B_PLAIN,GEO.sph,x,4.4,z,pick(['#4e7d36','#5b8a3c','#46703a']),0,0,0,R(2.4,3.2),R(2,2.6),R(2.4,3.2));addCollider(x-0.35,z-0.35,x+0.35,z+0.35,6)}
+const palms=[];function palm(x,z,coll){if(onNewRoad(x+BO.x,z+BO.z,1.5))return;palms.push([x+BO.x,z+BO.z]);if(coll!==false)addCollider(x-0.35,z-0.35,x+0.35,z+0.35,8)}
+function neem(x,z){if(onNewRoad(x+BO.x,z+BO.z,3))return;addG(B_PLAIN,GEO.cyl,x,1.6,z,'#5e4632',0,0,0,0.3,3.2,0.3);addG(B_PLAIN,GEO.sph,x,4.4,z,pick(['#4e7d36','#5b8a3c','#46703a']),0,0,0,R(2.4,3.2),R(2,2.6),R(2.4,3.2));addCollider(x-0.35,z-0.35,x+0.35,z+0.35,6)}
 
 
 /* ================= realism overhaul: shared helpers ================= */
