@@ -509,6 +509,7 @@ Some of the techniques used:
 - **Game design and direction:** *[Your name here]*
 - **Code, models and textures:** generated with **Claude** by Anthropic, through conversation
 - **3D engine:** [Three.js](https://threejs.org) © three.js authors, MIT licence (see `THREE-LICENSE.txt`)
+- **Map reference data:** landmark positions from [OpenStreetMap](https://www.openstreetmap.org/copyright) © OpenStreetMap contributors, available under the Open Database Licence (ODbL 1.0). The game map is a compressed, simplified layout based on this data, not an accurate map. See `tools/map/`.
 - **Fonts:** [Bebas Neue](https://fonts.google.com/specimen/Bebas+Neue) and [Rajdhani](https://fonts.google.com/specimen/Rajdhani) via Google Fonts (SIL Open Font Licence)
 
 **About the content:** real neighbourhood and road names are used only to evoke Coimbatore's geography. All shops, brands, characters, the mall, the station design and the statue are original and fictional. Kovai Streets is an independent fan project inspired by open-world games. It is not affiliated with, or endorsed by, any game publisher.

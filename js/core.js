@@ -41,15 +41,27 @@ const MB={};function MBasic(c){return MB[c]||(MB[c]=new THREE.MeshBasicMaterial(
 const GEO={box:new THREE.BoxGeometry(1,1,1),cyl:new THREE.CylinderGeometry(1,1,1,12),cone7:new THREE.ConeGeometry(1,1,7),cone4:new THREE.ConeGeometry(1,1,4),cone8:new THREE.ConeGeometry(1,1,8),sph:new THREE.SphereGeometry(1,12,9)};
 
 /* ================= world constants ================= */
-const CELL=74,NB=5,LIM=NB*CELL,HR=7,LANE=3.5,BOUND=560;
+const CELL=74,NB=10,LIM=NB*CELL,HR=7,LANE=3.5,GX=370,BOUND=560+GX;
+/* Map step D2: the city grew from 10 x 10 to 20 x 20 blocks, so the map edge moved outward by GX. ox() converts an x or z
+   coordinate written for the old map: beyond the old city edge (±370) it moves outward by GX; inside the city it is unchanged.
+   Hills (west) and coast (east) positions only move in x. */
+function ox(v){return v>370?v+GX:v<-370?v-GX:v}
+/* Build offset: everything added with addG/addBox/addFlat/quad/addCollider/palm while it is set moves by (BO.x, BO.z).
+   Used to move whole outskirts areas (coast, railway station, statue) without rewriting their coordinates. */
+const BO={x:0,z:0};function shifted(dx,dz,fn){BO.x=dx;BO.z=dz;try{fn()}finally{BO.x=0;BO.z=0}}
 const PAL=['#f2e6c9','#e8d3a9','#cfe3e8','#f3c6c0','#d7e8c8','#f5f1e6','#efd28a','#a8c5da','#f2b38a','#d9d2e9','#e4e0d6','#bfe0d0','#f6d6e0'];
 const SIGN=['#d62828','#f77f00','#2a9d8f','#1d4ed8','#7b2cbf','#e9c46a','#2b9348','#c1121f','#118ab2'];
-const DISTRICTS=[{n:'Gandhipuram',x:0,z:-200},{n:'R.S. Puram',x:-235,z:-10},{n:'Town Hall',x:-40,z:110},{n:'Race Course',x:115,z:-30},{n:'Peelamedu',x:265,z:-140},{n:'Ukkadam',x:-115,z:270},{n:'Singanallur',x:275,z:270},{n:'Saibaba Colony',x:-230,z:-240},{n:'Marudhamalai Foothills',x:-400,z:-400},{n:'Saravanampatti',x:150,z:-390},{n:'Podanur',x:70,z:360},{n:'Kuniyamuthur',x:-330,z:260},{n:'Velliangiri Foothills',x:-480,z:-170},{n:'Ghat Road',x:-780,z:0},{n:'Hilltop Viewpoint',x:-1000,z:-150},{n:'Kovai Coast',x:660,z:60},{n:'Lighthouse Point',x:690,z:-410},{n:'Open Sea',x:900,z:0}];
+/* Map step D3: district label points from tools/map/landmarks.json (real direction from Town Hall, see tools/map/REPORT.md),
+   shifted so Town Hall sits on the game's Town Hall block at (-37, 111). Saravanampatti, Kuniyamuthur and the hill/coast names are not in the registry yet. */
+const TH={x:-37,z:111};const DISTRICTS=[{n:'Gandhipuram',x:44,z:-196},{n:'R.S. Puram',x:-169,z:-70},{n:'Town Hall',x:-37,z:111},{n:'Race Course',x:168,z:15},{n:'Peelamedu',x:283,z:-187},{n:'Ukkadam',x:-16,z:136},{n:'Singanallur',x:447,z:36},{n:'Saibaba Colony',x:-206,z:-216},{n:'Vadavalli',x:-466,z:-138},{n:'Marudhamalai',x:-703,z:-218},{n:'Ramanathapuram',x:312,z:94},{n:'Uppilipalayam',x:431,z:-33},{n:'Podanur',x:213,z:433},{n:'Perur',x:-442,z:259},{n:'Lakshmi Mills',x:240,z:-109},{n:'Hope College',x:393,z:-145},{n:'Airport',x:497,z:-146},{n:'Saravanampatti',x:150,z:ox(-390)},{n:'Kuniyamuthur',x:-330,z:260},{n:'Velliangiri Foothills',x:ox(-480),z:-170},{n:'Ghat Road',x:ox(-780),z:0},{n:'Hilltop Viewpoint',x:ox(-1000),z:-150},{n:'Kovai Coast',x:ox(660),z:60},{n:'Lighthouse Point',x:ox(690),z:-410},{n:'Open Sea',x:ox(900),z:0}];
+/* Named roads (grid segments). The HUD shows the name while you are on one. Step D4 adds the main roads. Big Bazaar Street's direction still needs checking on a map. */
+const ROADS=[{n:'Big Bazaar Street',x0:-HR,x1:HR,z0:74,z1:148}];
+function roadName(x,z){for(const r of ROADS)if(x>=r.x0&&x<=r.x1&&z>=r.z0&&z<=r.z1)return r.n;return null}
 function district(x,z){let b=null,bd=1e18;for(const d of DISTRICTS){const q=(d.x-x)**2+(d.z-z)**2;if(q<bd){bd=q;b=d}}return b.n}
 
 /* ================= colliders ================= */
 const GS=16,grid=new Map(),boxes=[];let stamp=0;
-function addCollider(minX,minZ,maxX,maxZ,h,y0){const b={minX,minZ,maxX,maxZ,h,y0:y0===undefined?-1:y0,s:0};boxes.push(b);
+function addCollider(minX,minZ,maxX,maxZ,h,y0){minX+=BO.x;maxX+=BO.x;minZ+=BO.z;maxZ+=BO.z;const b={minX,minZ,maxX,maxZ,h,y0:y0===undefined?-1:y0,s:0};boxes.push(b);
   for(let ix=Math.floor(minX/GS);ix<=Math.floor(maxX/GS);ix++)for(let iz=Math.floor(minZ/GS);iz<=Math.floor(maxZ/GS);iz++){const k=ix*4099+iz;let l=grid.get(k);if(!l){l=[];grid.set(k,l)}l.push(b)}return b}
 const qOut=[];
 function queryBoxes(x,z,r){qOut.length=0;stamp++;const x0=Math.floor((x-r)/GS),x1=Math.floor((x+r)/GS),z0=Math.floor((z-r)/GS),z1=Math.floor((z+r)/GS);
@@ -70,14 +82,14 @@ function rayBoxes(origin,dir,maxD,minT){_ray.origin.copy(origin);_ray.direction.
   return best}
 const _la=new THREE.Vector3(),_lb=new THREE.Vector3(),_ld=new THREE.Vector3();
 function los(ax,ay,az,bx,by,bz){_la.set(ax,ay,az);_lb.set(bx,by,bz);_ld.subVectors(_lb,_la);const d=_ld.length();_ld.divideScalar(d);return rayBoxes(_la,_ld,d-0.4,0.3)>=d-0.4}
-function groundH(x,z){if(x<-552)return terrainH(x,z);if(x>596)return coastH(x,z);if(Math.abs(x)>LIM||Math.abs(z)>LIM)return 0;const lx=x-(Math.floor(x/CELL)+0.5)*CELL,lz=z-(Math.floor(z/CELL)+0.5)*CELL;return(Math.abs(lx)<30&&Math.abs(lz)<30)?0.16:0}
+function groundH(x,z){if(x<-552-GX)return terrainH(x,z);if(x>596+GX)return coastH(x,z);if(Math.abs(x)>LIM||Math.abs(z)>LIM)return 0;const lx=x-(Math.floor(x/CELL)+0.5)*CELL,lz=z-(Math.floor(z/CELL)+0.5)*CELL;return(Math.abs(lx)<30&&Math.abs(lz)<30)?0.16:0}
 
 /* ================= static geometry batching ================= */
 function batch(){return{pos:[],nor:[],uv:[],col:[]}}
 const B_WIN=batch(),B_PLAIN=batch(),B_FAR=batch();
 const _o=new THREE.Object3D(),_col=new THREE.Color();
 function addG(B,geom,x,y,z,color,ry,rx,rz,sx,sy,sz){
-  _o.position.set(x,y,z);_o.rotation.set(rx||0,ry||0,rz||0);_o.scale.set(sx||1,sy||1,sz||1);_o.updateMatrix();
+  _o.position.set(x+BO.x,y,z+BO.z);_o.rotation.set(rx||0,ry||0,rz||0);_o.scale.set(sx||1,sy||1,sz||1);_o.updateMatrix();
   const g=geom.index?geom.toNonIndexed():geom.clone();g.applyMatrix4(_o.matrix);
   const p=g.attributes.position.array,n=g.attributes.normal.array,uv=g.attributes.uv?g.attributes.uv.array:null;
   _col.set(color);const vc=p.length/3;
@@ -101,7 +113,7 @@ const plainMat=new THREE.MeshPhongMaterial({vertexColors:true,shininess:55,specu
 function buildingGeo(w,h,d){const g=new THREE.BoxGeometry(w,h,d);const uv=g.attributes.uv;const fl=h/3.4;
   for(let f=0;f<6;f++)for(let k=0;k<4;k++){const i=f*4+k;if(f===2||f===3){uv.setXY(i,0.01,0.01);continue}
     const horiz=f<2?d:w;uv.setXY(i,uv.getX(i)*Math.max(1,Math.round(horiz/5))/4,uv.getY(i)*fl/4)}return g}
-const palms=[];function palm(x,z,coll){palms.push([x,z]);if(coll!==false)addCollider(x-0.35,z-0.35,x+0.35,z+0.35,8)}
+const palms=[];function palm(x,z,coll){palms.push([x+BO.x,z+BO.z]);if(coll!==false)addCollider(x-0.35,z-0.35,x+0.35,z+0.35,8)}
 function neem(x,z){addG(B_PLAIN,GEO.cyl,x,1.6,z,'#5e4632',0,0,0,0.3,3.2,0.3);addG(B_PLAIN,GEO.sph,x,4.4,z,pick(['#4e7d36','#5b8a3c','#46703a']),0,0,0,R(2.4,3.2),R(2,2.6),R(2.4,3.2));addCollider(x-0.35,z-0.35,x+0.35,z+0.35,6)}
 
 

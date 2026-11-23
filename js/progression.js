@@ -12,7 +12,7 @@ const respectLv=()=>1+Math.floor(rep/3);
 const JOB_LV={deliver:1,race:1,fare:1,amb:1,gang:2,chase:2,boss:3};
 const AREA={hills:{lv:2,story:3,name:'The Western Ghats'},coast:{lv:3,story:4,name:'Kovai Coast'}};
 const areaOpen=k=>respectLv()>=AREA[k].lv||PROG.story>=AREA[k].story;
-const placeOpen=x=>(x>-552||areaOpen('hills'))&&(x<590||areaOpen('coast'));
+const placeOpen=x=>(x>ox(-552)||areaOpen('hills'))&&(x<ox(590)||areaOpen('coast'));
 function lvUnlocks(lv){const a=[];for(const it of SHOPITEMS)if(it.lv===lv)a.push(it.armor?'armour':WEAPONS[WI(it.w)].name.toLowerCase());
   const j=Object.keys(JOB_LV).filter(k=>JOB_LV[k]===lv).map(k=>JOBT[k].name.toLowerCase());let s='';if(a.length)s+='Shop: '+a.join(', ');if(j.length)s+=(s?' · ':'')+'Jobs: '+j.join(', ');
   for(const k in AREA)if(AREA[k].lv===lv)s+=(s?' · ':'')+'New area: '+AREA[k].name;return s}
@@ -76,21 +76,21 @@ function deleteAllSaves(){for(const k of[SAVE_KEY,SAVE_BAK,SAVE_BAD,SAVE_PREV])l
 addEventListener('beforeunload',()=>saveGame());
 
 /* ---------- safehouse & garage ---------- */
-const HOUSE={px:-439,pz:15,price:5000,gx0:-424,gx1:-410,gz0:14,gz1:28};
-function extraExcluded(x,z){if(x>-456&&x<-402&&z>8&&z<38)return true;return a2Excluded(x,z)}
+const HOUSE={px:ox(-439),pz:15,price:5000,gx0:ox(-424),gx1:ox(-410),gz0:14,gz1:28};
+function extraExcluded(x,z){if(x>ox(-456)&&x<ox(-402)&&z>8&&z<38)return true;return a2Excluded(x,z)}
 function buildSafehouse(){const{gx0,gx1,gz0,gz1}=HOUSE;
-  building(-439,24,14,12,7,'#f3c6c0',{noShop:true,noSign:true,noTank:true,style:0});addG(B_PLAIN,GEO.cone4,-439,8.7,24,'#a8432f',Math.PI/4,0,0,10.6,3.4,9.2);
-  addBox(B_PLAIN,1.5,2.5,0.12,-439,1.25,17.97,'#6d4c41');addBox(B_PLAIN,3,0.15,1.6,-439,0.08,17.1,'#cfc6b2');
+  building(ox(-439),24,14,12,7,'#f3c6c0',{noShop:true,noSign:true,noTank:true,style:0});addG(B_PLAIN,GEO.cone4,ox(-439),8.7,24,'#a8432f',Math.PI/4,0,0,10.6,3.4,9.2);
+  addBox(B_PLAIN,1.5,2.5,0.12,ox(-439),1.25,17.97,'#6d4c41');addBox(B_PLAIN,3,0.15,1.6,ox(-439),0.08,17.1,'#cfc6b2');
   const h=4.2,C='#d9d2c4';addBox(B_PLAIN,0.4,h,gz1-gz0,gx0,h/2,(gz0+gz1)/2,C);addCollider(gx0-0.2,gz0,gx0+0.2,gz1,h);
   addBox(B_PLAIN,0.4,h,gz1-gz0,gx1,h/2,(gz0+gz1)/2,C);addCollider(gx1-0.2,gz0,gx1+0.2,gz1,h);
   addBox(B_PLAIN,gx1-gx0,h,0.4,(gx0+gx1)/2,h/2,gz1,C);addCollider(gx0,gz1-0.2,gx1,gz1+0.2,h);
   addBox(B_PLAIN,gx1-gx0+0.6,0.3,gz1-gz0+0.6,(gx0+gx1)/2,h+0.15,(gz0+gz1)/2,'#7a7a7a');addCollider(gx0,gz0,gx1,gz1,h+0.3,h);
-  addBox(B_PLAIN,gx1-gx0,0.8,0.3,(gx0+gx1)/2,h-0.4,gz0,'#c0392b');addFlat(B_SIDE,gx0,7,gx1,gz1,0.05,'#ffffff',2.5);addFlat(B_SIDE,-442,7,-436,18,0.05,'#ffffff',2.5);
+  addBox(B_PLAIN,gx1-gx0,0.8,0.3,(gx0+gx1)/2,h-0.4,gz0,'#c0392b');addFlat(B_SIDE,gx0,7,gx1,gz1,0.05,'#ffffff',2.5);addFlat(B_SIDE,ox(-442),7,ox(-436),18,0.05,'#ffffff',2.5);
   const sg=textPlane('SAFEHOUSE GARAGE',7,0.9,'#1d3557','#ffd23f');sg.position.set((gx0+gx1)/2,h+0.75,gz0-0.25);sg.rotation.y=Math.PI;
-  for(const x of[-452,-404])palm(x,12);neem(-450,34)}
+  for(const x of[-452,-404])palm(ox(x),12);neem(ox(-450),34)}
 function inGarage(x,z){return x>HOUSE.gx0+0.4&&x<HOUSE.gx1-0.4&&z>HOUSE.gz0-0.5&&z<HOUSE.gz1-0.4}
 function garageList(){if(!PROG.house)return[];const a=[];for(const v of vehicles){if(v.wrecked||v.s.boat)continue;if(inGarage(v.pos.x,v.pos.z)&&a.length<3)a.push({type:v.type,color:v.color||null})}return a}
-function spawnGarage(){if(!PROG.house)return;const slots=[-420.5,-417,-413.5];PROG.garage.slice(0,3).forEach((c,i)=>{if(!VT[c.type])return;const v=spawnVehicle(c.type,slots[i],22,Math.PI,c.color||undefined);v.keep=true})}
+function spawnGarage(){if(!PROG.house)return;const slots=[-420.5,-417,-413.5].map(ox);PROG.garage.slice(0,3).forEach((c,i)=>{if(!VT[c.type])return;const v=spawnVehicle(c.type,slots[i],22,Math.PI,c.color||undefined);v.keep=true})}
 const OUTFITS=[{n:'Teal shirt & jeans',o:{shirt:'#2a9d8f',pants:'#22223b',lower:'pants',sleeve:'short'}},
   {n:'White veshti',o:{shirt:'#f4f1e8',pants:'#f4f1e8',lower:'veshti',sleeve:'long',chain:true}},
   {n:'Checked lungi',o:{shirt:'#e9c46a',pants:'#1d4ed8',lower:'lungi',sleeve:'short'}},
@@ -111,8 +111,8 @@ function houseTalk(){const t={kind:'house',obj:{x:HOUSE.px,z:HOUSE.pz},line:PROG
 
 
 /* ---------- gated areas ---------- */
-const GATES={hills:{x:-552,open:false,cols:[],grp:null,msgT:0},coast:{x:578,open:false,cols:[],grp:null,msgT:0}};
-function buildGates(){for(const k in GATES){const G=GATES[k],x=G.x,s=k==='hills'?1:-1;G.cols.push(addCollider(x-1,-560,x+1,560,400,-50));
+const GATES={hills:{x:ox(-552),open:false,cols:[],grp:null,msgT:0},coast:{x:ox(578),open:false,cols:[],grp:null,msgT:0}};
+function buildGates(){for(const k in GATES){const G=GATES[k],x=G.x,s=k==='hills'?1:-1;G.cols.push(addCollider(x-1,-BOUND,x+1,BOUND,400,-50));
   const g=new THREE.Group();const box=(w,h,d,c,px,py,pz)=>{const m=new THREE.Mesh(GEO.box,M(c));m.scale.set(w,h,d);m.position.set(px,py,pz);m.castShadow=true;g.add(m)};
   box(0.5,1.2,0.5,'#dddddd',x,0.6,-7.5);box(0.5,1.2,0.5,'#dddddd',x,0.6,7.5);for(let i=0;i<8;i++)box(0.25,0.25,1.85,i%2?'#ffffff':'#e63946',x,1.1,-6.5+i*1.85);
   box(2.4,2.6,2.4,k==='hills'?'#3f5130':'#1d3557',x+s*2.5,1.3,-10.5);box(2.8,0.2,2.8,'#c1121f',x+s*2.5,2.7,-10.5);

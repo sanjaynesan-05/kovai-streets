@@ -37,7 +37,8 @@ function aiNext(v){const a=v.ai;const opts=[];
 function playerP(){return player.vehicle?player.vehicle.pos:player.pos}
 function makeAI(v,i,j,dx,dz,cruise){const lane=v.s.cycle?RR(5.0,5.6):v.s.two?RR(2.0,5.4):LANE;v.ai={lane,i,j,dx,dz,wps:[laneWP(i,j,dx,dz,-9,lane)],turnWp:null,cruise,blockT:0,stuck:0,hitT:0};v.speed=cruise*0.6;v.vx=Math.sin(v.heading)*v.speed;v.vz=Math.cos(v.heading)*v.speed}
 function spawnAI(type,minDist){
-  for(let t=0;t<80;t++){const i=RI(-NB,NB),j=RI(-NB,NB);const[dx,dz]=rpick(DIRS);if(!inGrid(i-dx,j-dz))continue;
+  const P0=playerP(),pi=Math.round(P0.x/CELL),pj=Math.round(P0.z/CELL);/* D2: spawn within 5 blocks of the player */
+  for(let t=0;t<80;t++){const i=clamp(pi+RI(-5,5),-NB,NB),j=clamp(pj+RI(-5,5),-NB,NB);const[dx,dz]=rpick(DIRS);if(!inGrid(i-dx,j-dz))continue;
     const p=laneWP(i,j,dx,dz,-RR(12,58));const P=playerP();if(Math.hypot(p.x-P.x,p.z-P.z)<minDist)continue;
     if(vehicles.some(v=>Math.abs(v.pos.x-p.x)<9&&Math.abs(v.pos.z-p.z)<9))continue;
     const v=spawnVehicle(type,p.x,p.z,Math.atan2(dx,dz));const cr=CRUISE[type]||[9,11];makeAI(v,i,j,dx,dz,RR(cr[0],cr[1]));if(v.s.two)addRider(v);return v}
@@ -64,9 +65,9 @@ function updAI(v,dt){const a=v.ai;if(!a.wps.length)aiNext(v);let wp=a.wps[0];
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);
   const rate=v.s.steer*1.3*Math.min(1,Math.abs(v.speed)/3);v.heading+=clamp(diff,-rate*dt,rate*dt);
   if(!blocked&&target>1&&Math.abs(v.speed)<0.6)a.stuck+=dt;else a.stuck=0;
-  const P=playerP();const far=Math.hypot(v.pos.x-P.x,v.pos.z-P.z)>60;
+  const P=playerP();const dist=Math.hypot(v.pos.x-P.x,v.pos.z-P.z),far=dist>60;
   if(a.reckless){if(a.stuck>1.5){v.heading+=Math.PI*0.5*(Math.random()<0.5?-1:1);a.stuck=0;a.wps=[];}return}
-  if((a.stuck>4||a.blockT>10)&&far){relocateAI(v)}
+  if(((a.stuck>4||a.blockT>10)&&far)||(dist>420&&!v.keep&&!(mission&&mission.target===v))){relocateAI(v)}/* D2: the 20x20 map is big, so traffic that drifts far away respawns near the player */
   if(a.blockT>2.5&&!far&&Math.random()<dt*0.4&&a.blockT<12)hornAt(v.pos)}
 function relocateAI(v){const t=v.type;removeVehicle(v);spawnAI(t,110)}
 

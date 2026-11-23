@@ -49,8 +49,8 @@ function updateWanted(dt){if(starFlashT>0){starFlashT-=dt;if(starFlashT<=0)$('st
 
 /* ================= places, hospital, shop ================= */
 let SHOP={x:9.5,z:83.5};
-const PLACES=[{n:'Kovai Coast beach',x:640,z:40},{n:'the Race Course walking track',x:111,z:-65.4},{n:'the Marudhamalai temple gate',x:-333,z:-301},{n:'Ukkadam lake',x:-111,z:229},
-  {n:'the Town Hall clock tower',x:-37,z:81},{n:'Singanallur lake',x:259,z:303},{n:'the Gandhipuram bus stand',x:-37,z:-155},{n:'R.S. Puram park',x:-185,z:7.5}];
+const PLACES=[{n:'Kovai Coast beach',x:ox(640),z:40},{n:'the Race Course walking track',x:185,z:8.6},{n:'VOC Park',x:111,z:-65.4},{n:'the Saibaba Colony temple',x:-333,z:-301},{n:'Ukkadam lake',x:-111,z:229},
+  {n:'the Town Hall clock tower',x:-37,z:81},{n:'the Podanur pond',x:259,z:303},{n:'Singanallur lake',x:481,z:144},{n:'the Singanallur bus stand',x:481,z:70},{n:'the Ukkadam bus stand',x:-37,z:218},{n:'Marudhamalai temple',x:-703,z:-152},{n:'the Gandhipuram bus stand',x:37,z:-155},{n:'R.S. Puram park',x:-185,z:7.5}];
 function updateZones(dt){const healEl=$('heal');let healing=false;
   if(!player.dead&&!player.vehicle){const dh=Math.hypot(player.pos.x-HOSP.x,player.pos.z-HOSP.z);
     if(dh<3.6&&(player.hp<100)){player.hp=Math.min(100,player.hp+45*dt);healing=true}

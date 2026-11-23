@@ -6,14 +6,16 @@
 
 /* ================= world build ================= */
 const blockType={};const sp=(i,j,t)=>blockType[i+','+j]=t;
-sp(3,8,'lake');sp(8,9,'lake');sp(6,4,'race');sp(4,6,'townhall');sp(0,0,'temple');sp(4,2,'busstand');
-sp(8,3,'mill');sp(9,6,'mill');sp(7,8,'mill');sp(2,5,'park');sp(3,7,'hospital');sp(8,1,'tower');sp(5,8,'park');sp(3,4,'mall');sp(4,5,'market');sp(9,2,'college');sp(5,3,'stadium');
+sp(3,8,'lake');sp(8,9,'lake');sp(7,5,'race');sp(6,4,'park');/* D3: Race Course and VOC Park at their real positions */sp(4,6,'townhall');sp(0,0,'temple');sp(5,2,'busstand');/* D3: Gandhipuram bus stands */
+sp(8,3,'mill');sp(9,6,'mill');sp(7,8,'mill');sp(2,5,'park');sp(3,7,'hospital');sp(8,1,'tower');sp(5,8,'park');sp(3,4,'mall');sp(3,6,'market');sp(6,6,'lake');sp(5,5,'station');/* D3: Town Hall market, Valankulam Lake, Coimbatore Junction */sp(9,2,'college');sp(5,3,'stadium');
+/* D3: real landmarks placed from tools/map/landmarks.json (Town Hall block (4,6) = origin) */
+sp(4,7,'busstand');sp(11,5,'busstand');sp(11,6,'lake');sp(11,3,'airport');sp(-5,2,'temple');
 const pedBlocks=[];let HOSP={x:0,z:0};
 const BC=i=>(i-4.5)*CELL;
 function dens(cx,cz){return clamp(1-Math.hypot(cx+20,cz+40)/430,0.15,1)}
 
 function buildWorld(){
-  const gp=new THREE.PlaneGeometry(1160,3000);const guv=gp.attributes.uv;for(let i=0;i<guv.count;i++)guv.setXY(i,guv.getX(i)*1160/14,guv.getY(i)*3000/14);
+  const GW=1160+2*GX,gp=new THREE.PlaneGeometry(GW,3000);const guv=gp.attributes.uv;for(let i=0;i<guv.count;i++)guv.setXY(i,guv.getX(i)*GW/14,guv.getY(i)*3000/14);
   const ground=new THREE.Mesh(gp,new THREE.MeshLambertMaterial({map:TX.grass}));ground.rotation.x=-Math.PI/2;ground.position.set(22,0,0);ground.receiveShadow=true;scene.add(ground);
   buildTerrainGrid();buildTerrainMesh();buildCoast();
   // roads (textured asphalt) + lane dashes + zebra crossings
@@ -25,7 +27,7 @@ function buildWorld(){
       for(let t=-3;t<=3;t++){const o=t*1.9;addFlat(B_PLAIN,nx+o-0.5,nz+HR+0.6,nx+o+0.5,nz+HR+3.4,0.052,'#ece8dc');addFlat(B_PLAIN,nx+o-0.5,nz-HR-3.4,nx+o+0.5,nz-HR-0.6,0.052,'#ece8dc');
         addFlat(B_PLAIN,nx+HR+0.6,nz+o-0.5,nx+HR+3.4,nz+o+0.5,0.052,'#ece8dc');addFlat(B_PLAIN,nx-HR-3.4,nz+o-0.5,nx-HR-0.6,nz+o+0.5,0.052,'#ece8dc')}}}
   // blocks: paver sidewalks with painted kerbs
-  for(let i=0;i<10;i++)for(let j=0;j<10;j++){const cx=BC(i),cz=BC(j),t=blockType[i+','+j]||'city';
+  for(let i=-5;i<15;i++)for(let j=-5;j<15;j++){const cx=BC(i),cz=BC(j),t=blockType[i+','+j]||'city';/* blocks -5..14: the 20 x 20 city (D2); the original 10 x 10 are 0..9 */
     addFlat(B_SIDE,cx-30,cz-30,cx+30,cz+30,0.16,'#ffffff',2.5);
     addWallQ(B_CURB,cx-30,cz+30,cx+30,cz+30,0,0.16,'#ffffff',2);addWallQ(B_CURB,cx+30,cz-30,cx-30,cz-30,0,0.16,'#ffffff',2);addWallQ(B_CURB,cx+30,cz+30,cx+30,cz-30,0,0.16,'#ffffff',2);addWallQ(B_CURB,cx-30,cz-30,cx-30,cz+30,0,0.16,'#ffffff',2);
     BUILD[t](cx,cz);
@@ -36,13 +38,13 @@ function buildWorld(){
   for(let n=0;n<40;n++){let x=R(-BOUND+20,BOUND-20),z=R(-BOUND+20,BOUND-20);if(Math.abs(x)<LIM+24&&Math.abs(z)<LIM+24)continue;if(Math.abs(x)<20||Math.abs(z)<20||excluded(x,z))continue;
     building(x,z,R(7,12),R(7,11),R(3.5,6.5),pick(PAL),{noSign:true});if(rng()<0.5)addBox(B_PLAIN,4,3,4,x+8,1.5,z,'#a0522d')}
   // boundary (west: top of the Ghats, east: open sea)
-  addCollider(-1190,-BOUND-6,1020,-BOUND,400,-50);addCollider(-1190,BOUND,1020,BOUND+6,400,-50);
-  addCollider(-1190,-BOUND,-1176,BOUND,400,-50);addCollider(1010,-BOUND,1020,BOUND,400,-50);
+  addCollider(-1190-GX,-BOUND-6,1020+GX,-BOUND,400,-50);addCollider(-1190-GX,BOUND,1020+GX,BOUND+6,400,-50);
+  addCollider(-1190-GX,-BOUND,-1176-GX,BOUND,400,-50);addCollider(1010+GX,-BOUND,1020+GX,BOUND,400,-50);
   // mountains (Western Ghats to the west and north-west)
   const MC=['#58705a','#4c6650','#617a5c','#55704f'];
-  for(let n=0;n<40;n++){const h=R(180,380),r=h*R(1.0,1.5);addG(B_FAR,GEO.cone7,R(-1700,-1260),h/2+60,R(-1500,1500),pick(MC),R(0,6),0,0,r,h,r)}
-  for(let n=0;n<16;n++){const h=R(90,220),r=h*R(1.2,1.8);addG(B_FAR,GEO.cone7,R(-1100,500),h/2,R(-1500,-900),pick(MC),R(0,6),0,0,r,h,r)}
-  for(let n=0;n<10;n++){const h=R(40,90),r=h*R(2,3);addG(B_FAR,GEO.cone7,R(-1100,500),h/2,R(900,1400),pick(MC),R(0,6),0,0,r,h,r)}
+  for(let n=0;n<40;n++){const h=R(180,380),r=h*R(1.0,1.5);addG(B_FAR,GEO.cone7,R(-1700-GX,-1260-GX),h/2+60,R(-1500,1500),pick(MC),R(0,6),0,0,r,h,r)}
+  for(let n=0;n<16;n++){const h=R(90,220),r=h*R(1.2,1.8);addG(B_FAR,GEO.cone7,R(-1100-GX,500+GX),h/2,R(-1500-GX,-900-GX),pick(MC),R(0,6),0,0,r,h,r)}
+  for(let n=0;n<10;n++){const h=R(40,90),r=h*R(2,3);addG(B_FAR,GEO.cone7,R(-1100-GX,500+GX),h/2,R(900+GX,1400+GX),pick(MC),R(0,6),0,0,r,h,r)}
   buildExtras();
   finish(B_WIN,winMat,true);for(let i=1;i<4;i++)finish(B_FAC[i],FACMAT[i],true);finish(B_SHOP,shopMat,true);finish(B_ROAD,roadMat,false);finish(B_SIDE,sideMat,false);finish(B_CURB,curbMat,false);
   finish(B_PLAIN,plainMat,true);
@@ -141,16 +143,16 @@ function building(x,z,w,d,h,color,opts){opts=opts||{};
 
 
 /* ================= terrain: Western Ghats ================= */
-const TER={x0:-1182,x1:-552,z0:-1500,z1:1500,res:6};let tH=null,tRD=null,tNX=0,tNZ=0;
+const TER={x0:-1182-GX,x1:-552-GX,z0:-1500,z1:1500,res:6};let tH=null,tRD=null,tNX=0,tNZ=0;
 function hash2(x,z){let h=Math.imul(x|0,374761393)+Math.imul(z|0,668265263);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967295}
 function vnoise(x,z){const xi=Math.floor(x),zi=Math.floor(z),xf=x-xi,zf=z-zi,u=xf*xf*(3-2*xf),v=zf*zf*(3-2*zf);
   const a=hash2(xi,zi),b=hash2(xi+1,zi),c=hash2(xi,zi+1),d=hash2(xi+1,zi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
 function fbm(x,z){let s=0,a=0.5,f=1;for(let i=0;i<5;i++){s+=a*vnoise(x*f,z*f);f*=2.03;a*=0.5}return s}
-function rawMountain(x,z){const r=smooth(-560,-1010,x);if(r<=0)return 0;const n=fbm(x*0.0045+11,z*0.0045-5),ridge=1-Math.abs(fbm(x*0.009+7,z*0.009-3)*2-1);return Math.pow(r,1.35)*(140+n*110)+r*ridge*40}
-const GHAT_CP=[[-548,0],[-600,0],[-650,8],[-688,40],[-700,110],[-708,152],[-730,175],[-758,168],[-768,120],[-768,-110],[-782,-160],[-812,-176],[-836,-150],[-846,-60],[-846,110],[-862,160],[-892,176],[-916,150],[-926,60],[-932,-60],[-948,-130],[-978,-152],[-1015,-152]];
+function rawMountain(x,z){x+=GX;/* shape defined in pre-D2 coordinates */const r=smooth(-560,-1010,x);if(r<=0)return 0;const n=fbm(x*0.0045+11,z*0.0045-5),ridge=1-Math.abs(fbm(x*0.009+7,z*0.009-3)*2-1);return Math.pow(r,1.35)*(140+n*110)+r*ridge*40}
+const GHAT_CP=[[-548,0],[-600,0],[-650,8],[-688,40],[-700,110],[-708,152],[-730,175],[-758,168],[-768,120],[-768,-110],[-782,-160],[-812,-176],[-836,-150],[-846,-60],[-846,110],[-862,160],[-892,176],[-916,150],[-926,60],[-932,-60],[-948,-130],[-978,-152],[-1015,-152]].map(p=>[p[0]-GX,p[1]]);/* moved west with the hills (D2) */
 let GHAT=[],GHAT_TOP=null,FALLS=null;
 function buildGhatPath(){const curve=new THREE.CatmullRomCurve3(GHAT_CP.map(p=>new THREE.Vector3(p[0],0,p[1])),false,'centripetal');const L=curve.getLength(),n=Math.round(L/3);const pts=curve.getSpacedPoints(n);
-  let top=0;for(let a=0;a<12;a++)for(const rr of[0,25,50])top=Math.max(top,rawMountain(-1015+Math.cos(a/2)*rr,-152+Math.sin(a/2)*rr));top=Math.min(250,top+5);GHAT=pts.map((p,i)=>({x:p.x,z:p.z,h:Math.max(0,top*Math.pow(i/n,1.05))}));GHAT_TOP=GHAT[GHAT.length-1]}
+  let top=0;for(let a=0;a<12;a++)for(const rr of[0,25,50])top=Math.max(top,rawMountain(-1015-GX+Math.cos(a/2)*rr,-152+Math.sin(a/2)*rr));top=Math.min(250,top+5);GHAT=pts.map((p,i)=>({x:p.x,z:p.z,h:Math.max(0,top*Math.pow(i/n,1.05))}));GHAT_TOP=GHAT[GHAT.length-1]}
 function buildTerrainGrid(){buildGhatPath();tNX=Math.round((TER.x1-TER.x0)/TER.res)+1;tNZ=Math.round((TER.z1-TER.z0)/TER.res)+1;tH=new Float32Array(tNX*tNZ);tRD=new Float32Array(tNX*tNZ);
   const hs=new Map(),C=30;GHAT.forEach((p,i)=>{const k=Math.floor(p.x/C)*7919+Math.floor(p.z/C);let l=hs.get(k);if(!l){l=[];hs.set(k,l)}l.push(i)});
   for(let iz=0;iz<tNZ;iz++)for(let ix=0;ix<tNX;ix++){const x=TER.x0+ix*TER.res,z=TER.z0+iz*TER.res;let h=rawMountain(x,z);
@@ -158,7 +160,7 @@ function buildTerrainGrid(){buildGhatPath();tNX=Math.round((TER.x1-TER.x0)/TER.r
     bd=Math.sqrt(bd);const dt=Math.hypot(x-GHAT_TOP.x,z-GHAT_TOP.z);
     if(bd<7)h=bh;else if(bd<24){const t=smooth(7,24,bd);h=bh+(h-bh)*t}
     if(dt<50){const t=smooth(26,50,dt);h=GHAT_TOP.h+(h-GHAT_TOP.h)*t;if(dt<26)bd=Math.min(bd,6)}
-    if(x>-566)h*=smooth(-552,-570,x);tH[iz*tNX+ix]=h;tRD[iz*tNX+ix]=bd}}
+    if(x>-566-GX)h*=smooth(-552-GX,-570-GX,x);tH[iz*tNX+ix]=h;tRD[iz*tNX+ix]=bd}}
 function terrainH(x,z){if(!tH)return 0;const fx=(x-TER.x0)/TER.res,fz=(z-TER.z0)/TER.res;if(fx<0||fz<0||fx>=tNX-1||fz>=tNZ-1)return 0;const ix=fx|0,iz=fz|0,u=fx-ix,v=fz-iz,i=iz*tNX+ix;
   return tH[i]*(1-u)*(1-v)+tH[i+1]*u*(1-v)+tH[i+tNX]*(1-u)*v+tH[i+tNX+1]*u*v}
 function roadDist(x,z){if(!tRD)return 1e9;const ix=Math.round((x-TER.x0)/TER.res),iz=Math.round((z-TER.z0)/TER.res);if(ix<0||iz<0||ix>=tNX||iz>=tNZ)return 1e9;return tRD[iz*tNX+ix]}
@@ -199,8 +201,8 @@ function buildTrees(){const n=TREES.length;if(!n)return;const tr=new THREE.Insta
   for(const m of[tr,f1,f2]){m.frustumCulled=false;m.castShadow=QS.shadow>0;scene.add(m)}}
 
 /* ================= coast, sea, water ================= */
-const SHORE=684;
-function coastH(x,z){if(x<598)return 0;let h;if(x<622)h=0.12;else if(x<SHORE){const t=(SHORE-x)/(SHORE-622);h=0.12*t+(vnoise(x*0.08,z*0.05)-0.5)*0.5*t*t}else h=-(x-SHORE)*0.075-0.02;
+const SHORE0=684,SHORE=SHORE0+GX;/* SHORE0: pre-D2 coordinates used inside coastH and buildCoast */
+function coastH(x,z){x-=GX;if(x<598)return 0;let h;if(x<622)h=0.12;else if(x<SHORE0){const t=(SHORE0-x)/(SHORE0-622);h=0.12*t+(vnoise(x*0.08,z*0.05)-0.5)*0.5*t*t}else h=-(x-SHORE0)*0.075-0.02;
   const dl=Math.hypot(x-700,z+420);if(dl<46)h=Math.max(h,7.5*(1-dl/46)*(1-dl/46)*1.4);return Math.max(-9,h)}
 const waterU={time:{value:0},sunDir:{value:new THREE.Vector3(0,1,0)},sunCol:{value:new THREE.Color(1,1,1)},skyCol:{value:new THREE.Color('#9cc6e6')},fogCol:{value:new THREE.Color()},fogNear:{value:200},fogFar:{value:1500},dayF:{value:1}};
 const WV=[[-0.97,0.24,0.09,1.1,0.32],[-0.76,-0.65,0.17,1.7,0.14],[0.29,0.96,0.33,2.3,0.06]];
@@ -222,35 +224,36 @@ function seaDepth(x,z){if(x<SHORE-6)return 0;return Math.max(0,waveY(x,z)-coastH
 function isDeep(x,z){return inLake(x,z)||seaDepth(x,z)>1.35}
 function humanY(x,z,y){if(inLake(x,z))return -1.0;if(x>SHORE-6&&seaDepth(x,z)>1.35)return waveY(x,z)-1.12;return surfaceH(x,z,y)}
 const LH={g:null,beam:null};
-function buildCoast(){const x0=592,x1=1012,res=5,nx=Math.round((x1-x0)/res)+1,z0=-1500,nz=Math.round(3000/6)+1;const pos=[],col=[],uv=[],idx=[];const c=new THREE.Color();
-  for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const x=x0+ix*res,z=z0+iz*6,h=coastH(x,z);pos.push(x,h,z);uv.push(x/8,z/8);const n=vnoise(x*0.1,z*0.1);
+function buildCoast(){shifted(GX,0,buildCoast0)}/* built in pre-D2 coordinates, moved east by GX (D2) */
+function buildCoast0(){const x0=592,x1=1012,res=5,nx=Math.round((x1-x0)/res)+1,z0=-1500,nz=Math.round(3000/6)+1;const pos=[],col=[],uv=[],idx=[];const c=new THREE.Color();
+  for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const x=x0+ix*res,z=z0+iz*6,h=coastH(x+GX,z);pos.push(x,h,z);uv.push(x/8,z/8);const n=vnoise(x*0.1,z*0.1);
     if(Math.hypot(x-700,z+420)<44&&h>1.2)c.set(n>0.5?'#7a756c':'#6a665e');else if(x<604)c.set('#9aa36a');else if(h>0.05)c.set(n>0.5?'#e6d3a0':'#dcc793');else if(h>-0.6)c.set('#c9b07a');else c.set(h>-3?'#b09566':'#8a7650');
     c.multiplyScalar(0.94+n*0.12);col.push(c.r,c.g,c.b);if(ix<nx-1&&iz<nz-1){const a=iz*nx+ix;idx.push(a,a+nx,a+1,a+1,a+nx,a+nx+1)}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
-  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true,map:TX.detail}));m.receiveShadow=true;scene.add(m);
-  const wm=waterMaterial(false);const sea=(xa,xb,za,zb,sx,sz)=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(xb-xa,zb-za,sx,sz),wm);p.rotation.x=-Math.PI/2;p.position.set((xa+xb)/2,0,(za+zb)/2);p.frustumCulled=false;scene.add(p)};
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true,map:TX.detail}));m.receiveShadow=true;m.position.x=GX;scene.add(m);
+  const wm=waterMaterial(false);const sea=(xa,xb,za,zb,sx,sz)=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(xb-xa,zb-za,sx,sz),wm);p.rotation.x=-Math.PI/2;p.position.set((xa+xb)/2+GX,0,(za+zb)/2);p.frustumCulled=false;scene.add(p)};
   sea(640,1120,-900,900,96,180);sea(1120,3800,-3000,3000,60,80);sea(640,1120,900,3000,24,30);sea(640,1120,-3000,-900,24,30);
   // coastal road + link
-  addFlat(B_ROAD,598,-540,612,540,0.14,'#ffffff',8);addFlat(B_ROAD,BOUND-2,-HR,606,HR,0.03,'#ffffff',8);for(let z=-536;z<536;z+=9)addBox(B_PLAIN,0.22,0.02,3,605,0.16,z,'#e8e2c8');
+  addFlat(B_ROAD,598,-540,612,540,0.14,'#ffffff',8);addFlat(B_ROAD,BOUND-GX-2,-HR,606,HR,0.03,'#ffffff',8);for(let z=-536;z<536;z+=9)addBox(B_PLAIN,0.22,0.02,3,605,0.16,z,'#e8e2c8');
   for(let z=-530;z<=530;z+=18){if(Math.abs(z)<12)continue;palm(594,z+R(-2,2));palm(R(618,626),z+R(-4,4))}
   for(let k=0;k<8;k++){const z=-300+k*80+R(-10,10),x=630,cc=pick(['#e63946','#2a9d8f','#f4a261','#457b9d','#ffb703']);addBox(B_PLAIN,4.4,2.6,3.4,x,1.43,z,cc);addBox(B_PLAIN,3.4,1.0,0.6,x,0.65,z+1.9,'#7a5536');
-    addG(B_PLAIN,GEO.cone4,x,3.6,z,'#8d6e3c',Math.PI/4,0,0,3.9,1.8,3.2);addCollider(x-2.2,z-1.7,x+2.2,z+1.7,2.8);WZONES.push({cx:x+4,cz:z+4,rx:3,rz:3,n:1,kind:'beach'})}
+    addG(B_PLAIN,GEO.cone4,x,3.6,z,'#8d6e3c',Math.PI/4,0,0,3.9,1.8,3.2);addCollider(x-2.2,z-1.7,x+2.2,z+1.7,2.8);WZONES.push({cx:x+4+GX,cz:z+4,rx:3,rz:3,n:1,kind:'beach'})}
   for(let k=0;k<26;k++){const x=R(640,672),z=R(-420,440);if(Math.abs(z-200)<10)continue;addG(B_PLAIN,GEO.cyl8,x,1.15,z,'#ddd',0,0,0,0.04,2.2,0.04);addG(B_PLAIN,GEO.cone8,x,2.3,z,pick(['#e63946','#1d4ed8','#ffb703','#2a9d8f','#f15bb5']),0,0,0,1.5,0.5,1.5);
     if(Math.random()<0.7)addBox(B_PLAIN,0.7,0.25,1.8,x+1.2,0.25,z,'#f1faee')}
   for(let k=0;k<6;k++){const x=R(660,676),z=-120+k*40+R(-6,6);for(const s of[-0.45,0.45])addG(B_PLAIN,GEO.cyl8,x+s,0.3,z,'#7a5536',Math.PI/2,0,0,0.22,7,0.22);addG(B_PLAIN,GEO.cyl8,x,1.6,z+1,'#6d4c41',0,0,0,0.06,3,0.06)}
   {const x=652,z=120;for(const sx of[-1,1])for(const sz of[-1,1])addBox(B_PLAIN,0.15,3,0.15,x+sx*1,1.5,z+sz*1,'#f4f4f4');addBox(B_PLAIN,2.4,0.2,2.4,x,3.1,z,'#c1121f');addBox(B_PLAIN,2.6,0.15,2.6,x,4.6,z,'#f4f4f4');addCollider(x-1.2,z-1.2,x+1.2,z+1.2,3.2)}
   // lighthouse on the headland
-  {const x=700,z=-420,y=coastH(700,-420);addG(B_PLAIN,GEO.cyl16,x,y+2,z,'#cfc6b2',0,0,0,4.2,4,4.2);for(let k=0;k<6;k++)addG(B_PLAIN,CY(1,1,1,16),x,y+4+k*4.5+2.25,z,k%2?'#f4f4f4':'#c1121f',0,0,0,3-k*0.13,4.5,3-k*0.13);
+  {const x=700,z=-420,y=coastH(700+GX,-420);addG(B_PLAIN,GEO.cyl16,x,y+2,z,'#cfc6b2',0,0,0,4.2,4,4.2);for(let k=0;k<6;k++)addG(B_PLAIN,CY(1,1,1,16),x,y+4+k*4.5+2.25,z,k%2?'#f4f4f4':'#c1121f',0,0,0,3-k*0.13,4.5,3-k*0.13);
     addG(B_PLAIN,GEO.cyl16,x,y+31.3,z,'#333',0,0,0,2.9,0.4,2.9);addG(B_PLAIN,GEO.cyl16,x,y+32.8,z,'#fff2b0',0,0,0,1.6,2.6,1.6);addG(B_PLAIN,GEO.cone8,x,y+35,z,'#c1121f',0,0,0,2,1.8,2);addCollider(x-4.2,z-4.2,x+4.2,z+4.2,y+36,-10);
-    LH.g=new THREE.Group();LH.g.position.set(x,y+32.8,z);const bm=new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
-    for(const s of[-1,1]){const b=new THREE.Mesh(new THREE.ConeGeometry(14,220,14,1,true).translate(0,-110,0).rotateZ(s*Math.PI/2),bm);LH.g.add(b)}LH.beam=bm;scene.add(LH.g);PLACES.push({n:'the lighthouse',x:676,z:-400})}
+    LH.g=new THREE.Group();LH.g.position.set(x+GX,y+32.8,z);const bm=new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+    for(const s of[-1,1]){const b=new THREE.Mesh(new THREE.ConeGeometry(14,220,14,1,true).translate(0,-110,0).rotateZ(s*Math.PI/2),bm);LH.g.add(b)}LH.beam=bm;scene.add(LH.g);PLACES.push({n:'the lighthouse',x:676+GX,z:-400})}
   // jetty
   {const z=200,y=1.4;addBox(B_PLAIN,120,0.25,5,720,y-0.12,z,'#8b6b4a');for(let x=662;x<=780;x+=6)for(const s of[-2.3,2.3])addG(B_PLAIN,GEO.cyl8,x,(y-6)/2,z+s,'#5d4030',0,0,0,0.18,y+6,0.18);
     for(const s of[-1,1]){addBox(B_PLAIN,120,0.1,0.1,720,y+0.9,z+s*2.45,'#6d4c41');addCollider(660,z+s*2.5-0.15,780,z+s*2.5+0.15,y+1,y-0.3)}
-    SURF.push({minX:660,maxX:780,minZ:z-2.5,maxZ:z+2.5,h:()=>y});SURF.push({minX:648,maxX:660,minZ:z-2.5,maxZ:z+2.5,h:x=>Math.max(0.1,y*(x-648)/12)});addG(B_PLAIN,GEO.box,654,y/2,z,'#8b6b4a',0,0,Math.atan2(y,12),12.2,0.2,5);
-    PARKED.push({type:'speedboat',x:786,z:z-4,h:Math.PI/2},{type:'speedboat',x:786,z:z+4,h:Math.PI/2},{type:'fishboat',x:770,z:z+12,h:Math.PI/2},{type:'fishboat',x:760,z:z-13,h:Math.PI/2});PLACES.push({n:'the jetty',x:650,z:208})}
-  WZONES.push({cx:650,cz:-60,rx:20,rz:180,n:10,kind:'beach'},{cx:650,cz:260,rx:16,rz:120,n:6,kind:'beach'});PLACES.push({n:'Kovai Coast beach',x:640,z:40});
-  for(let k=0;k<8;k++){const x=R(642,672),z=R(-300,380),yaw=R(0,6);STATICS.push({x,z,lie:true,yaw});addBox(B_PLAIN,0.9,0.02,2,x,coastH(x,z)+0.03,z,pick(['#e63946','#ffb703','#8ecae6']),yaw)}}
+    SURF.push({minX:660+GX,maxX:780+GX,minZ:z-2.5,maxZ:z+2.5,h:()=>y});SURF.push({minX:648+GX,maxX:660+GX,minZ:z-2.5,maxZ:z+2.5,h:x=>Math.max(0.1,y*(x-GX-648)/12)});addG(B_PLAIN,GEO.box,654,y/2,z,'#8b6b4a',0,0,Math.atan2(y,12),12.2,0.2,5);
+    PARKED.push({type:'speedboat',x:786+GX,z:z-4,h:Math.PI/2},{type:'speedboat',x:786+GX,z:z+4,h:Math.PI/2},{type:'fishboat',x:770+GX,z:z+12,h:Math.PI/2},{type:'fishboat',x:760+GX,z:z-13,h:Math.PI/2});PLACES.push({n:'the jetty',x:650+GX,z:208})}
+  WZONES.push({cx:650+GX,cz:-60,rx:20,rz:180,n:10,kind:'beach'},{cx:650+GX,cz:260,rx:16,rz:120,n:6,kind:'beach'});PLACES.push({n:'Kovai Coast beach',x:640+GX,z:40});
+  for(let k=0;k<8;k++){const x=R(642,672),z=R(-300,380),yaw=R(0,6);STATICS.push({x:x+GX,z,lie:true,yaw});addBox(B_PLAIN,0.9,0.02,2,x,coastH(x+GX,z)+0.03,z,pick(['#e63946','#ffb703','#8ecae6']),yaw)}}
 
 /* ================= new city places ================= */
 const WZONES=[],STATICS=[],PARKED=[],WANDER=[];
@@ -269,6 +272,17 @@ BUILD.college=function(cx,cz){addBox(B_PLAIN,58,0.06,58,cx,0.19,cz,'#7fae5a');ad
   const sg=textPlane('KOVAI INSTITUTE OF TECHNOLOGY',10,0.9,'#1d3557','#f2d13a');sg.position.set(cx,6.4,cz+29.15);
   for(let k=0;k<6;k++)neem(cx+R(-24,24),cz+R(12,24));for(let k=0;k<5;k++)PARKED.push({type:rpick(['scooter','retro','cycle','moped']),x:cx-12+k*2.2,z:cz+22,h:0});
   WZONES.push({cx,cz:cz+6,rx:14,rz:12,n:10,kind:'college'});PLACES.push({n:'the college campus',x:cx,z:cz+33})};
+BUILD.station=function(cx,cz){addBox(B_PLAIN,58,0.06,58,cx,0.19,cz,'#bdb5a3');/* D3: Coimbatore Junction. The through line still runs along the south edge, so this is a terminus with buffer stops */
+  for(const tz of[cz+10,cz+22]){addBox(B_PLAIN,52,0.2,4,cx+2,0.27,tz,'#7a7064');for(const d of[-0.75,0.75])addBox(B_PLAIN,52,0.14,0.12,cx+2,0.4,tz+d,'#4e535a');addBox(B_PLAIN,1,1.2,3,cx-24.5,0.8,tz,'#c1121f');addCollider(cx-25,tz-1.5,cx-24,tz+1.5,1.4)}
+  addBox(B_PLAIN,50,0.9,6,cx+3,0.45,cz+16,'#d6cfc0');SURF.push({minX:cx-22,maxX:cx+28,minZ:cz+13,maxZ:cz+19,h:()=>0.9});addBox(B_PLAIN,46,0.3,8,cx+3,5,cz+16,'#9c3b2a');
+  for(let x=cx-18;x<=cx+24;x+=10.5){addBox(B_PLAIN,0.35,4.1,0.35,x,2.95,cz+16,'#d8d2c4');addCollider(x-0.2,cz+15.8,x+0.2,cz+16.2,5)}
+  wallW(cx,cz-14,50,14,9,0,'#a64b2a');addBox(B_PLAIN,51,0.6,15,cx,9.3,cz-14,'#7b2d1d');addG(B_WIN,buildingGeo(12,6,4),cx,12,cz-14,'#a64b2a');addG(B_PLAIN,GEO.cone4,cx,16.5,cz-14,'#7b2d1d',Math.PI/4,0,0,8,3,4);
+  const sg=textPlane('COIMBATORE JUNCTION',16,2.2,'#f2d13a','#111');sg.position.set(cx,7.4,cz-6.9);PLACES.push({n:'Coimbatore Junction station',x:cx,z:cz-33})};
+BUILD.airport=function(cx,cz){addBox(B_PLAIN,58,0.06,58,cx,0.19,cz,'#8c8c88');for(let x=cx-26;x<=cx+26;x+=6.5)addBox(B_PLAIN,3,0.02,0.3,x,0.23,cz+8,'#f2d13a');
+  building(cx,cz-18,50,14,11,'#cfe3e8',{noShop:true,noSign:true,noTank:true});addBox(B_PLAIN,52,0.6,16,cx,11.3,cz-18,'#e8e8e8');
+  addG(B_PLAIN,GEO.cyl,cx+22,11,cz+18,'#d9d9d9',0,0,0,1.6,22,1.6);addG(B_PLAIN,GEO.cyl,cx+22,23,cz+18,'#2a6f97',0,0,0,3,2.4,3);addCollider(cx+20.4,cz+16.4,cx+23.6,cz+19.6,24.2);
+  addG(B_PLAIN,GEO.cyl,cx-6,2.4,cz+12,'#f4f4f4',0,0,Math.PI/2,1.4,22,1.4);addBox(B_PLAIN,4,0.3,24,cx-6,2.2,cz+12,'#e0e0e0');addBox(B_PLAIN,0.3,4,2.6,cx-16.5,4.4,cz+12,'#1d4ed8');addCollider(cx-17,cz+10.5,cx+5,cz+13.5,3.8);
+  const sg=textPlane('COIMBATORE AIRPORT',14,1.6,'#1d3557','#ffffff');sg.position.set(cx,9,cz-10.9);PLACES.push({n:'the airport',x:cx,z:cz+33})};/* D3: simplified terminal, control tower and a parked plane */
 BUILD.stadium=function(cx,cz){addG(B_PLAIN,new THREE.CircleGeometry(1,40),cx,0.2,cz,'#5f9e3e',0,-Math.PI/2,0,19,15,1);addG(B_PLAIN,new THREE.RingGeometry(15,18,44),cx,0.21,cz,'#b5583a',0,-Math.PI/2,0,1.22,1,1);
   for(let k=0;k<30;k++){const a=k/30*Math.PI*2;if(Math.abs(Math.sin(a)-1)<0.08&&Math.cos(a)>-0.3&&Math.cos(a)<0.3)continue;if(Math.abs(a-Math.PI/2)<0.25)continue;
     for(let t=0;t<3;t++){const rx=23.5+t*1.6,rz=19.5+t*1.6,x=cx+Math.cos(a)*rx,z=cz+Math.sin(a)*rz,hh=1.0+t*1.3;addBox(B_PLAIN,5.2,hh,1.6,x,hh/2,z,'#bdb8ad',-a+Math.PI/2);addBox(B_PLAIN,5.0,0.12,1.4,x,hh+0.06,z,pick(['#1d4ed8','#f2c200','#c1121f']),-a+Math.PI/2)}
@@ -281,11 +295,11 @@ function teaStallAt(x,z,y,fz){addBox(B_PLAIN,2.6,1.0,1.1,x,y+0.5,z,'#2a9d8f');ad
 
 
 /* ================= living city: landmarks, sky, weather ================= */
-const TRACKZ=405,STATUE={x:-480,z:-200},FLY={xa:86,x1:126,x2:300,xb:340,H:7,hw:6.5};
+const TRACKZ=ox(405),STATUE={x:ox(-480),z:-200},FLY={xa:86,x1:126,x2:300,xb:340,H:7,hw:6.5};
 const FLY_CLEAR=3.6; // clearance (m) under the flyover deck that the tallest vehicles need
 const LAKES=[],SURF=[],STALLS=[],MALLPEOPLE=[],CROSS=[],FLAMES=[];
-function excluded(x,z){if(Math.abs(z-TRACKZ)<16)return true;if(extraExcluded(x,z))return true;if(x>30&&x<190&&z>372&&z<425)return true;
-  if(x>-540&&x<-420&&z>-262&&z<-140)return true;if(Math.abs(x-STATUE.x)<6&&z>-200&&z<0)return true;return false}
+function excluded(x,z){if(Math.abs(z-TRACKZ)<16)return true;if(extraExcluded(x,z))return true;if(x>30&&x<190&&z>ox(372)&&z<ox(425))return true;
+  if(x>ox(-540)&&x<ox(-420)&&z>-262&&z<-140)return true;if(Math.abs(x-STATUE.x)<6&&z>-200&&z<0)return true;return false}
 function flyH(x){return x<FLY.x1?FLY.H*(x-FLY.xa)/(FLY.x1-FLY.xa):x>FLY.x2?FLY.H*(FLY.xb-x)/(FLY.xb-FLY.x2):FLY.H}
 function surfaceH(x,z,y){let best=groundH(x,z);for(const s of SURF){if(x<s.minX||x>s.maxX||z<s.minZ||z>s.maxZ)continue;const hh=s.h(x,z);if(hh>best&&y>=hh-1.6)best=hh}return best}
 function inLake(x,z){for(const L of LAKES)if(Math.abs(x-L.cx)<27.3&&Math.abs(z-L.cz)<27.3)return true;return false}
@@ -295,7 +309,7 @@ function textPlane(txt,w,h,bg,fg,font){const c=document.createElement('canvas');
   const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)}));scene.add(m);return m}
 function wallW(x,z,w,d,h,y0,col){y0=y0||0;addG(B_WIN,buildingGeo(w,h,d),x,y0+h/2,z,col);addCollider(x-w/2,z-d/2,x+w/2,z+d/2,y0+h,y0>0?y0:-1)}
 
-function buildExtras(){buildFlyover();buildRail();buildStatue();buildTeaStalls();buildPlayExtras()}
+function buildExtras(){buildKoniamman();buildStreetSigns();buildFlyover();buildRail();buildStatue();buildTeaStalls();buildPlayExtras()}
 
 /* --- Avinashi Road style flyover (east, over the main road) --- */
 function buildFlyover(){const{xa,x1,x2,xb,H,hw}=FLY,L=Math.hypot(x1-xa,H),a=Math.atan2(H,x1-xa);
@@ -358,12 +372,21 @@ BUILD.mall=function(cx,cz){const H=16.5,F1=5.5,F2=11,G='#a9cfe0';
   const sign=textPlane('KOVAI CENTRAL',22,3,'#1d3557','#ffd23f');sign.position.set(cx,13.2,cz+21.35);
   PLACES.push({n:'Kovai Central mall',x:cx,z:cz+25})};
 
-/* --- railway: track, Kovai Junction station, level crossing --- */
+/* --- green street-name signs at the start and end of each named road --- */
+function buildStreetSigns(){for(const r of ROADS){const ns=r.x1-r.x0<r.z1-r.z0;for(const e of[0,1]){const x=ns?r.x1+2.2:(e?r.x1-4:r.x0+4),z=ns?(e?r.z1-4:r.z0+4):r.z1+2.2;
+  addG(B_PLAIN,GEO.cyl,x,1.6,z,'#7a7a7a',0,0,0,0.08,3.2,0.08);addCollider(x-0.15,z-0.15,x+0.15,z+0.15,3.2);
+  for(const s of[-1,1]){const t=textPlane(r.n.toUpperCase(),3.6,0.5,'#1b6e3a','#ffffff');t.position.set(x+(ns?s*0.02:0),3.3,z+(ns?0:s*0.02));t.rotation.y=(ns?Math.PI/2:0)+(s<0?Math.PI:0)}}}}
+/* --- Koniamman Temple: small gopuram shrine on the east side of the Town Hall block (D3; real temple is about 0.3 km east of Town Hall) --- */
+function buildKoniamman(){const x=-13,z=104,TC=['#f4a6a6','#9fd3e8','#f7e08a','#a7e0a3','#f5b97a'];addBox(B_PLAIN,8,0.3,8,x,0.3,z,'#d8c9a8');addBox(B_PLAIN,6,3.2,6,x,2,z,'#e0d2b4');addCollider(x-3,z-3,x+3,z+3,3.6);
+  let y=3.6;for(let t=0;t<5;t++){const w=5.4-t*0.9;addBox(B_PLAIN,w,1.3,w,x,y+0.65,z,TC[t]);y+=1.3}addG(B_PLAIN,GEO.sph,x,y+0.5,z,'#e8b923',0,0,0,0.7,0.9,0.7);
+  addBox(B_PLAIN,1.8,2.4,0.2,x,1.6,z+3.05,'#6d4c41');FLAMES.push({x:x-1.6,y:1.2,z:z+3.4},{x:x+1.6,y:1.2,z:z+3.4});PLACES.push({n:'Koniamman temple',x,z:z+8})}
+/* --- railway: track, Podanur Junction station (south edge), level crossing --- */
 function buildRail(){const Z=TRACKZ;
   addBox(B_PLAIN,2*BOUND,0.25,5,0,0.12,Z,'#7a7064');for(const dz of[-0.75,0.75])addBox(B_PLAIN,2*BOUND,0.14,0.12,0,0.32,Z+dz,'#4e535a');
   for(let x=-BOUND;x<=BOUND;x+=2.4)addBox(B_PLAIN,0.35,0.08,2.6,x,0.27,Z,'#5b4636');
+  shifted(0,GX,()=>{/* station: pre-D2 coordinates, moved south with the railway (D2) */
   addBox(B_PLAIN,120,0.9,7.4,110,0.45,397.9,'#bdb5a3');addBox(B_PLAIN,120,0.06,0.3,110,0.92,401.45,'#f2d13a');
-  SURF.push({minX:50,maxX:170,minZ:394.2,maxZ:401.6,h:()=>0.9});
+  SURF.push({minX:50,maxX:170,minZ:394.2+GX,maxZ:401.6+GX,h:()=>0.9});
   addBox(B_PLAIN,110,0.3,4.8,110,5,398.6,'#9c3b2a');for(let x=58;x<=162;x+=13){addBox(B_PLAIN,0.35,4.1,0.35,x,2.95,398.2,'#d8d2c4');addCollider(x-0.2,398,x+0.2,398.4,5)}
   for(let x=64;x<=156;x+=13)addBox(B_PLAIN,2.2,0.45,0.6,x,1.12,396.4,'#6b4f3a');
   const W='#a64b2a',T='#efe2c2',H=10;
@@ -377,13 +400,13 @@ function buildRail(){const Z=TRACKZ;
   addBox(B_PLAIN,79,0.04,13,110,0.2,387,'#d6cfc0');
   for(let k=0;k<4;k++){addBox(B_PLAIN,4,1.1,1,76+k*4.5,0.7,384,'#5d4037');addBox(B_PLAIN,4,1.6,0.15,76+k*4.5,2.2,383.3,'#8d6e63')}addCollider(74,383.5,92,384.5,1.2);
   for(let r=0;r<3;r++)for(let k=0;k<4;k++)addBox(B_PLAIN,4,0.45,0.6,104+k*9,0.4,384+r*3.5,'#6b4f3a');
-  const nb=textPlane('KOVAI JUNCTION',16,2.4,'#f2d13a','#111');nb.position.set(110,8.2,379.6);nb.rotation.y=Math.PI;
-  for(const x of[80,140]){const b=textPlane('KOVAI JUNCTION',7,1.1,'#f2d13a','#111');b.position.set(x,4.2,400.9);b.rotation.y=Math.PI;
-    const b2=textPlane('KOVAI JUNCTION',7,1.1,'#f2d13a','#111');b2.position.set(x,4.2,401.0)}
+  const nb=textPlane('PODANUR JUNCTION',16,2.4,'#f2d13a','#111');nb.position.set(110,8.2,379.6+GX);nb.rotation.y=Math.PI;
+  for(const x of[80,140]){const b=textPlane('PODANUR JUNCTION',7,1.1,'#f2d13a','#111');b.position.set(x,4.2,400.9+GX);b.rotation.y=Math.PI;
+    const b2=textPlane('PODANUR JUNCTION',7,1.1,'#f2d13a','#111');b2.position.set(x,4.2,401.0+GX)}});
   for(const z of[Z-8,Z+8]){addBox(B_PLAIN,0.4,1.6,0.4,8.5,0.8,z,'#ddd');const pv=new THREE.Group();pv.position.set(8.5,1.4,z);
     const boom=new THREE.Mesh(GEO.box,M('#e63946'));boom.scale.set(14.5,0.18,0.18);boom.position.x=-7.25;pv.add(boom);
     for(let k=0;k<5;k++){const s=new THREE.Mesh(GEO.box,M('#ffffff'));s.scale.set(1.2,0.2,0.2);s.position.x=-1.5-k*2.8;pv.add(s)}pv.rotation.z=-1.45;scene.add(pv);CROSS.push(pv)}
-  PLACES.push({n:'Kovai Junction station',x:110,z:372})}
+  PLACES.push({n:'Podanur Junction station',x:110,z:ox(372)})}
 const train={g:null,L:0,x:0,dir:-1,v:0,state:'wait',t:18,dwell:0,stopped:false,horned:false};
 function buildTrain(){const g=new THREE.Group();const box=(w,h,d,c,x,y,mat)=>{const m=new THREE.Mesh(GEO.box,mat||M(c));m.scale.set(w,h,d);m.position.set(x,y,0);m.castShadow=true;g.add(m);return m};
   const CL=20,EL=17,gap=1.2;let cur=0;

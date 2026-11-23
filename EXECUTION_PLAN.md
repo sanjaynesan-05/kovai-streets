@@ -104,9 +104,39 @@ Phases are kept small, so each one is a single focused change followed by one co
 
 ---
 
-## Phase D: City population and traffic (TODO §12)
+## Phase D: Coimbatore city map, then population and traffic (TODO §12)
 
-**Goal:** a busier city without slowing it down.
+**Goal:** a map that people from Coimbatore recognise, then a busier city on top of it.
+
+**Your decisions (settled):**
+- **Hybrid approach:** keep the grid engine (blocks, AI lanes, box collisions). Move districts and landmarks to their real relative positions, and add the main arterial roads as angled, named roads.
+- **Scale:** about 1.5 km across, a 20 × 20 grid of blocks. That is roughly 1:10 for the central city.
+- **Coast:** the fictional coast becomes a fictional reservoir with a boat jetty. Missions 5 and 14 get reworded.
+
+**Honest limits of the hybrid approach** (the README must say so; no "geographically accurate" claim):
+- Real distances can't be kept at one scale. Marudhamalai is about 10 km from Town Hall and the airport about 8 km, so the outskirts are compressed more than the centre. Directions and the order of places are kept.
+- Roads stay mostly on the grid. Only the arterials are angled.
+- The reservoir and jetty are fictional and stay east of the city. The real Siruvani and Pilloor reservoirs are in the west.
+
+**Audit (done):**
+- **Current map:** a 10 × 10 grid with 74 m blocks (`CELL`, `NB` in `core.js`), 740 m across. North is −z.
+- **Districts:** 18 named district points (`DISTRICTS` in `core.js`). Their directions already match the real city.
+- **Fixed positions that move with the map edge:** the Ghats terrain (`TER`, x < −552), the coast (`SHORE`, x > 596), the railway (`TRACKZ`), the flyover (`FLY`), the statue, the tea stalls, block types (`sp(i,j,…)` in `world.js`), and every mission coordinate in `missions.js` and `story2.js`.
+
+**Steps** (one commit each; each step leaves the game fully playable):
+
+| Step | Work | Verify |
+|---|---|---|
+| D1 ✓ | `tools/map/`: a landmark registry (name, latitude/longitude, category) and one `geoToGame()` transform. A report compares real positions with today's game positions. Uses OpenStreetMap coordinates, downloaded once (ODbL, attribution added to the credits and README). | Report lists every landmark with its real direction and distance from Town Hall, and whether the game position matches |
+| D2 ✓ (needs your playtest) | Grow the grid to 20 × 20. The current city stays in the middle with unchanged coordinates. Ghats, reservoir and edge features move outward with the map edge, and mission coordinates in those areas shift by the same amount. | All Act 1 and Act 2 regression tests pass; saves load; minimap covers the new area |
+| D3 ✓ (needs your playtest; Podanur Junction stays on the south line) | Place districts and landmarks from the registry: bus stands, Town Hall, Koniamman Temple, the railway junction, the lakes (Valankulam, Ukkadam/Periyakulam, Singanallur), Race Course, VOC Park, Lakshmi Mills, Hope College, the airport edge, and Marudhamalai temple in the hills. New blocks get district-specific buildings. | Each landmark is within one block of its registry position; missions near moved landmarks still complete |
+| D4 | Arterial roads as angled, named roads joining the grid at the real junctions: Avinashi, Trichy, Mettupalayam, Sathy, Palakkad and Pollachi Roads. Cross Cut Road, DB Road, Race Course Road and 100 Feet Road become named grid streets. The flyover becomes the Avinashi Road flyover. | Cars drive each arterial end to end without getting stuck; flyover and underpass tests pass |
+| D5 | The coast becomes the reservoir: water, a jetty, and the hill road. Missions 5 and 14 are reworded. | Missions 5 and 14 complete; nothing still refers to a beach or the sea |
+| D6 | Road graph and GPS: a navigation graph built from the grid and the arterials, a route line on the minimap, distance to the destination, and landmark, shop and police markers. | GPS route avoids buildings between any two districts |
+| D7 | Population and traffic (the original Phase D scope below): density by district, local vehicle mix (town buses, autos, two-wheelers), parked cars, traffic signals at the named junctions. | Counts differ by district; frame time within 10% of the baseline |
+| D8 | Validation report: landmark and junction positions against the registry, connectivity, frame rate in dense and hill areas, and a list of what still needs manual checking. | Report written; open items listed |
+
+**Original Phase D scope (now step D7):**
 
 **Scope:**
 - **District density table:** Gandhipuram is high, the outskirts low, the Ghats very low.

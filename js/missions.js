@@ -83,7 +83,7 @@ function stWreck(make,txt,opt){opt=opt||{};return{auto(m){if(m.tgt)m.tgt.wrecked
   mk(v.pos.x,v.pos.z);m.txt=txt;if(opt.tick)opt.tick(v,dt);const P=playerP();if(Math.hypot(v.pos.x-P.x,v.pos.z-P.z)>(opt.far||420))return'They got away';return false}}}
 function courierCar(){let i=clamp(Math.round(GIVER.x/CELL),-NB,NB),j=clamp(Math.round(GIVER.z/CELL),-NB,NB);const dir=rpick(DIRS.filter(d=>inGrid(i-d[0],j-d[1])));
   const p=laneWP(i,j,dir[0],dir[1],-22);const v=spawnVehicle('suv',p.x,p.z,Math.atan2(dir[0],dir[1]),'#151515');makeAI(v,i,j,dir[0],dir[1],22);v.ai.reckless=true;v.ai.flee=true;v.hp=900;return v}
-function scorpionBoat(){const v=spawnVehicle('speedboat',820,170,0);v.hp=600;return v}
+function scorpionBoat(){const v=spawnVehicle('speedboat',ox(820),170,0);v.hp=600;return v}
 const STORY=[
   {title:'Smoke Over the Mills',reward:2000,intro:'Vanakkam, thambi. I ran the looms at Podanur for thirty years. Now the Black Scorpions squeeze my workers for money every week. Will you help?',
    make:()=>[stTalk('a1_m1_go'),stKill(182,259,5,'Clear the Black Scorpions out of the Podanur mill',{rx:16,rz:3}),stTalk('a1_m1_end')]},
@@ -94,7 +94,7 @@ const STORY=[
   {title:'Ghat Road Deal',reward:5000,intro:'Vettu Velu is meeting gun runners at the hilltop viewpoint. Without those guns, Sundaram is weak.',
    make:()=>[stGo(GHAT_TOP.x,GHAT_TOP.z,'Drive up the ghat road to the hilltop viewpoint',{r:40}),stBoss(GHAT_TOP.x+6,GHAT_TOP.z+4,'Vettu Velu',4,900,'Sundaram\'s right-hand man'),stTalk('a1_m4_end')]},
   {title:'The Jetty Shipment',reward:6000,intro:'Sundaram\'s last shipment arrives by speedboat at the jetty on Kovai Coast. Stop it.',
-   make:()=>[stGo(650,200,'Go to the jetty on Kovai Coast',{r:14}),stKill(725,200,4,'Take out the smugglers on the jetty',{rx:24,rz:1.4}),
+   make:()=>[stGo(ox(650),200,'Go to the jetty on Kovai Coast',{r:14}),stKill(ox(725),200,4,'Take out the smugglers on the jetty',{rx:24,rz:1.4}),
      stWreck(scorpionBoat,'Sink the smugglers\' speedboat (take a boat, or shoot it from the jetty)',{far:700,tick:(v,dt)=>{if(v!==player.vehicle){v.heading+=0.35*dt;v.speed=13}}}),
      stTalk('a1_m5_end')]},
   {title:'Silk Sundaram',reward:25000,intro:'This is it. Sundaram and every Scorpion left are holed up in the old Kovai Mills. End it tonight.',
@@ -119,9 +119,9 @@ function extraTalkable(){const p=player.pos;if(Math.hypot(p.x-GIVER.x,p.z-GIVER.
   if(Math.hypot(p.x-HOUSE.px,p.z-HOUSE.pz)<2.8)return{kind:'house',hint:PROG.house?'to use your safehouse':'to look at the house for sale',custom:houseTalk};return null}
 
 /* ---------- collectibles: film reels, stunt jumps, rampages ---------- */
-const REELS=[[-106,-49,1],[-96,-37,1],[110,398,1],[213,0,1],[-333,-339.5,0],[-21,95,0],[111,-18,0],[-487,-180,0],['hill'],['falls'],[676,-410,0],[776,200,1],[652,125,0],[37,-111,0],[333,-175,0],[-43.7,27,0],[-111,160,0],[-182,47,0],[265,303.8,0],[204,3,0]];
+const REELS=[[-106,-49,1],[-96,-37,1],[110,ox(398),1],[213,0,1],[-333,-339.5,0],[-21,95,0],[111,-18,0],[ox(-487),-180,0],['hill'],['falls'],[ox(676),-410,0],[ox(776),200,1],[ox(652),125,0],[37,-111,0],[333,-175,0],[-43.7,27,0],[-111,160,0],[-182,47,0],[265,303.8,0],[204,3,0]];
 const reelObjs=[];
-const RAMPS=[{id:0,a:[440,0],d:[1,0]},{id:1,a:[-470,0],d:[-1,0]},{id:2,a:[0,-440],d:[0,-1]},{id:3,a:[0,440],d:[0,1]},{id:4,a:[645,-150],d:[0,1]}];
+const RAMPS=[{id:0,a:[ox(440),0],d:[1,0]},{id:1,a:[ox(-470),0],d:[-1,0]},{id:2,a:[0,ox(-440)],d:[0,-1]},{id:3,a:[0,ox(440)],d:[0,1]},{id:4,a:[ox(645),-150],d:[0,1]}];
 function buildRamps(){for(const r of RAMPS){const[ax,az]=r.a,[dx,dz]=r.d,L=r.L=9,H=r.H=2.4,W=r.W=5;const cx=ax+dx*L/2,cz=az+dz*L/2,ang=Math.atan2(H,L),Ls=Math.hypot(L,H);const gy=r.gy=surfaceH(cx,cz,0);
   if(dx!==0)addG(B_PLAIN,GEO.box,cx,gy+H/2-0.1,cz,'#e0a800',0,0,dx*ang,Ls,0.25,W);else addG(B_PLAIN,GEO.box,cx,gy+H/2-0.1,cz,'#e0a800',-dz*ang,0,0,W,0.25,Ls);
   for(const s of[-1,1]){const ox=dz*s*(W/2-0.4),oz=dx*s*(W/2-0.4);if(dx!==0)addG(B_PLAIN,GEO.box,cx+ox,gy+H/2-0.02,cz+oz,'#111',0,0,dx*ang,Ls,0.25,0.35);else addG(B_PLAIN,GEO.box,cx+ox,gy+H/2-0.02,cz+oz,'#111',-dz*ang,0,0,0.35,0.25,Ls)}

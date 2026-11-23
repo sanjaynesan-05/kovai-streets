@@ -59,7 +59,7 @@ const roadMat=new THREE.MeshPhongMaterial({map:TX.asphalt,shininess:30,specular:
 B_WIN.tex=true;const B_FAC=[B_WIN,batch(),batch(),batch()];B_FAC.forEach(b=>b.tex=true);const B_SHOP=batch(),B_ROAD=batch(),B_SIDE=batch(),B_CURB=batch();[B_SHOP,B_ROAD,B_SIDE,B_CURB].forEach(b=>b.tex=true);
 function quad(B,a,b,c,d,ua,ub,uc,ud,color){const v=[a,b,c,a,c,d],u=[ua,ub,uc,ua,uc,ud];
   const nx=(b[1]-a[1])*(c[2]-a[2])-(b[2]-a[2])*(c[1]-a[1]),ny=(b[2]-a[2])*(c[0]-a[0])-(b[0]-a[0])*(c[2]-a[2]),nz=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]),nl=Math.hypot(nx,ny,nz)||1;
-  _col.set(color||'#ffffff');for(let i=0;i<6;i++){B.pos.push(v[i][0],v[i][1],v[i][2]);B.nor.push(nx/nl,ny/nl,nz/nl);B.uv.push(u[i][0],u[i][1]);B.col.push(_col.r,_col.g,_col.b)}}
+  _col.set(color||'#ffffff');for(let i=0;i<6;i++){B.pos.push(v[i][0]+BO.x,v[i][1],v[i][2]+BO.z);B.nor.push(nx/nl,ny/nl,nz/nl);B.uv.push(u[i][0],u[i][1]);B.col.push(_col.r,_col.g,_col.b)}}
 function addFlat(B,x0,z0,x1,z1,y,color,us){us=us||8;quad(B,[x0,y,z1],[x1,y,z1],[x1,y,z0],[x0,y,z0],[x0/us,z1/us],[x1/us,z1/us],[x1/us,z0/us],[x0/us,z0/us],color)}
 function addWallQ(B,x0,z0,x1,z1,y0,y1,color,us){const L=Math.hypot(x1-x0,z1-z0)/(us||2);quad(B,[x0,y0,z0],[x1,y0,z1],[x1,y1,z1],[x0,y1,z0],[0,0],[L,0],[L,1],[0,1],color)}
 function shopGeo(w,d){const g=new THREE.BoxGeometry(w,3.6,d);const uv=g.attributes.uv;const off=Math.floor(rng()*8);

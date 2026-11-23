@@ -34,7 +34,7 @@ const peds=[],goons=[];
 const PL=55,PP=220;
 function pedPos(p){const H=27.5+p.off;let s=((p.s%PP)+PP)%PP;const seg=Math.floor(s/PL),u=(s-seg*PL)/PL*2*H;
   if(seg===0)return[p.cx-H+u,p.cz-H];if(seg===1)return[p.cx+H,p.cz-H+u];if(seg===2)return[p.cx+H-u,p.cz+H];return[p.cx-H,p.cz+H-u]}
-function placePed(p,minD){for(let t=0;t<30;t++){const b=rpick(pedBlocks);const P=playerP();if(minD&&Math.hypot(b.cx-P.x,b.cz-P.z)<minD)continue;p.cx=b.cx;p.cz=b.cz;break}
+function placePed(p,minD){for(let t=0;t<60;t++){const b=rpick(pedBlocks);const P=playerP(),d=Math.hypot(b.cx-P.x,b.cz-P.z);if((minD&&d<minD)||(d>300&&t<59))continue;/* D2: stay within 300 m of the player */p.cx=b.cx;p.cz=b.cz;break}
   p.s=RR(0,PP);p.dir=Math.random()<0.5?1:-1;p.off=RR(-1.2,1.2);p.dead=false;p.fly=null;p.flee=0;p.talk=false;p.hp=50;p.fight=false;p.stagger=0;p.punchCD=1;p.punchT=0;p.hidden=false;p.inV=null;p.h.g.rotation.x=0;p.h.g.rotation.z=0;p.h.g.visible=true;[p.x,p.z]=pedPos(p)}
 const NAMES_F=['Lakshmi','Priya','Anitha','Kavitha','Saranya','Revathi','Nandhini','Shalini'],NAMES_M=['Murugan','Karthik','Senthil','Ravi','Prakash','Arun','Ganesh','Vignesh'];
 function spawnPed(){const female=Math.random()<0.48;const shirt=rpick(SHIRTS);const lower=female?rpick(['saree','saree','kurta','kurta','pants']):rpick(['pants','pants','pants','veshti','lungi','lungi']);
@@ -54,7 +54,7 @@ function panic(x,z,r){for(const p of peds){if(!p.dead&&!p.hidden&&!p.talk&&!p.fi
 function updatePeds(dt){const P=playerP();
   for(const p of peds){if(p.hidden)continue;const dx=p.x-P.x,dz=p.z-P.z,far=dx*dx+dz*dz>200*200;
     if(p.dead){if(p.fly){flyStep(p,dt);continue}p.deadT+=dt;if(p.deadT>15&&(far||p.deadT>40))placePed(p,150);continue}
-    p.h.g.visible=!far;if(far&&!p.talk){p.s+=p.dir*p.speed*dt;[p.x,p.z]=pedPos(p);continue}
+    p.h.g.visible=!far;if(far&&!p.talk){if(dx*dx+dz*dz>420*420)placePed(p,150);/* D2: walkers left far behind reappear near the player */p.s+=p.dir*p.speed*dt;[p.x,p.z]=pedPos(p);continue}
     if(p.fight){if(updPedFight(p,dt))continue}
     if(p.talk){p.yaw+=angDiff(p.yaw,Math.atan2(player.pos.x-p.x,player.pos.z-p.z))*Math.min(1,dt*6);animHuman(p.h,0,0,false);p.h.g.rotation.y=p.yaw;continue}
     p.umb.visible=rainF>0.35&&p.hasUmb;const sp=p.flee>0?5.2:p.speed*(rainF>0.35&&!p.hasUmb?2:1);p.flee-=dt;p.s+=p.dir*sp*dt;const[nx,nz]=pedPos(p);

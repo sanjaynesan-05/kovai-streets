@@ -68,7 +68,7 @@ function init(){buildWheel();setupTouch();buildWorld();buildTrees();spawnWandere
   for(const[k,x,z]of[['hosp',HOSP.x,HOSP.z],['gun',SHOP.x,SHOP.z]]){const s=iconSprite(k,x,3.6,z,2.6);s.userData.y=3.6;zoneSprites.push(s)}
   for(const f of FRIENDS){f.h=makeHuman({...f.look,gun:true});f.h.gun.visible=false;f.icon=iconSprite('heart',f.home.x,3.4,f.home.z,2)}
   spawnVehicle('car',-25,-154.2,Math.PI/2,'#b3202a');spawnVehicle('auto',-15,-154.4,Math.PI/2);
-  const bs={x:BC(4),z:BC(2)};for(const[ox,oz]of[[-10,-8],[10,-8],[-10,8],[10,8]])spawnVehicle('bus',bs.x+ox,bs.z+oz,Math.PI/2);
+  const bs={x:BC(5),z:BC(2)};for(const[ox,oz]of[[-10,-8],[10,-8],[-10,8],[10,8]])spawnVehicle('bus',bs.x+ox,bs.z+oz,Math.PI/2);
   for(let n=0;n<12;n++){const i=RI(-NB,NB),j=RI(-NB,NB);const[dx,dz]=rpick(DIRS);if(!inGrid(i+dx,j+dz))continue;const t=RR(15,55);
     spawnVehicle(Math.random()<0.7?'car':'auto',i*CELL+dx*t+dz*6.2,j*CELL+dz*t-dx*6.2,Math.atan2(dx,dz))}
   for(let n=0;n<AI_TARGET;n++)spawnAI(aiType(),25)
