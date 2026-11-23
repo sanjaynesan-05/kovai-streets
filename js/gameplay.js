@@ -6,27 +6,44 @@
 
 /* ================= police / wanted ================= */
 let wanted=0,wantedCool=0,policeSpawnT=0;
-function addWanted(n){if(player.dead)return;const before=wanted;wanted=Math.min(5,wanted+n);wantedCool=0;if(wanted>before)$('stars').classList.add('flash');starFlashT=3}
+function addWanted(n){if(player.dead)return;const before=wanted;if(before===0){const P=playerP();lastSeen.x=P.x;lastSeen.z=P.z}wanted=Math.min(5,wanted+n);wantedCool=0;if(wanted>before)$('stars').classList.add('flash');starFlashT=3}
+/* Witnesses: a crime at (x,z) only adds stars if someone sees it within WIT_R. Police add them at once; a pedestrian
+   runs off and reports after REPORT_T s, unless they are stopped first. */
+const WIT_R=40,REPORT_T=5;let reports=[],policeSeen=false;const lastSeen={x:0,z:0};
+function witnessed(x,z,n){const sees=(ox,oz,oy)=>Math.hypot(ox-x,oz-z)<WIT_R&&los(ox,oy,oz,x,1.2,z);
+  for(const v of vehicles)if(v.policeAI&&!v.policeAI.leaving&&sees(v.pos.x,v.pos.z,1.5)){addWanted(n);return}
+  for(const g of goons)if(g.cop&&!g.dead&&sees(g.x,g.z,1.6)){addWanted(n);return}
+  let w=null,bd=WIT_R;for(const p of peds){if(p.dead||p.hidden||p.talk)continue;const d=Math.hypot(p.x-x,p.z-z);if(d<bd&&sees(p.x,p.z,1.6)){bd=d;w=p}}
+  if(!w)return;w.flee=REPORT_T+3;if(!reports.some(r=>r.p===w)){reports.push({p:w,t:REPORT_T,n});floatMsg('A witness is calling the police!')}else reports.find(r=>r.p===w).n+=n}
+function updateReports(dt){for(let i=reports.length-1;i>=0;i--){const r=reports[i];if(r.p.dead||r.p.hidden){reports.splice(i,1);continue}
+  r.t-=dt;if(r.t<=0){reports.splice(i,1);addWanted(r.n);toast('REPORTED','A witness called the police',2)}}}
+/* Search: without sight of you, police cars drive to your last known position and search around it. */
+function policeGoal(pa){if(policeSeen){pa.st=null;return playerP()}
+  if(!pa.st)pa.st={x:lastSeen.x,z:lastSeen.z};return pa.st}
 let starFlashT=0;
 function spawnPolice(){const P=playerP();
   for(let t=0;t<60;t++){const i=RI(-NB,NB),j=RI(-NB,NB);const x=i*CELL,z=j*CELL;const d=Math.hypot(x-P.x,z-P.z);if(d<110||d>220)continue;
     if(vehicles.some(v=>Math.abs(v.pos.x-x)<6&&Math.abs(v.pos.z-z)<6))continue;
     const v=spawnVehicle('police',x,z,Math.atan2(P.x-x,P.z-z));v.speed=14;v.policeAI={shootT:2,stuck:0,reverse:0,revSteer:1,leaving:false,leaveT:0};return v}}
-function updPolice(v,dt){const pa=v.policeAI;const T=playerP();const dx=T.x-v.pos.x,dz=T.z-v.pos.z,d=Math.hypot(dx,dz);
+function updPolice(v,dt){const pa=v.policeAI;const T=policeGoal(pa);const dx=T.x-v.pos.x,dz=T.z-v.pos.z,d=Math.hypot(dx,dz);
+  if(!policeSeen&&d<18)pa.st={x:lastSeen.x+RR(-30,30),z:lastSeen.z+RR(-30,30)};/* reached the search point: check another spot nearby */
   if(wanted===0||player.dead)pa.leaving=true;
   if(pa.leaving){pa.leaveT+=dt;v.speed+=clamp(16-v.speed,-v.s.brake*dt,v.s.acc*dt);if(pa.leaveT>9&&d>70)removeVehicle(v);return}
   if(d>300){removeVehicle(v);return}
-  if(pa.block&&!pa.broke&&d>22){v.speed*=Math.max(0,1-4*dt);pa.shootT-=dt;if(d<34&&pa.shootT<=0){pa.shootT=RR(1,1.6);enemyShoot(v.pos.x,1.5,v.pos.z,clamp(0.55-d/80,0.15,0.45),6)}return}pa.broke=true;
+  if(pa.block&&!pa.broke&&d>22){v.speed*=Math.max(0,1-4*dt);pa.shootT-=dt;if(policeSeen&&d<34&&pa.shootT<=0){pa.shootT=RR(1,1.6);enemyShoot(v.pos.x,1.5,v.pos.z,clamp(0.55-d/80,0.15,0.45),6)}return}pa.broke=true;
   if(pa.reverse>0){pa.reverse-=dt;v.speed+=clamp(-8-v.speed,-v.s.brake*dt,v.s.acc*dt);v.heading+=pa.revSteer*dt*1.3;return}
   const diff=angDiff(v.heading,Math.atan2(dx,dz));
   let target=d>18?Math.min(v.s.max,12+d*0.5):(player.vehicle?9:0);if(Math.abs(diff)>1.2&&d>18)target=Math.min(target,11);
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);
   const rate=v.s.steer*1.4*Math.min(1,Math.abs(v.speed)/3);v.heading+=clamp(diff,-rate*dt,rate*dt);
   if(target>3&&Math.abs(v.speed)<1.2){pa.stuck+=dt;if(pa.stuck>1.3){pa.reverse=1.1;pa.revSteer=Math.random()<0.5?-1:1;pa.stuck=0}}else pa.stuck=0;
-  pa.shootT-=dt;if(d<34&&pa.shootT<=0){pa.shootT=RR(0.8,1.4);enemyShoot(v.pos.x-Math.cos(v.heading),1.5,v.pos.z+Math.sin(v.heading),clamp(0.6-d/80,0.2,0.5),7)}}
+  pa.shootT-=dt;if(policeSeen&&d<34&&pa.shootT<=0){pa.shootT=RR(0.8,1.4);enemyShoot(v.pos.x-Math.cos(v.heading),1.5,v.pos.z+Math.sin(v.heading),clamp(0.6-d/80,0.2,0.5),7)}}
 function updateWanted(dt){if(starFlashT>0){starFlashT-=dt;if(starFlashT<=0)$('stars').classList.remove('flash')}
+  updateReports(dt);
   let cops=0,seen=false;const P=playerP();
-  for(const v of vehicles)if(v.policeAI&&!v.policeAI.leaving){cops++;if(Math.hypot(v.pos.x-P.x,v.pos.z-P.z)<75)seen=true}
+  for(const v of vehicles)if(v.policeAI&&!v.policeAI.leaving){cops++;if(Math.hypot(v.pos.x-P.x,v.pos.z-P.z)<75&&los(v.pos.x,1.5,v.pos.z,P.x,1.2,P.z))seen=true}
+  if(!seen)for(const g of goons)if(g.cop&&!g.dead&&Math.hypot(g.x-P.x,g.z-P.z)<50&&los(g.x,1.6,g.z,P.x,1.2,P.z)){seen=true;break}
+  policeSeen=seen;if(seen){lastSeen.x=P.x;lastSeen.z=P.z}
   if(wanted>0){const want=Math.min(4,wanted);policeSpawnT-=dt;if(cops<want&&policeSpawnT<=0){policeSpawnT=3.5;spawnPolice()}
     if(seen)wantedCool=0;else{wantedCool+=dt;if(wantedCool>(10+wanted*3)*heatMult()){wanted--;wantedCool=0;if(wanted===0)toast('Lost the cops','The heat is off',2.2)}}}}
 
@@ -153,7 +170,7 @@ $('cheatGo').addEventListener('click',()=>{$('cheatIn').dispatchEvent(new Keyboa
 /* ================= death / respawn ================= */
 function die(){player.dead=true;player.hp=0;player.deadT=3.6;if(player.vehicle)exitVehicle();poseDead(player.human,groundH(player.pos.x,player.pos.z));
   const fee=Math.min(player.cash,500);player.cash-=fee;$('deadMsg').innerHTML=`Waking up at the Government Hospital… Bill: ₹${fee}<br><small style="opacity:.7">Tip: ${esc(rpick(TIPS))}</small>`;$('dead').classList.remove('hidden');
-  wanted=0;missionFail('You got knocked out');closeTalk();noise(0.6,300,0.4,2)}
+  wanted=0;reports=[];missionFail('You got knocked out');closeTalk();noise(0.6,300,0.4,2)}
 function respawn(){player.dead=false;player.hp=100;player.pos.set(HOSP.x,0,HOSP.z);player.vy=0;player.human.g.rotation.x=0;player.human.g.rotation.z=0;player.down=0;player.crouch=false;player.human.g.visible=true;camYaw=0;camPitch=-0.1;
   for(let i=0;i<NW;i++){if(player.owned[i]&&player.mags[i]===0&&player.res[i]>0){const t=Math.min(WEAPONS[i].mag,player.res[i]);player.mags[i]=t;player.res[i]-=t}}{const pi=WI('pistol');if(player.mags[pi]===0)player.mags[pi]=17}$('dead').classList.add('hidden')}
 

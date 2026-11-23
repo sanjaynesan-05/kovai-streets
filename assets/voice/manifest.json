@@ -83,7 +83,10 @@
     "intro_14": "intro_14.mp3",
     "after_1": "after_1.mp3",
     "after_2": "after_2.mp3",
-    "after_3": "after_3.mp3"
+    "after_3": "after_3.mp3",
+    "gang_warn_1": "gang_warn_1.mp3",
+    "gang_warn_2": "gang_warn_2.mp3",
+    "gang_attack": "gang_attack.mp3"
   },
   "en": {
     "a1_m1_go": "a1_m1_go.mp3",
@@ -168,6 +171,9 @@
     "intro_14": "intro_14.mp3",
     "after_1": "after_1.mp3",
     "after_2": "after_2.mp3",
-    "after_3": "after_3.mp3"
+    "after_3": "after_3.mp3",
+    "gang_warn_1": "gang_warn_1.mp3",
+    "gang_warn_2": "gang_warn_2.mp3",
+    "gang_attack": "gang_attack.mp3"
   }
 }

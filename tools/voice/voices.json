@@ -9,6 +9,7 @@
   "malai":       {"description": "A man speaks in a loud, rough, harsh and gravelly voice with an aggressive tone. The recording is clear, with no background noise.", "seed": 707},
   "sundaram":    {"description": "A man speaks in a weak, breathless and fading voice, slowly, as if badly hurt. The recording is clear, with no background noise.", "seed": 808},
   "guard":       {"description": "A man shouts loudly and urgently in a rough voice. The recording is clear, with no background noise.", "seed": 909},
+  "gang":        {"description": "A young man speaks in a rough, menacing street voice, loudly and aggressively. The recording is clear, with no background noise.", "seed": 333},
   "radio":       {"description": "A man speaks quickly and flatly in a clipped, official voice. The recording is clear.", "seed": 111, "filter": "highpass=f=350,lowpass=f=3200,acompressor"},
   "architect":   {"description": "A person speaks in a very calm, even, emotionless and quiet voice, slowly. The recording is very clear, with no background noise.", "seed": 222, "filter": "asetrate=24000*0.88,aresample=24000,atempo=1.12,aecho=0.6:0.5:35:0.35"}
 }

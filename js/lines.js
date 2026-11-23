@@ -669,5 +669,29 @@ const DIALOGUE={
   "en": "Someone sent me flowers today. No name. Only a card with the letter A.",
   "mood": "warm",
   "whoTa": "பரமசிவம் அண்ணா"
+ },
+ "gang_warn_1": {
+  "spk": "gang",
+  "who": "GANG MEMBER",
+  "ta": "டேய்! இது எங்க ஏரியா. நடந்து போ.",
+  "en": "Hey! This is our area. Keep walking.",
+  "mood": "threatening",
+  "whoTa": "கும்பல் ஆள்"
+ },
+ "gang_warn_2": {
+  "spk": "gang",
+  "who": "GANG MEMBER",
+  "ta": "வழி தெரியலையா? அடி வாங்கும் முன்னாடி திரும்பிப் போ.",
+  "en": "Lost? Turn around before you get hurt.",
+  "mood": "threatening",
+  "whoTa": "கும்பல் ஆள்"
+ },
+ "gang_attack": {
+  "spk": "gang",
+  "who": "GANG MEMBER",
+  "ta": "அவ்வளவுதான். அவனைப் பிடிங்கடா!",
+  "en": "That's it. Get him!",
+  "mood": "angry",
+  "whoTa": "கும்பல் ஆள்"
  }
 };

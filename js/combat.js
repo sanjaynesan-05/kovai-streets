@@ -37,7 +37,7 @@ function fire(){if(player.dead||player.down>0)return;
   flash(muzzle);gunSound(w.id,1);
   camPitch+=w.kick;shake=Math.max(shake,w.kick*2);
   panic(player.pos.x,player.pos.z,45);
-  for(const g of goons)if(!g.dead&&Math.abs(g.x-player.pos.x)<70&&Math.abs(g.z-player.pos.z)<70)g.aggro=true;
+  for(const g of goons)if(!g.dead&&Math.abs(g.x-player.pos.x)<70&&Math.abs(g.z-player.pos.z)<70){if(g.spot)gangProvoke(g.spot);else g.aggro=true}
   if(player.mags[player.weapon]===0&&player.res[player.weapon]>0)setTimeout(()=>{if(!player.vehicle)startReload()},w.rate*1000)}
 function assist(d,org){if(!isTouch)return d;let best=null,ba=0.13;
   const tryT=(x,y,z)=>{_v.set(x-org.x,y-org.y,z-org.z);const L=_v.length();if(L>140||L<1)return;_v.divideScalar(L);const a=Math.acos(clamp(_v.dot(d),-1,1));if(a<ba&&los(org.x,org.y,org.z,x,y,z)){ba=a;best=_v.clone()}};

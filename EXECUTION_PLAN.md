@@ -60,7 +60,9 @@ Phases are kept small, so each one is a single focused change followed by one co
 
 ---
 
-## Phase B: Gang territory AI (TODO §10)
+## Phase B: Gang territory AI (TODO §10)  *✓ built, needs your playtest*
+
+**Status:** built in `js/actors.js` with fixed values: territory 30 m, warning 16 m, attack after 6 s inside, cooldown 60 s, 3 reinforcements after 2 kills. New lines `gang_warn_1`, `gang_warn_2`, `gang_attack` (speaker `gang`) need voices: `python tools/voice/generate.py --lang both --speaker gang`.
 
 **Goal:** gangs stop attacking on sight.
 
@@ -83,7 +85,9 @@ Phases are kept small, so each one is a single focused change followed by one co
 
 ---
 
-## Phase C: Police witnesses and search (TODO §11)
+## Phase C: Police witnesses and search (TODO §11)  *✓ built, needs your playtest*
+
+**Status:** built in `js/gameplay.js`. Killing a pedestrian or a cop is witnessed (police: stars at once; pedestrian: reports after 5 s unless stopped). Crimes against police cars and the helicopter still add stars directly, because the officers are the witnesses. Police cars search around your last known position; foot officers and the helicopter keep their old behaviour.
 
 **Goal:** wanted stars come from witnessed crimes, and police search for you.
 
@@ -268,8 +272,8 @@ New lines added in later phases need a line ID in `js/lines.js`, then a run of `
 | Order | Phase | Size |
 |---|---|---|
 | 1 | A: Heist (Act 3 opener) | Large |
-| 2 | B: Gang AI | Medium |
-| 3 | C: Police witnesses | Medium |
+| 2 | B: Gang AI | Built |
+| 3 | C: Police witnesses | Built |
 | 4 | D: Population and traffic | Large |
 | 5 | E: Meena and Divya | Large |
 | 6 | F: Economy | Large (6 sub-commits) |
