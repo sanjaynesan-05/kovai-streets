@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const TIPS=['Coloured beams are jobs. Finishing jobs raises your Respect.','Respect unlocks better guns, new job types, the Western Ghats and the reservoir.','Buy the house on Perur Road (west of the city) to get a safehouse and a garage.','Cars parked inside your garage are kept when you save.','Hold right click to lock on to the nearest enemy.','Press C to crouch. Crouch next to a wall or car to take cover.','20 old film reels are hidden around Kovai. Each one pays ₹250.','Hit the yellow ramps fast for stunt jumps.','Walk into a skull icon to start a rampage.','Tea stalls heal you cheaply. Bun butter jam = full health.','Paramasivam Anna (gold S on the map) has the story missions.','At 4 stars the police send a helicopter. Rockets bring it down fast.','Press N in a vehicle to change the radio station.','The game saves itself every 30 seconds and when you pause.'];
+const TIPS=['Coloured beams are jobs. Finishing jobs raises your Respect.','Respect unlocks better guns, new job types, the Western Ghats and the reservoir.','Buy the house in Lakeview (west of the city) to get a safehouse and a garage.','Cars parked inside your garage are kept when you save.','Hold right click to lock on to the nearest enemy.','Press C to crouch. Crouch next to a wall or car to take cover.','20 old film reels are hidden around Kovai. Each one pays ₹250.','Hit the yellow ramps fast for stunt jumps.','Walk into a skull icon to start a rampage.','Tea stalls heal you cheaply. Bun butter jam = full health.','Paramasivam Anna (gold S on the map) has the story missions.','At 4 stars the police send a helicopter. Rockets bring it down fast.','Press N in a vehicle to change the radio station.','The game saves itself every 30 seconds and when you pause.'];
 {const el=$('tips');if(el)el.textContent='Tip: '+rpick(TIPS)}
 
 
@@ -15,7 +15,7 @@ function iconCanvas2(kind){const c=document.createElement('canvas');c.width=c.he
   else if(kind==='skull'){circ('#111');g.fillStyle='#fff';g.beginPath();g.arc(32,28,14,0,7);g.fill();g.fillRect(24,36,16,10);g.fillStyle='#111';g.beginPath();g.arc(26,28,4,0,7);g.arc(38,28,4,0,7);g.fill();g.fillRect(28,42,2,5);g.fillRect(34,42,2,5)}
   return c}
 ICON.story=iconCanvas2('story');ICON.house=iconCanvas2('house');ICON.skull=iconCanvas2('skull');
-function extraIcons(a){a.push({x:HOUSE.px,z:HOUSE.pz,img:ICON.house,edge:true});if(PROG.story<STORY.length)a.push({x:GIVER.x,z:GIVER.z,img:ICON.story,edge:true});
+function extraIcons(a){sideIcons(a);a.push({x:HOUSE.px,z:HOUSE.pz,img:ICON.house,edge:true});if(PROG.story<STORY.length)a.push({x:GIVER.x,z:GIVER.z,img:ICON.story,edge:true});
   if(!mission)for(const r of RAMPAGES)if((r.cd||0)<=0)a.push({x:r.x,z:r.z,img:ICON.skull,edge:false})}
 function renderPause(){const el=$('progress');if(!el)return;
   el.innerHTML=[`Story <span>${PROG.story}/${STORY.length}</span>`,`Film reels <span>${PROG.reels.length}/${REELS.length}</span>`,`Stunt jumps <span>${PROG.jumps.length}/${RAMPS.length}</span>`,

@@ -49,7 +49,7 @@ function geoFleeCar(type,x,z,color,cruise){const c=navNear(x,z,250).filter(k=>!N
 /* the tail (mission 8) on the real map: Gandhipuram Central Bus Stand -> hotel stop by VOC Park -> construction office on the north-east edge of the city
    -> meeting a few hundred metres on. Positions in game metres inside the compact city (tools/geo/build_city.py). */
 const TAIL_START=[180,-230],TAIL_HOTEL=[1570,170],TAIL_OFFICE=[1800,950];   /* Central Kovai -> East Junction -> Greenfield (REBUILD_SPEC.md) */
-function geoTailRoute(){const meet=geoRoadPoint(TAIL_OFFICE[0],TAIL_OFFICE[1],450,800),legs=[[TAIL_START,TAIL_HOTEL,{stop:8,id:'hotel'}],[TAIL_HOTEL,TAIL_OFFICE,{stop:9,id:'office'}],[TAIL_OFFICE,[meet.x,meet.z],{stop:1e9,id:'meet'}]],pts=[];
+function geoTailRoute(){const meet=geoRoadPoint(TAIL_OFFICE[0],TAIL_OFFICE[1],450,800),legs=[[TAIL_START,TAIL_HOTEL,{stop:20,id:'hotel'}],[TAIL_HOTEL,TAIL_OFFICE,{stop:9,id:'office'}],[TAIL_OFFICE,[meet.x,meet.z],{stop:1e9,id:'meet'}]],pts=[];
   for(const[a,b,st]of legs){const r=navRoute(a[0],a[1],b[0],b[1],true)||navRoute(a[0],a[1],b[0],b[1],false);const seg=r?r.pts:[a,b];for(let i=pts.length?1:0;i<seg.length;i++)pts.push({x:seg[i][0],z:seg[i][1]});pts.push(Object.assign({x:seg[seg.length-1][0],z:seg[seg.length-1][1]},st))}
   for(let i=pts.length-1;i>0;i--)if(Math.hypot(pts[i].x-pts[i-1].x,pts[i].z-pts[i-1].z)<3&&!pts[i].stop)pts.splice(i,1);return pts}
 

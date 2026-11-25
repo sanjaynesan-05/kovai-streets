@@ -3,7 +3,7 @@
  * Usage (browser console, after the start screen has loaded and Play has been clicked):
  *   await import? -> no: load with
  *   const s=document.createElement('script');s.src='tools/regression-test.js';document.body.appendChild(s);
- *   then: await KST.run('core')  // or 'missions', 'jobs', 'vehicles', 'world', 'police', 'save', 'all'
+ *   then: await KST.run('core')  // or 'missions', 'jobs', 'vehicles', 'world', 'police', 'save', 'act2', 'act3', 'all'
  * Each test returns {name, pass, detail}. Tests mutate game state: run them on a throwaway save.
  */
 (function(){
@@ -139,7 +139,7 @@ function playStory(i,choice){const g=G();clearMission();resetPlayer(g.GIVER.x,g.
 groups.act2=async()=>{const g=G();const a=()=>g.PROG.a2;
   for(let i=6;i<14;i++)await t('act2 mission '+(i+1)+' ('+g.STORY[i].title+')',()=>playStory(i,0));
   await t('act2 flags after a full run',()=>({pass:a().done&&a().epilogue===1&&a().inspector==='ally'&&a().kathir==='forgiven'&&a().vault&&a().evidence>=7,detail:JSON.stringify(a())}));
-  for(const[c,want]of[[1,'coerced'],[2,'neutral']])await t('M11 choice '+c+' -> '+want,()=>{const r=playStory(10,c);return{pass:r.pass&&a().inspector===want,detail:r.detail+' inspector='+a().inspector}});
+  for(const[c,want]of[[2,'coerced'],[3,'neutral']])await t('M11 choice '+c+' -> '+want,()=>{const r=playStory(10,c);return{pass:r.pass&&a().inspector===want,detail:r.detail+' inspector='+a().inspector}});
   await t('M12 choice 1 -> handed (+8000)',()=>{const c0=g.player.cash;const r=playStory(11,1);return{pass:r.pass&&a().kathir==='handed'&&g.player.cash-c0>=8000,detail:r.detail}});
   for(const[insp,kath]of[['neutral','handed'],['coerced','forgiven']])await t(`finale with inspector=${insp}, kathir=${kath}`,()=>{a().inspector=insp;a().kathir=kath;return playStory(13,0)});
   await t('free-roam heat follows the inspector choice',()=>{a().inspector='ally';const x=window.__game;return{pass:true,detail:'(checked in code path)'}});
@@ -163,7 +163,21 @@ groups.act2=async()=>{const g=G();const a=()=>g.PROG.a2;
   await t('epilogue: message, CCTV and Act 2 card complete',()=>{a().done=true;a().epilogue=1;g.a2Epilogue();let n=0;while(g.cineHold&&n++<10)g.cineSkip();return{pass:a().epilogue===2&&!g.cineHold,detail:'epilogue '+a().epilogue}});
 };
 
-groups.all=async()=>{for(const k of['core','vehicles','world','missions','jobs','police','save','saveSafety','act2']){await groups[k]();await yieldUI()}};
+/* R4-R7: Act 3, character side missions, saved story state, random events */
+groups.act3=async()=>{const g=G();
+  g.PROG.a2.epilogue=2;g.PROG.a2.kathir='forgiven';g.PROG.a2.inspector='ally';
+  for(let i=14;i<g.STORY.length;i++)await t('act3 mission '+(i+1)+' ('+g.STORY[i].title+')',()=>playStory(i,0));
+  await t('act3 flags after a full run',()=>{const a=g.PROG.a3;return{pass:a.done&&a.creds&&a.card&&!!a.car&&a.intel>=1&&!!a.approach,detail:JSON.stringify(a)}});
+  for(const k of['para','kathir','selvi','bhaskar'])for(let i=0;i<3;i++)await t('side '+k+' '+(i+1)+' ('+g.SIDE[k].missions[i].title+')',()=>{clearMission();resetPlayer(g.GIVER.x,g.GIVER.z+3);g.PROG.story=Math.max(g.PROG.story,14);g.PROG.side[k]=i;g.startSide(k);const m=g.mission;
+    if(!m)return{pass:false,detail:'did not start'};let n=0;for(;n<600&&g.mission===m;n++){g.player.hp=100;g.player.dead=false;g.storyAuto();if(g.cineHold)g.cineSkip();S(3)}return{pass:g.PROG.side[k]===i+1&&!g.mission,detail:`stage ${m.stage}/${m.stages.length} "${m.txt}" iters=${n}`}});
+  await t('save keeps Act 3 and side progress',()=>{const d=g.saveApi.sanitizeSave({cash:5,prog:{story:20,a3:{intel:9,creds:true,car:'ufo',card:1,approach:'loud'},side:{para:2,kathir:7,selvi:-1}}});const a=d.prog.a3,s=d.prog.side;
+    return{pass:a.intel===3&&a.creds&&a.car===''&&a.card&&a.approach==='loud'&&s.para===2&&s.kathir===3&&s.selvi===0&&s.bhaskar===0,detail:JSON.stringify(d.prog.a3)+JSON.stringify(d.prog.side)}});
+  for(const e of g.EVENTS)await t('random event: '+e.id,()=>{clearMission();resetPlayer(g.GIVER.x,g.GIVER.z+3);if(g.EV)return{pass:false,detail:'event already running'};let o=null;
+    try{if(e.can&&!e.can())return{pass:true,detail:'not applicable here'};o=e.start(g.player.pos)}catch(err){return{pass:false,detail:err.message}}if(!o)return{pass:true,detail:'nothing to start here'};
+    let n=0;try{for(;n<200&&!o.upd(1/20);n++)S(1);if(o.end)o.end()}catch(err){return{pass:false,detail:err.message}}if(g.cineHold)g.cineSkip();g.evT=999;return{pass:true,detail:'ran '+n+' ticks'}});
+};
+
+groups.all=async()=>{for(const k of['core','vehicles','world','missions','jobs','police','save','saveSafety','act2','act3']){await groups[k]();await yieldUI()}};
 
 window.KST={start(name){this.done=null;this.run(name).then(r=>{this.done=r}).catch(e=>{this.done={error:e.message}})},progress(){return results.length+' results, last: '+(results.length?results[results.length-1].name:'-')},async run(name){const before=results.length;await groups[name]();const out=results.slice(before);const failed=out.filter(r=>!r.pass);return{group:name,passed:out.length-failed.length,total:out.length,failed,errors:errs.slice()}},results,clearErrors(){errs=[]},groups};
 })();

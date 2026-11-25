@@ -30,9 +30,9 @@ function updateOffers(dt){if(!GEO_SITES_READY)return;/* real map: wait for the r
     if(d<5.5&&!player.dead){if((o.type==='fare'||o.type==='amb')&&!player.vehicle){if(time-needVehT>3){needVehT=time;floatMsg('You need a vehicle for this job')}continue}
       offers.splice(i,1);startMission(o);break}}}
 function startMission(o){const T=JOBT[o.type],mult=1+rep*0.08;let m={type:o.type,title:T.name,step:0,timer:null,steps:[]};
-  if(o.type==='deliver'){const B=roadPoint(o.x,o.z,250,560);const goods=rpick(GOODS);const dist=Math.hypot(B.x-o.x,B.z-o.z);
+  if(o.type==='deliver'){const B=roadPoint(o.x,o.z,250,560);const goods=districtGoods(o.x,o.z);const dist=Math.hypot(B.x-o.x,B.z-o.z);
     Object.assign(m,{reward:r50((dist*4+600)*mult),steps:[{...B,txt:`Rush the ${goods} to ${district(B.x,B.z)}`}],timer:Math.round(dist/12+22)});toast('PICKED UP',goodsCap(goods),2)}
-  else if(o.type==='race'){const r=geoRaceSteps(o);m.steps=r.steps;Object.assign(m,{reward:r50(2000*mult),timer:Math.round(r.len/17+8)});toast('GO!','Hit every checkpoint',1.5)}
+  else if(o.type==='race'){const r=geoRaceSteps(o);m.steps=r.steps;if(district(o.x,o.z)==='Hillcrest')m.title='Hillcrest off-road race';Object.assign(m,{reward:r50(2000*mult),timer:Math.round(r.len/17+8)});toast('GO!','Hit every checkpoint',1.5)}
   else if(o.type==='gang'){m.left=0;for(let k=0;k<6;k++){const g=spawnGoon(o.x+RR(-9,9),o.z+RR(-9,9),null,true);g.mission=true;m.left++}m.reward=r50(2500*mult);toast('TAKE THEM OUT','6 goons',1.8)}
   else if(o.type==='boss'){const name=rpick(BOSSES);m.left=0;m.boss=spawnGoon(o.x,o.z,null,true,{boss:true});m.boss.mission=true;m.left++;
     for(let k=0;k<4;k++){const g=spawnGoon(o.x+RR(-7,7),o.z+RR(-7,7),null,true,{wep:rpick(['smg','rifle'])});g.mission=true;m.left++}
@@ -75,23 +75,8 @@ function stBoss(x,z,name,guards,hp,sub){return{auto(m){if(m.boss&&!m.boss.dead){
   upd(m){const P=playerP();if(Math.hypot(P.x-x,P.z-z)>40)mk(x,z);else marker.visible=false;m.txt=`Take down ${name} (gold shirt) · guards left: ${Math.max(0,m.left-(m.boss.dead?0:1))}`;return m.boss.dead}}}
 function stWreck(make,txt,opt){opt=opt||{};return{auto(m){if(m.tgt)m.tgt.wrecked=true},timer:opt.timer,init(m){m.tgt=make();m.tgt.keep=true},upd(m,dt){const v=m.tgt;if(!vehicles.includes(v)||v.wrecked||v===player.vehicle)return true;
   mk(v.pos.x,v.pos.z);m.txt=txt;if(opt.tick)opt.tick(v,dt);const P=playerP();if(Math.hypot(v.pos.x-P.x,v.pos.z-P.z)>(opt.far||420))return'They got away';return false}}}
-function courierCar(){const v=geoFleeCar('suv',GIVER.x,GIVER.z,'#151515',22);v.hp=900;return v}
-function scorpionBoat(){const v=spawnVehicle('speedboat',...W(ox(820),170),siteHeading(SITE('jetty'),0));v.hp=600;return v}
-const STORY=[
-  {title:'Smoke Over the Mills',reward:2000,intro:'Vanakkam, thambi. I ran the looms at Podanur for thirty years. Now the Black Scorpions squeeze my workers for money every week. Will you help?',
-   make:()=>[stTalk('a1_m1_go'),stKill(...W(182,259),5,'Clear the Black Scorpions out of the Podanur mill',{rx:16,rz:3}),stTalk('a1_m1_end')]},
-  {title:'The Courier',reward:3000,intro:'Sundaram sends a courier around in a black SUV to collect his "protection" money. Today is collection day.',
-   make:()=>[stTalk('a1_m2_go'),stWreck(courierCar,'Wreck or steal the black courier SUV',{timer:150}),stTalk('a1_m2_end')]},
-  {title:'Burning Looms',reward:4000,intro:'Kathir was right. The Scorpions are attacking the Singanallur mill to teach us a lesson!',
-   make:()=>[stTalk('a1_m3_go'),stKill(...W(330,111),5,'Defend the Singanallur mill',{rx:16,rz:3,aggro:true,waves:1,timer:240}),stTalk('a1_m3_end')]},
-  {title:'Ghat Road Deal',reward:5000,intro:'Vettu Velu is meeting gun runners at the old quarry yard. Without those guns, Sundaram is weak.',
-   make:()=>{const T=SITE('dealyard');return[stGo(T.x,T.z,'Go to the quarry yard where the gun deal is happening',{r:40}),stBoss(T.x+6,T.z+4,'Vettu Velu',4,900,'Sundaram\'s right-hand man'),stTalk('a1_m4_end')]}},
-  {title:'The Jetty Shipment',reward:6000,intro:'Sundaram\'s last shipment arrives by speedboat at an old jetty on Valankulam. Stop it.',
-   make:()=>[stGo(...W(ox(650),200),'Go to the old jetty on Valankulam',{r:14}),stKill(...W(ox(725),200),4,'Take out the smugglers on the jetty',SITE('jetty').rot%2?{rx:1.4,rz:24}:{rx:24,rz:1.4}),
-     stWreck(scorpionBoat,'Sink the smugglers\' speedboat (take a boat, or shoot it from the jetty)',{far:700,tick:(v,dt)=>{if(v!==player.vehicle){v.heading+=0.35*dt;v.speed=13}}}),
-     stTalk('a1_m5_end')]},
-  {title:'Silk Sundaram',reward:25000,intro:'This is it. Sundaram and every Scorpion left are holed up in the old Kovai Mills. End it tonight.',
-   make:()=>[stKill(...W(256,-111),6,'Storm the old Kovai Mills',{rx:16,rz:3,waves:1}),stBoss(...W(240,-111),'Silk Sundaram',3,2200,'Boss of the Black Scorpions'),stTalk('a1_m6_end')]}];
+/* Act 1 (story 1-6) is in act1.js, Act 2 (7-14) in story2.js, Act 3 (15-21) in act3.js: each adds its missions to STORY in order */
+const STORY=[];
 function startStory(i){const S=STORY[i];if(!S||mission)return;offers=[];
   mission={type:'story',idx:i,title:`Story ${i+1}/${STORY.length}: ${S.title}`,reward:S.reward,txt:'',steps:[],step:0,timer:null,stages:S.make(),stage:0,wave:0,custom:stageTick,done:storyDone,ticks:[],cleanup:[],meters:[]};startStage(mission);noise(0.12,3000,0.2,1);if(S.onStart)S.onStart(mission)}
 function startStage(m){const s=m.stages[m.stage];marker.visible=false;m.timer=s.timer||null;m.wave=0;m.meters=[];if(s.init)s.init(m)}
@@ -100,15 +85,15 @@ function stageTick(dt){const m=mission;if(m.ticks){for(const f of m.ticks)f(m,dt
   if(r===true){m.stage++;if(m.stage>=m.stages.length){marker.visible=false;m.done(m);return}startStage(m)}else if(typeof r==='string')missionFail(r)}
 function storyDone(m){if(m.tgt)m.tgt.keep=false;player.cash+=m.reward;rep+=2;PROG.story=Math.max(PROG.story,m.idx+1);
   toast('MISSION PASSED','+₹'+m.reward.toLocaleString('en-IN')+' · Respect +2',3.2);noise(0.2,3500,0.25,1);
-  if(STORY[m.idx].onDone)STORY[m.idx].onDone(m);if(m.idx===5){player.armor=100;setTimeout(()=>toast('KOVAI IS FREE','You beat the Black Scorpions. Story complete!',5),3400)}
-  else setTimeout(()=>{if(!mission)floatMsg('Paramasivam Anna has more work for you (gold S on the map)')},3600);endMissionCleanup()}
-function storyOpts(){const S=STORY[PROG.story];const o=[];if(S&&!mission)o.push({t:`Start "${S.title}" (₹${S.reward.toLocaleString('en-IN')})`,fn:()=>{startStory(PROG.story);return false}});o.push({t:'Bye',fn:()=>false});return o}
+  if(STORY[m.idx].onDone)STORY[m.idx].onDone(m);if(m.idx===5){player.armor=100;setTimeout(()=>toast('KOVAI IS FREE','You beat the Black Scorpions. Act 1 complete!',5),3400)}
+  else if(STORY[m.idx+1]&&(!STORY[m.idx+1].ready||STORY[m.idx+1].ready()))setTimeout(()=>{if(!mission)floatMsg('Paramasivam Anna has more work for you (gold S on the map)')},3600);endMissionCleanup()}
+function storyOpts(){const S=STORY[PROG.story];const o=[];if(S&&!mission&&(!S.ready||S.ready()))o.push({t:`Start "${S.title}" (₹${S.reward.toLocaleString('en-IN')})`,fn:()=>{startStory(PROG.story);return false}});o.push(...sideOpts('para'));o.push({t:'Bye',fn:()=>false});return o}
 function storyTalk(){const S=STORY[PROG.story];const t={kind:'story',obj:{x:GIVER.x,z:GIVER.z},
   hdr:()=>`<h3>Paramasivam Anna</h3><div class="sub">Retired mill foreman · Story ${Math.min(PROG.story,STORY.length)}/${STORY.length} done</div>`,optsFn:storyOpts,
-  line:''};const lid=mission?null:S?'intro_'+(PROG.story+1):PROG.a2&&PROG.a2.done?rpick(A2_AFTER):null,L=lid&&DIALOGUE[lid];
+  line:''};const lid=mission?null:S?(S.ready&&!S.ready()?'r6_locked':'intro_'+(PROG.story+1)):PROG.a2&&PROG.a2.done?rpick(A2_AFTER):null,L=lid&&DIALOGUE[lid];
   if(L){t.line=SET.subs==='en'?L.en:L.ta;t.lineEn=SET.subs==='both'?L.en:'';playVoice(lid)}
   else t.line=mission?'Finish what you are doing first, thambi.':rpick(['Kovai is quiet again, thanks to you.','The workers ask about you every day. Have some tea!','Sundaram is gone, but stay sharp, thambi.']);t.opts=storyOpts();return t}
-function extraTalkable(){const p=player.pos;if(Math.hypot(p.x-GIVER.x,p.z-GIVER.z)<3.2)return{kind:'story',hint:'to talk to Paramasivam Anna',custom:storyTalk};
+function extraTalkable(){const p=player.pos;const sx=sideTalkable();if(sx)return sx;/* R7: side givers, food, fishing (side.js) */if(Math.hypot(p.x-GIVER.x,p.z-GIVER.z)<3.2)return{kind:'story',hint:'to talk to Paramasivam Anna',custom:storyTalk};
   if(Math.hypot(p.x-HOUSE.px,p.z-HOUSE.pz)<2.8)return{kind:'house',hint:PROG.house?'to use your safehouse':'to look at the house for sale',custom:houseTalk};return null}
 
 /* ---------- collectibles: film reels, stunt jumps, rampages ---------- */

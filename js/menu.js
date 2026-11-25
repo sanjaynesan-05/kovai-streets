@@ -42,11 +42,11 @@ for(const b of document.querySelectorAll('.mn-back'))b.addEventListener('click',
 
 /* ---------- story panel & continue info (from the real save) ---------- */
 function saveTime(){try{const o=JSON.parse(lsGet(SAVE_KEY)||'null');return o&&o.t?new Date(o.t):null}catch(e){return null}}
-function storyLabel(st){const n=STORY.length;if(st>=n)return'Story complete';return(st<6?'Act 1':'Act 2')+' · Mission '+(st+1)+': '+STORY[st].title}
+function storyLabel(st){const n=STORY.length;if(st>=n)return'Story complete';return(st<6?'Act 1':st<14?'Act 2':'Act 3')+' · Mission '+(st+1)+': '+STORY[st].title}
 function renderStoryPanel(){const el=$('mnStory');el.classList.remove('hidden');
-  if(!hasSave()){el.innerHTML=`<div class="k">NEW STORY</div><div class="t">ACT 1 · KOVAI'S MILLS</div><div class="s">Your journey begins in Gandhipuram</div>`;return}
-  const st=PROG.story,n=STORY.length,pct=Math.round(st/n*100),act=st<6?'ACT 1 · KOVAI\'S MILLS':'ACT 2 · THREADS OF KOVAI';
-  const next=st<n?'Next: '+STORY[st].title:(PROG.a2&&PROG.a2.done?'Act 2 complete. The Vault awaits…':'Story complete');
+  if(!hasSave()){el.innerHTML=`<div class="k">NEW STORY</div><div class="t">ACT 1 · KOVAI'S MILLS</div><div class="s">Your journey begins in Mill Estate</div>`;return}
+  const st=PROG.story,n=STORY.length,pct=Math.round(st/n*100),act=st<6?'ACT 1 · KOVAI\'S MILLS':st<14?'ACT 2 · THREADS OF KOVAI':'ACT 3 · THE VAULT JOB';
+  const next=st<n?'Next: '+STORY[st].title:(PROG.a3&&PROG.a3.done?'Act 3 complete. The Architect is watching…':'Story complete');
   el.innerHTML=`<div class="t">${act}</div><div class="s">${esc(next)}</div><div class="p"><span>STORY PROGRESS</span><b>${pct}%</b></div><div class="bar"><i style="width:${pct}%"></i></div><div class="s small">${st} of ${n} story missions · Respect LV ${respectLv()}</div>`}
 function refreshMenu(){const saved=hasSave(),c=document.querySelector('[data-act="continue"]'),nw=document.querySelector('[data-act="new"]');
   c.classList.toggle('off',!saved);c.classList.toggle('primary',saved);nw.classList.toggle('primary',!saved);

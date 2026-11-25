@@ -11,5 +11,14 @@
   "guard":       {"description": "A man shouts loudly and urgently in a rough voice. The recording is clear, with no background noise.", "seed": 909},
   "gang":        {"description": "A young man speaks in a rough, menacing street voice, loudly and aggressively. The recording is clear, with no background noise.", "seed": 333},
   "radio":       {"description": "A man speaks quickly and flatly in a clipped, official voice. The recording is clear.", "seed": 111, "filter": "highpass=f=350,lowpass=f=3200,acompressor"},
-  "architect":   {"description": "A person speaks in a very calm, even, emotionless and quiet voice, slowly. The recording is very clear, with no background noise.", "seed": 222, "filter": "asetrate=24000*0.88,aresample=24000,atempo=1.12,aecho=0.6:0.5:35:0.35"}
+  "architect":   {"description": "A person speaks in a very calm, even, emotionless and quiet voice, slowly. The recording is very clear, with no background noise.", "seed": 222, "filter": "asetrate=24000*0.88,aresample=24000,atempo=1.12,aecho=0.6:0.5:35:0.35"},
+  "worker":      {"description": "A middle-aged working man speaks in a tired, plain voice. The recording is clear, with no background noise.", "seed": 411},
+  "worker_f":    {"description": "A middle-aged working woman speaks quickly in a worried voice. The recording is clear, with no background noise.", "seed": 523},
+  "fisherman":   {"description": "An old man speaks slowly and quietly in a rough, weathered voice. The recording is clear, with no background noise.", "seed": 617},
+  "velu":        {"description": "A man speaks in a harsh, deep, threatening voice. The recording is clear, with no background noise.", "seed": 719},
+  "official":    {"description": "A middle-aged man speaks in a nervous, hushed, formal voice at a quick pace. The recording is very clear, with no background noise.", "seed": 1414},
+  "arjun":       {"description": "A man in his forties speaks in a calm, precise, low and technical voice at an even pace. The recording is very clear, with no background noise.", "seed": 1515},
+  "mechanic":    {"description": "A middle-aged man speaks in a cheerful, proud, slightly rough voice. The recording is clear, with no background noise.", "seed": 1616},
+  "guest":       {"description": "A middle-aged man speaks in a relaxed, gossiping, upper-class voice. The recording is very clear, with no background noise.", "seed": 1717},
+  "prakash":     {"description": "A man in his forties speaks in a smooth, nervous, slightly high voice. The recording is very clear, with no background noise.", "seed": 1818}
 }

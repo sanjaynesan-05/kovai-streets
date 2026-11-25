@@ -38,7 +38,7 @@ function sanitizeSave(d){if(!d||typeof d!=='object'||Array.isArray(d))return nul
     fr:arr(d.fr,FRIENDS.length).map(a=>Array.isArray(a)?[num(a[0],0,0,100),!!a[1]]:[0,false]),tod:num(d.tod,8.5,0,24),
     prog:{story:Math.floor(num(p.story,0,0,STORY.length)),reels:ids(p.reels,REELS.length),jumps:ids(p.jumps,RAMPS.length),ramp:ids(p.ramp,RAMPAGES.length),house:!!p.house,
       garage:arr(p.garage,3).filter(c=>c&&VT[c.type]).map(c=>({type:c.type,color:typeof c.color==='string'?c.color:null})),outfit:Math.floor(num(p.outfit,0,0,OUTFITS.length-1)),
-      tut:Math.floor(num(p.tut,0,0,TUT.length)),lastLv:Math.floor(num(p.lastLv,1,1,1e5)),a2:sanitizeA2(p.a2)}}}
+      tut:Math.floor(num(p.tut,0,0,TUT.length)),lastLv:Math.floor(num(p.lastLv,1,1,1e5)),a2:sanitizeA2(p.a2),a3:sanitizeA3(p.a3),side:sanitizeSide(p.side)}}}
 /* parseSave(raw) -> {ok:true,data,version} or {ok:false,reason:'empty'|'corrupt'|'newer',why} */
 function parseSave(raw){if(raw==null||raw==='')return{ok:false,reason:'empty'};let o;try{o=JSON.parse(raw)}catch(e){return{ok:false,reason:'corrupt',why:'not JSON'}}
   if(!o||typeof o!=='object'||!Number.isInteger(o.v))return{ok:false,reason:'corrupt',why:'no version'};
