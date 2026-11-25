@@ -58,7 +58,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,Math.max(0
 /* ================= init ================= */
 function init(){buildWheel();setupTouch();initGeo()}
 /* real-geography pilot (step G2): world, sky, player and a car to drive; traffic, people, gangs and missions follow in G4-G6 */
-function initGeo(){initLights();initGeoWorld();initGeoNav();initGeoPois();$('bigmap').querySelector('.k').textContent='Click the map to set a GPS destination (click it again to clear) · + hospital · P police · B bus stand · press M to close';buildSky();buildRain();
+function initGeo(){initLights();initGeoWorld();initGeoNav();initGeoPois();$('bigmap').querySelector('.k').textContent='Click the map to set a GPS destination · click the pin again to clear it · M or Esc to close';buildSky();buildRain();
   player.human=makeHuman({shirt:'#2a9d8f',pants:'#22223b',skin:'#8d5524',gun:true});player.human.g.position.copy(player.pos);setGun();
   for(const f of FRIENDS){f.h=makeHuman({...f.look,gun:true});f.h.gun.visible=false;f.icon=iconSprite('heart',f.home.x,3.4,f.home.z,2)}
   initPlay();GWLD.starters.push(spawnVehicle('car',player.pos.x+4,player.pos.z+3,0,'#b3202a'),spawnVehicle('bike',player.pos.x+7,player.pos.z+3,0));

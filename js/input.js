@@ -24,7 +24,8 @@ addEventListener('keydown',e=>{if(consoleOpen)return;if(cineHold&&started&&!paus
   else if(e.code==='KeyR')startReload();
   else if(e.code==='KeyC')toggleCrouch();
   else if(e.code==='KeyN')radioNext();
-  else if(e.code==='KeyM'){bigMapOpen=!bigMapOpen;$('bigmap').classList.toggle('hidden',!bigMapOpen);if(bigMapOpen&&document.pointerLockElement)try{document.exitPointerLock()}catch(e){}/* free the mouse to click a GPS destination */}
+  else if(e.code==='KeyM'){if(bigMapOpen)closeBigMap();else openBigMap()}
+  else if(e.code==='Escape'&&bigMapOpen)closeBigMap()
   else if(e.code==='KeyH'){if(player.vehicle){horn(1);panic(player.vehicle.pos.x,player.vehicle.pos.z,25)}}
   else if(e.code==='KeyP'||(e.code==='Escape'&&!locked))pause()});
 addEventListener('keyup',e=>{K[e.code]=false;if(e.code==='Tab'&&wheelOpen&&wheelMode==='hold')closeWheel(true)});
@@ -37,7 +38,12 @@ addEventListener('wheel',e=>{if(!started||paused||player.vehicle||talk||player.d
 addEventListener('mousemove',e=>{if(!started||paused||consoleOpen||isTouch)return;if(wheelOpen&&wheelMode==='hold'){wheelAim(e.movementX||0,e.movementY||0);return}if(!locked&&!e.buttons)return;const k=scoped()?0.22:aiming?0.7:1;const sx=e.movementX||0,sy=e.movementY||0;
   camYaw-=sx*0.0026*k*SET.sens;camPitch=clamp(camPitch-sy*0.0022*k*SET.sens*(SET.inv?-1:1),-1.15,0.75);lastMouseT=time});
 function requestLock(){if(isTouch)return;try{const r=canvas.requestPointerLock();lockWanted=true;if(r&&r.catch)r.catch(()=>{lockWanted=false})}catch(e){lockWanted=false}}
-document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;if(!locked&&started&&!paused&&lockWanted&&!consoleOpen)pause()});
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;if(!locked&&started&&!paused&&lockWanted&&!consoleOpen&&!bigMapOpen)pause()});/* the open map frees the mouse on purpose: no pause */
+/* R3: the city map. Opening it frees the mouse to click a GPS destination; closing it takes the mouse back */
+function openBigMap(){bigMapOpen=true;$('bigmap').classList.remove('hidden');if(document.pointerLockElement)try{document.exitPointerLock()}catch(e){}}
+function closeBigMap(){bigMapOpen=false;$('bigmap').classList.add('hidden');if(lockWanted&&started&&!paused&&!isTouch)requestLock()}
+/* clicking the map sets a GPS destination, clicking outside it closes the map (mouse and touch; this used to be set up for touch screens only) */
+$('bigmap').addEventListener('pointerdown',e=>{if(e.target.id==='bigmapC'){geoMapClick(e);return}closeBigMap()});
 document.addEventListener('pointerlockerror',()=>{lockWanted=false});
 function pause(){paused=true;onPause();mouseL=false;aiming=false;$('pause').classList.remove('hidden');if(document.pointerLockElement)try{document.exitPointerLock()}catch(e){}}
 function resume(){$('pause').classList.add('hidden');paused=false;audioInit();requestLock();if(isTouch)goFull()}
@@ -73,10 +79,9 @@ function setupTouch(){if(!isTouch)return;document.body.classList.add('touch');
   btn('bGun',()=>{if(wheelOpen)closeWheel(false);else openWheel('tap')});
   btn('bTalk',()=>{if(talk){closeTalk();return}const t=nearestTalkable();if(t)openTalk(t);else floatMsg('Nobody close enough to talk to')});
   btn('bHorn',()=>{if(player.vehicle){horn(1);panic(player.vehicle.pos.x,player.vehicle.pos.z,25)}});
-  btn('bMap',()=>{bigMapOpen=!bigMapOpen;$('bigmap').classList.toggle('hidden',!bigMapOpen)});
+  btn('bMap',()=>{if(bigMapOpen)closeBigMap();else openBigMap()});
   btn('bCheat',()=>{openConsole()});
   btn('bPause',()=>{pause()});
-  $('bigmap').addEventListener('pointerdown',e=>{if(e.target.id==='bigmapC'){geoMapClick(e);return}bigMapOpen=false;$('bigmap').classList.add('hidden')});
   // lighter settings for phones
   
   document.addEventListener('gesturestart',e=>e.preventDefault());}

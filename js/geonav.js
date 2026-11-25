@@ -118,9 +118,9 @@ function updateGPS(dt){if(!NAV.ready)return;const D=gpsDest(),P=playerP();if(!D)
   if(GPS.route){const p=GPS.route.pts;let L=0;for(let i=1;i<p.length;i++)L+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);GPS.len=L}}
 function gpsText(){if(!GPS.route)return'';const L=GPS.len;return' · GPS '+(L<1000?Math.round(L/10)*10+' m':(L/1000).toFixed(1)+' km')}
 /* big map click: set (or clear) the GPS destination */
-function geoMapClick(e){const cv=$('bigmapC'),r=cv.getBoundingClientRect(),S=cv.width,k=S/(MX1-MX0),oy=(S-(MZ1-MZ0)*k)/2,px=(e.clientX-r.left)*S/r.width,py=(e.clientY-r.top)*S/r.height;
-  const x=MX0+px/k,z=MZ0+(py-oy)/k;if(GPS.manual&&Math.hypot(GPS.manual.x-x,GPS.manual.z-z)<60){GPS.manual=null;GPS.route=null;floatMsg('GPS destination cleared');return}
-  GPS.manual={x,z};GPS.dest=null;floatMsg('GPS destination set')}
+function geoMapClick(e){const F=bigMapFrame(),r=F.cv.getBoundingClientRect(),px=(e.clientX-r.left)*F.W/r.width,py=(e.clientY-r.top)*F.H/r.height,x=MX0+(px-F.ox)/F.k,z=MZ0+(py-F.oy)/F.k;
+  if(GPS.manual&&Math.hypot(GPS.manual.x-x,GPS.manual.z-z)<60){GPS.manual=null;GPS.route=null;floatMsg('GPS destination cleared');return}
+  GPS.manual={x,z};GPS.dest=null;GPS.t=0;floatMsg('GPS destination set')}
 /* purple route line; map(x,z) converts world metres to canvas pixels */
 function drawRoute(c,map,wide){if(!GPS.route)return;c.save();c.strokeStyle='#b14dff';c.lineWidth=wide?4:3.5;c.lineJoin=c.lineCap='round';c.beginPath();
   GPS.route.pts.forEach((q,i)=>{const[x,y]=map(q[0],q[1]);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
@@ -145,7 +145,7 @@ function geoRoadblock(){const v=player.vehicle;if(!v||!NAV.ready)return;const fx
 
 /* map icons from OpenStreetMap: hospitals, police stations, bus stands (geodata/processed/kovai/pois.json) */
 const POI_ICON={};let GEO_POIS=[];
-function letterIcon(L,bg){const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');g.fillStyle=bg;g.beginPath();g.arc(16,16,14,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=2.5;g.stroke();
-  g.fillStyle='#fff';g.font='bold 18px Rajdhani,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(L,16,17);return c}
-function initGeoPois(){POI_ICON.hospital=ICON.hosp;POI_ICON.police=letterIcon('P','#1d4ed8');POI_ICON.bus_station=letterIcon('B','#2b9348');POI_ICON.fuel=letterIcon('F','#e76f51');POI_ICON.fire=letterIcon('🔥','#9d0208')}/* the list itself loads with the road graph */
+/* R3: map badges in the concept map's style (also on the minimap) */
+function badgeIcon(glyph,bg){const c=document.createElement('canvas');c.width=c.height=32;mapBadge(c.getContext('2d'),16,16,glyph,bg,28);return c}
+function initGeoPois(){POI_ICON.hospital=badgeIcon('✚','#d62828');POI_ICON.police=badgeIcon('🛡','#1d4ed8');POI_ICON.bus_station=badgeIcon('🚌','#1d4ed8');POI_ICON.fuel=badgeIcon('⛽','#f77f00');POI_ICON.fire=badgeIcon('🚒','#c1121f')}/* the list itself loads with the road graph */
 function geoIcons(){return GEO_POIS.map(p=>({x:p.x,z:p.z,img:POI_ICON[p.kind],edge:false,near:true}))}

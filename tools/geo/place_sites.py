@@ -41,12 +41,15 @@ TH_GRID = (-37, 111)   # Town Hall block in the grid world
 CITY_TGT = {"mill_podanur": (-900, 300), "mill_singanallur": (1700, -700), "mill_kovai": (1700, -2350), "mall": (1100, -1300), "godown": (-500, 350),
             "police": (500, -1500), "safehouse": (-1000, -1200), "hideout": (-1050, -400), "dealyard": (1750, -1700), "jetty": (1250, 100)}
 # designed city (build_kovai.py): the current missions' places in the new districts, until Acts 1-3 are rewritten (REBUILD_SPEC.md, R4-R6)
-KOVAI_TGT = {"mill_podanur": (-1250, 300), "mill_singanallur": (-1650, -150), "mill_kovai": (-420, 230), "mall": (520, 250), "godown": (1900, 880),
-             "police": (1480, 60), "safehouse": (450, 1260), "hideout": (520, -1320), "dealyard": (-330, -1650), "rally": (180, -230), "jetty": (1000, 900)}
+KOVAI_TGT = {"mill_podanur": (-1380, 110), "mill_singanallur": (-1600, 100), "mill_kovai": (-400, 140), "mall": (450, 190), "godown": (1900, 880),
+             "police": (1400, -50), "safehouse": (450, 1260), "hideout": (520, -1320), "dealyard": (-330, -1650), "rally": (180, -262), "jetty": (1000, 900),
+             "tailmeet": (1650, 800), "giver": (-1330, 75), "shop": (1230, -300), "meena": (-760, -690), "divya": (1500, 260)}
+KOVAI_NAME = {"mill_singanallur": "Mill Estate spinning mill (fictional)", "tailmeet": "Greenfield meeting spot (fictional)", "police": "East Junction Police Station (fictional)"}
 if DATASET == "kovai":
     for s in SITES:
         if s["id"] in KOVAI_TGT: s["tgt"] = KOVAI_TGT[s["id"]]
         if s["id"] == "jetty": s["lake"] = "w1"
+        if s["id"] in KOVAI_NAME: s["name"] = KOVAI_NAME[s["id"]]
 if DATASET == "city":
     for s in SITES:
         if s["id"] in CITY_TGT: s["tgt"] = CITY_TGT[s["id"]]
@@ -87,9 +90,12 @@ def main():
     rect = load("graph_pilot")["rect"]
     clampr = lambda q, m=250: (min(max(q[0], rect[0] + m), rect[2] - m), min(max(q[1], rect[1] + m), rect[3] - m))   # far grid positions map outside the pilot
     roads = [r for r in load("roads")["roads"] if not r["bridge"] and not r["layer"]]
+    decks = [(r["pts"][k - 1], r["pts"][k], r["width"] / 2) for r in load("roads")["roads"] if r["layer"] for k in range(1, len(r["pts"]))]   # flyovers: no site under them
+    decks += [(x["pts"][k - 1], x["pts"][k], 2.5) for x in load("rail")["rail"] for k in range(1, len(x["pts"]))]   # and none on the railway
+    under_deck = lambda x, z, R: any(seg_d((x, z), a, b) < R + w + 12 for a, b, w in decks)
     blds = load("buildings")["buildings"]; water = load("water")["water"]; landuse = load("landuse")["landuse"]
     marks = [(L["x"], L["z"], L["name"]) for L in load("landmarks")["landmarks"] if L["in_pilot"] and L["category"] != "district"]
-    marks += [(p["x"], p["z"], p["name"] or p["kind"]) for p in load("pois")["pois"]]
+    marks += [(p["x"], p["z"], p["name"] or p["kind"]) for p in load("pois")["pois"] if not (DATASET == "kovai" and p["name"] == "East Junction Police Station")]   # that icon follows the police site
     C = 50
     bcell, rcell, pcell = {}, {}, {}
     for b in blds:
@@ -130,6 +136,7 @@ def main():
                     dt = math.hypot(gx, gz)
                     if best and dt / 100 > best[0]: continue
                     if any(math.hypot(x - c[0], z - c[1]) < R + c[2] + 40 for c in chosen): continue
+                    if under_deck(x, z, R): continue
                     md, _ = mark_d(x, z)
                     if md < R + 40: continue
                     rd, _ = road_dist(x, z)
@@ -144,7 +151,7 @@ def main():
             out.append(dict(id=s["id"], kind=s["kind"], old=s["old"], r=s["r"], x=round(x, 1), z=round(z, 1), R=R, clear=R if s["kind"] == "area" else 0, rot=0, name=s["name"]))
             rep.append(f"| {s['name']} | {s['kind']} | {x:.0f}, {z:.0f} | {lu or '-'} | {cleared} | {md:.0f} m ({mark_d(x, z)[1]}) | {rd:.0f} m |")
         elif s["kind"] == "spot":
-            tx, tz = clampr(grid_to_real(*s["old"])); best = None
+            tx, tz = s["tgt"] if s.get("tgt") else clampr(grid_to_real(*s["old"])); best = None
             for a, b, r in near(rcell, tx, tz, 400):
                 if r["width"] < 5: continue
                 for t in (0.25, 0.5, 0.75):
@@ -181,6 +188,11 @@ def main():
             out.append(dict(id="jetty", kind="jetty", old=s["old"], r=s["r"], x=round(x, 1), z=round(z, 1), R=0, clear=0, rot=rot, name=s["name"]))
             rep.append(f"| {s['name']} | jetty on {lake['name']} | {x:.0f}, {z:.0f} | water | 0 | {md:.0f} m ({mark_d(x, z)[1]}) | {rd:.0f} m |")
 
+    if DATASET == "kovai":   # the police mission site IS East Junction police station: its map icon goes where the site went
+        pj = load("pois"); pol = next(o for o in out if o["id"] == "police")
+        for q in pj["pois"]:
+            if q["name"] == "East Junction Police Station": q["x"], q["z"] = pol["x"], pol["z"]
+        json.dump(pj, open(os.path.join(P, "pois.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     js = ("/* Kovai Streets: geosites_data.js. GENERATED by tools/geo/place_sites.py; do not edit by hand.\n"
           " * Real-map positions (game metres) for the fictional mission sites and small points of interest. See js/geosites.js. */\n"
           "'use strict';\nconst GEO_SITES=" + json.dumps(out, ensure_ascii=False) + ";\n")

@@ -216,9 +216,9 @@ Also: Kovai Central station, with a flyover crossing the railway east of it; the
 
 **Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · P police station · B bus stand · F petrol bunk · 🔥 fire station · ♥ friends · coloured letters = jobs · gold **S** = story · green house = safehouse · skull = rampage
 
-**Being rebuilt:**
-- The story missions still use the earlier place names in their text and voice lines until Acts 1–3 are rewritten (R4–R6).
-- Silver Hill is flat until step R2 adds terrain.
+**Being rebuilt:** the story missions still use the earlier place names in their text and voice lines until Acts 1–3 are rewritten (R4–R6).
+
+Silver Hill rises about 55 m above the city: drive Silver Hill Road through the forest to the viewpoint for a view over Kovai.
 
 ---
 

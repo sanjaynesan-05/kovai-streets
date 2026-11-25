@@ -6,19 +6,19 @@ Every fictional site keeps at least 40 m plus its radius from real landmarks, ho
 
 | Site | Kind | Game x, z | Land use | Buildings cleared | Nearest real landmark / POI | Road |
 |---|---|---|---|---|---|---|
-| Podanur mill (fictional) | area | -1175, 330 | - | 0 | 170 m (Mill chimney) | 37 m |
-| Singanallur mill (fictional) | area | -1620, -120 | - | 1 | 120 m (Mill chimney) | 36 m |
-| Old Kovai Mills (fictional) | area | -465, 245 | - | 4 | 469 m (Kovai Municipal Cricket Stadium) | 31 m |
-| Kovai Central mall (fictional) | area | 535, 100 | - | 0 | 357 m (Kovai Central) | 44 m |
-| Thendral Builders godown (fictional) | area | 1885, 865 | - | 0 | 686 m (East Junction bus terminus) | 40 m |
-| Kovai Central Police Station (fictional) | area | 1480, 60 | - | 2 | 136 m (East Junction Police Station) | 18 m |
-| Safehouse (fictional) | area | 450, 1290 | - | 6 | 332 m (Petrol bunk) | 30 m |
-| Ghat Wolves compound (fictional) | area | 565, -1245 | - | 0 | 232 m (Petrol bunk) | 42 m |
+| Podanur mill (fictional) | area | -1350, 125 | - | 5 | 136 m (Mill chimney) | 31 m |
+| Mill Estate spinning mill (fictional) | area | -1570, 25 | - | 4 | 76 m (Mill chimney) | 36 m |
+| Old Kovai Mills (fictional) | area | -400, 110 | - | 8 | 541 m (Government Hospital) | 31 m |
+| Kovai Central mall (fictional) | area | 435, 190 | - | 13 | 293 m (Kovai Central) | 44 m |
+| Thendral Builders godown (fictional) | area | 1960, 910 | farmland | 1 | 777 m (East Junction bus terminus) | 43 m |
+| East Junction Police Station (fictional) | area | 1400, -50 | - | 3 | 366 m (East Junction bus terminus) | 29 m |
+| Safehouse (fictional) | area | 465, 1230 | - | 22 | 365 m (Petrol bunk) | 30 m |
+| Ghat Wolves compound (fictional) | area | 520, -1320 | - | 28 | 195 m (Petrol bunk) | 37 m |
 | Quarry yard deal spot (fictional) | area | -330, -1680 | forest | 0 | 442 m (Silver Hill Viewpoint) | 38 m |
-| Town Hall rally spot | open | 150, -230 | marketplace | 0 | 76 m (Town Hall) | 28 m |
-| Peelamedu meeting spot (fictional) | open | 685, -688 | - | 0 | 458 m (Old Kovai Church) | 11 m |
-| Paramasivam Anna | spot | 691, -499 | - | 0 | 471 m (Old Kovai Church) | on a sidewalk |
-| Gun shop (fictional) | spot | 377, -290 | - | 0 | 197 m (Town Hall) | on a sidewalk |
-| Meena's home (fictional) | spot | 501, -431 | - | 0 | 347 m (Town Hall) | on a sidewalk |
-| Divya's home (fictional) | spot | 651, -636 | - | 0 | 451 m (Kovai Temple) | on a sidewalk |
-| Lakeside jetty (fictional) | jetty on Silver Lake | 1036, 801 | water | 0 | 639 m (Silver Lake) | 1 m |
+| Town Hall rally spot | open | 135, -262 | marketplace | 0 | 82 m (Town Hall) | 20 m |
+| Greenfield meeting spot (fictional) | open | 1650, 815 | - | 0 | 631 m (East Junction bus terminus) | 26 m |
+| Paramasivam Anna | spot | -1332, 56 | - | 0 | 176 m (Mill chimney) | on a sidewalk |
+| Gun shop (fictional) | spot | 1248, -317 | - | 0 | 341 m (Old Kovai Church) | on a sidewalk |
+| Meena's home (fictional) | spot | -777, -689 | - | 0 | 433 m (Government Hospital) | on a sidewalk |
+| Divya's home (fictional) | spot | 1501, 272 | - | 0 | 199 m (East Junction bus terminus) | on a sidewalk |
+| Lakeside jetty (fictional) | jetty on Silver Lake | 1035, 876 | water | 0 | 635 m (Silver Lake) | 0 m |

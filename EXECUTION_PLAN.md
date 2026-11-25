@@ -32,9 +32,9 @@ The full spec is `REBUILD_SPEC.md`. Decisions made:
 |---|---|---|
 | R0 | Design spec (`REBUILD_SPEC.md`) | ✓ approved |
 | R1 | The new city | ✓ built (details below); needs your playtest |
-| R2 | Silver Hill: terrain height for driving, people, traffic, collisions and missions on slopes | **next** |
-| R3 | Full map and minimap in the concept map's style (legend, district labels, icons) | |
-| R4 | Act 1 rewritten (missions 01–06, multi-stage, per Storyline 2.0) | |
+| R2 | Silver Hill: terrain height for driving, people, traffic, collisions and missions on slopes | ✓ built (details below); needs your playtest |
+| R3 | Full map and minimap in the concept map's style (legend, district labels, icons); M key and GPS pin fixed; no empty land in the city | ✓ built (details below); needs your playtest |
+| R4 | Act 1 rewritten (missions 01–06, multi-stage, per Storyline 2.0) | **next** |
 | R5 | Act 2 rewritten (missions 07–14) with the evidence board | |
 | R6 | Act 3 (missions 15–21): Arjun Varadhan, heist board, hacking puzzle, the Vault Job, escape, ending. Replaces Phase A below | |
 | R7 | Optional content: 12 character side missions, district activities, 10 random world events | |
@@ -73,6 +73,79 @@ The full spec is `REBUILD_SPEC.md`. Decisions made:
 *Still open:*
 - The current missions are placed in the new districts, but their text and voice lines still name the old places (rewritten in R4–R6).
 - Paramasivam stays near Central Kovai until R4.
+
+**R2 result (2026-11-26):**
+
+*How the hill works:*
+- `groundH()` (`js/core.js`) is now a real height function: a smooth hill about 55 m high at the viewpoint, with gentle unevenness.
+- It is zero at the ring road, so the city and farmland stay flat, and zero over the quarry floor, so the quarry deal yard sits level.
+- Everything that already used it follows the hill: driving and its slope physics, the player, pedestrians, gang members, police, pickups, and the camera's ground clamp.
+
+*What was added:*
+- A terrain mesh over the forest (`buildTerrain` in `js/geoworld.js`), coloured forest and quarry, replaces the flat patches.
+- Roads, footpaths and lane markings follow the ground at each edge. The hill and quarry roads have points every 8 m.
+- Trees, their colliders, and the viewpoint model with its colliders sit on the slope.
+- No lamps or parked cars on Silver Hill: it's a dark forest road.
+- A clearing below the viewpoint keeps the city in view.
+
+*Tests:*
+- New: a car, a bike and a bus each drive Silver Hill Road from the ring road to the viewpoint and back down. All pass, staying on the ground.
+- World group 20/21. The one failure, a fare passenger riding pillion, is intermittent: it failed twice and passed once since R1, so it's a known flaky test to look into.
+
+*Not done:* bullets and line-of-sight checks don't yet treat the hill as solid, so you could shoot through a hilltop.
+
+**R3 result (2026-11-26):**
+
+*Bugs fixed, found in your playtest:*
+- **M opened the pause menu.** Opening the map frees the mouse, and the game treated that as leaving the window. The open map no longer pauses the game. M toggles it; Esc or a click outside closes it and takes the mouse back.
+- **Pinning a destination never worked on a PC.** The map's click handler was only set up for touch screens. Now a click sets a free-roam GPS destination with a red pin and a purple route on the map and minimap, plus the distance on the HUD. Clicking the pin again clears it.
+
+*City:*
+- **No empty land inside the ring.** A final pass gives every open plot a building, turned to the nearest street: about 17,500 more buildings, about 28,900 in all.
+- Plots are checked every 4 m, so no building can straddle a road or sit under the flyover.
+- Street angles are less random, so the layout reads simpler.
+
+*Mission-site placer:* it now keeps sites clear of flyovers and the railway. The fictional mall had landed under the Station Flyover.
+
+*The city map, in the concept map's style:*
+- **Whole city at once:** the map draws every building, the forest trees, fields and the railway from the start.
+- **New look:** a 3:2 map with a legend, district name boxes, landmark badges (station, viewpoint, stadium, temple, church, mosque), a Silver Lake label, a north arrow, a 0–1.5 km scale bar and the KOVAI STREETS title.
+- **Icons:** hospital, police, bus terminus, petrol bunk and fire station now use matching badges, on the minimap too.
+
+*Tests:*
+- The pillar test now ignores tree trunks.
+- World group 21/21 in Chrome. The full suite before the last fixes was 99/103: the save test fails only when saving is blocked to protect your save, and the fare-passenger pillion test is the known intermittent one.
+
+*Speed:* about 34 fps in Chrome in Central Kovai with the denser city. To check on your PC and phone.
+
+**R3 follow-up (2026-11-26), from your review of the locations:**
+
+*Kovai Central is now a proper station precinct:*
+- Temple Loop moved north so the station faces it; Town Hall, Devarajan Tower and the Royal Grand Hotel shifted to make room.
+- Everything between the loop and the railway is the station:
+  - a paved forecourt with a prepaid auto stand and parked autos, cars and taxis (the game's real vehicle models)
+  - the station building: cream with maroon trim, arched windows, a columned porch, a clock tower, and the "கோவை சென்ட்ரல் / KOVAI CENTRAL" sign
+  - three platforms 270 m long that you can walk on, with roofs, benches, yellow name boards and a footbridge with stairs
+  - four tracks (two platform loop lines added)
+  - two trains standing at the platforms
+  - passengers waiting on the platforms
+
+*East Junction bus terminus,* rebuilt beside East Junction Road:
+- a raised passenger platform with a long roof and benches
+- real buses (red, blue and green) parked nose-in on both sides
+- a ticket office with the "கிழக்கு சந்திப்பு பேருந்து நிலையம் / EAST JUNCTION BUS TERMINUS" sign, and an entrance gate
+- waiting passengers; the old box-shaped buses are gone
+
+*Duplicates removed:*
+- The Podanur Mill, Old Kovai Mills and Kovai Central Mall buildings, and the East Junction Police Station building, *are* now the mission sites. No more pairs.
+- The police map icon follows the police site.
+- Leftover old names renamed: "Singanallur mill" is now the Mill Estate spinning mill, and the "Peelamedu meeting spot" is now the Greenfield meeting spot.
+
+*People moved to their districts:* Paramasivam to the Podanur Mill gate, Meena to Campus Nagar, Divya to East Junction, the gun shop to the Old Kovai market.
+
+*Code:*
+- `parkedVehicles()` (`js/geolandmarks.js`) parks real vehicle models as scenery, a few draw calls for many vehicles.
+- Landmark models can add signs, parked vehicles, walkable platforms (`SURF`) and waiting-passenger spots.
 
 ---
 

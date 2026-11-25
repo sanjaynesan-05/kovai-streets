@@ -21,7 +21,7 @@ function quietRoad(){if(quietRoad.c)return quietRoad.c;let best=null;for(const e
 let errs=[];
 window.addEventListener('error',e=>errs.push(String(e.message)));
 function rec(name,pass,detail){const r={name,pass:!!pass,detail:detail===undefined?'':detail};results.push(r);return r}
-async function t(name,fn){await new Promise(r=>setTimeout(r,0));try{const r=await fn();if(r&&typeof r==='object'&&'pass' in r)return rec(name,r.pass,r.detail);return rec(name,!!r,r)}catch(e){return rec(name,false,'EXCEPTION '+e.message+' '+String(e.stack||'').split('\n')[1])}}
+async function t(name,fn){if(window.KST_ONLY&&!window.KST_ONLY.test(name))return;/* optional: run only tests whose name matches (set KST_ONLY to a RegExp) */await new Promise(r=>setTimeout(r,0));try{const r=await fn();if(r&&typeof r==='object'&&'pass' in r)return rec(name,r.pass,r.detail);return rec(name,!!r,r)}catch(e){return rec(name,false,'EXCEPTION '+e.message+' '+String(e.stack||'').split('\n')[1])}}
 const yieldUI=()=>new Promise(r=>setTimeout(r,0));
 function resetPlayer(x,z){const g=G();if(g.player.vehicle)g.exitV();S(2);g.player.dead=false;g.player.hp=100;g.player.down=0;g.player.crouch=false;g.wanted=0;g.player.pos.set(x,0.2,z);S(3)}
 function clearMission(){const g=G();if(g.mission&&g.mission.custom===undefined){/* job */}let k=0;while(g.mission&&k++<3){g.player.dead=false;try{g.CHEATS.LEAVEMEALONE()}catch(e){}if(g.mission.tgt)g.mission.tgt.wrecked=true;S(2);if(g.mission){/* force end via a fail path */g.mission.timer=0.001;S(2)}}}
@@ -71,15 +71,23 @@ groups.world=async()=>{const g=G();
   /* real-map flyover (G7): the longest raised bridge edge in the road graph, and a ground road that passes under it */
   const X=(a,b,c,d)=>{const den=(b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);if(!den)return null;const t=((c[0]-a[0])*(d[1]-c[1])-(c[1]-a[1])*(d[0]-c[0]))/den,u=((c[0]-a[0])*(b[1]-a[1])-(c[1]-a[1])*(b[0]-a[0]))/den;return t>0&&t<1&&u>0&&u<1?{t,u}:null};
   const at=(e,s)=>{const c=e.cum;let k=1;while(k<c.length-1&&c[k]<s)k++;const t=Math.min(1,Math.max(0,(s-c[k-1])/((c[k]-c[k-1])||1))),a=e.pts[k-1],b=e.pts[k];return{x:a[0]+(b[0]-a[0])*t,z:a[1]+(b[1]-a[1])*t,h:Math.atan2(b[0]-a[0],b[1]-a[1])}};
+  const onRoad=(x,z)=>navNear(x,z,120).some(k=>{const e=NAV.E[k];if(e.bridge||e.layer)return false;for(let i=1;i<e.pts.length;i++)if(segDist(x,z,e.pts[i-1],e.pts[i])<e.w/2)return true;return false});
   const load=(x,z)=>{resetPlayer(x,z);for(let k=0;k<40&&!(geoDeckH(x,z,99)>-1e8||queryBoxes(x,z,30).length);k++)S(20);S(20)};
   const [fly,cross]=(()=>{let best=null;for(const f of NAV.E){if(!f.bridge||f.layer<1||f.len<200||f.len>1800)continue;const xs=[];
       for(const e of NAV.E){if(e.bridge||e.layer||e.w<6||e.len<30)continue;for(let i=1;i<e.pts.length;i++)for(let k=1;k<f.pts.length;k++){const r=X(e.pts[i-1],e.pts[i],f.pts[k-1],f.pts[k]);if(!r)continue;
-        const s=f.cum[k-1]+(f.cum[k]-f.cum[k-1])*r.u;if(s<60||s>f.len-60)continue;const a=e.pts[i-1],b=e.pts[i];xs.push({x:a[0]+(b[0]-a[0])*r.t,z:a[1]+(b[1]-a[1])*r.t,h:Math.atan2(b[0]-a[0],b[1]-a[1])})}}
+        const s=f.cum[k-1]+(f.cum[k]-f.cum[k-1])*r.u;if(s<60||s>f.len-60)continue;const a=e.pts[i-1],b=e.pts[i],hx=Math.atan2(b[0]-a[0],b[1]-a[1]),px=a[0]+(b[0]-a[0])*r.t,pz=a[1]+(b[1]-a[1])*r.t;if(!onRoad(px-Math.sin(hx)*25,pz-Math.cos(hx)*25)||!onRoad(px+Math.sin(hx)*12,pz+Math.cos(hx)*12))continue;/* the run-up and the way out are on a road */xs.push({x:a[0]+(b[0]-a[0])*r.t,z:a[1]+(b[1]-a[1])*r.t,h:Math.atan2(b[0]-a[0],b[1]-a[1])})}}
       if(xs.length&&(!best||xs.length>best[1].n))best=[f,Object.assign(xs[0],{n:xs.length})]}return best||[null,null]})();
+  /* R2: Silver Hill. Each vehicle drives Silver Hill Road from the ring road up to the viewpoint and back down, staying on the ground */
+  for(const type of['car','bike','bus'])await t(type+' climbs Silver Hill and comes down',async()=>{clearMission();const r=NAV.roads.find(r=>r.name==='Silver Hill Road');if(!r)return{pass:false,detail:'no hill road'};
+    const up=r.pts.slice(r.pts.findIndex(q=>q[1]<-1430)).map(q=>({x:q[0],z:q[1]}));await preload(up.map(q=>[q.x,q.z]));const s0=up[0];resetPlayer(s0.x+6,s0.z);
+    for(const o of G().vehicles)if(Math.hypot(o.pos.x-s0.x,o.pos.z-s0.z)<250)park(o);const v=g.spawnVehicle(type,s0.x,s0.z,Math.atan2(up[1].x-s0.x,up[1].z-s0.z));v.keep=true;
+    let maxY=0,err=0;const leg=pts=>{const R={pts,i:0,speed:13,hold:0,reckless:true};v.script=routeDrive(R);for(let k=0;k<9000&&!R.done;k++){S(1);g.player.pos.set(v.pos.x+6,0.2,v.pos.z);maxY=Math.max(maxY,v.y);if(v.vy===0)err=Math.max(err,Math.abs(v.y-groundH(v.pos.x,v.pos.z)))}return!!R.done};
+    const upOk=leg(up),downOk=leg(up.slice().reverse()),alive=v.hp>0;park(v);
+    return{pass:upOk&&downOk&&alive&&maxY>40&&err<0.6,detail:`up ${upOk}, down ${downOk}, highest ${maxY.toFixed(1)} m, worst gap to ground ${err.toFixed(2)} m`}});
   await t('real flyover and an underpass found',()=>({pass:!!fly&&!!cross,detail:fly?`flyover ${fly.len.toFixed(0)} m, underpass ${cross?'yes':'no'}`:'no flyover'}));
   const under=(type)=>{const c=cross,fx=Math.sin(c.h),fz=Math.cos(c.h);load(c.x,c.z);const dh=geoDeckH(c.x,c.z,99);for(const o of g.vehicles)if(Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<45)park(o);
     const sx=c.x-fx*25,sz=c.z-fz*25;let v=null;resetPlayer(sx,sz);if(type){v=g.spawnVehicle(type,sx,sz,c.h);g.enterVehicle(v);S(25)}else g.setCam(c.h,-0.1);
-    let maxY=0;g.K.KeyW=true;for(let k=0;k<(type?330:560);k++){S(1);const o=type?v:g.player;if(type)v.heading=c.h;maxY=Math.max(maxY,type?v.y:o.pos.y)}g.K.KeyW=false;
+    let maxY=0;g.K.KeyW=true;for(let k=0;k<(type==='bus'?480:type?330:560);k++){/* the bus accelerates slowly */if(k%20===0)for(const o of g.vehicles)if(o!==v&&o.ai&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<60)park(o);/* traffic that arrives meanwhile is moved away: this tests clearance, not traffic */S(1);const o=type?v:g.player;if(type)v.heading=c.h;maxY=Math.max(maxY,type?v.y:o.pos.y)}g.K.KeyW=false;
     const P=type?v.pos:g.player.pos,prog=(P.x-c.x)*fx+(P.z-c.z)*fz;if(type){g.exitV();S(10);park(v)}return{pass:prog>8&&maxY<2,detail:`deck ${dh.toFixed(1)} m above; passed ${prog.toFixed(1)} m beyond, max height ${maxY.toFixed(1)}`}};
   await t('walk under a real flyover',()=>cross?under(null):{pass:false,detail:'no underpass'});
   for(const type of['car','bus','bike'])await t(type+' under a real flyover',()=>cross?under(type):{pass:false,detail:'no underpass'});
@@ -91,7 +99,7 @@ groups.world=async()=>{const g=G();
     const r={pass:dh>4&&v.y>dh-0.5,detail:`deck ${dh.toFixed(1)}, car ${v.y.toFixed(2)}`};g.exitV();S(10);park(v);return r});
   await t('real flyover parapet keeps a car on the deck',()=>{if(!fly)return{pass:false};const m=at(fly,fly.len/2);load(m.x,m.z);const dh=geoDeckH(m.x,m.z,99);const v=g.spawnVehicle('car',m.x,m.z,m.h+Math.PI/2);v.y=dh+0.5;v.pos.y=dh+0.5;g.enterVehicle(v);S(20);
     g.K.KeyW=true;S(240);g.K.KeyW=false;const lat=Math.abs((v.pos.x-m.x)*Math.cos(m.h)-(v.pos.z-m.z)*Math.sin(m.h));const r={pass:v.y>dh-0.6&&lat<fly.w/2+1.2,detail:`height ${v.y.toFixed(2)} (deck ${dh.toFixed(1)}), ${lat.toFixed(1)} m from the centre line`};g.exitV();S(10);park(v);return r});
-  await t('real flyover pillar blocks',()=>{if(!fly)return{pass:false};const m=at(fly,fly.len/2);load(m.x,m.z);let pier=null;for(let q=0;q<fly.len&&!pier;q+=4){const p=at(fly,q);for(const b of queryBoxes(p.x,p.z,3))if(b.maxX-b.minX<1.4&&b.maxZ-b.minZ<1.4&&b.h>3&&b.y0<0){pier=b;break}}
+  await t('real flyover pillar blocks',()=>{if(!fly)return{pass:false};const m=at(fly,fly.len/2);load(m.x,m.z);let pier=null;for(let q=0;q<fly.len&&!pier;q+=4){const p=at(fly,q);for(const b of queryBoxes(p.x,p.z,3))if(b.maxX-b.minX>1&&b.maxX-b.minX<1.4&&b.maxZ-b.minZ>1&&b.maxZ-b.minZ<1.4&&b.h>3&&b.y0<0){pier=b;break}}/* pillars are 1.2 m square; tree trunks (0.6 m) are not pillars */
     if(!pier)return{pass:false,detail:'no pillar collider found'};const cx=(pier.minX+pier.maxX)/2,cz=(pier.minZ+pier.maxZ)/2;resetPlayer(cx-4,cz);g.setCam(Math.PI/2,-0.1);g.K.KeyW=true;S(240);g.K.KeyW=false;
     const d=Math.hypot(g.player.pos.x-cx,g.player.pos.z-cz);return{pass:d>0.6,detail:`stopped ${d.toFixed(2)} m from the pillar centre`}});
   await t('a real-map film reel is collectable',()=>{const r=reelObjs.find(o=>!o.got);if(!r)return{pass:true,detail:'all collected'};const n0=g.PROG.reels.length;resetPlayer(r.x-3,r.z);g.setCam(Math.PI/2,-0.1);g.K.KeyW=true;S(240);g.K.KeyW=false;

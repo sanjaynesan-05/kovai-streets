@@ -10,7 +10,7 @@ const GW_DIR='geodata/processed/kovai/chunks/';
 const GW_NEAR=1000,GW_FAR=1900,GW_DROP=250;   // chunk-centre distances (m) for 500 m chunks: full detail, roads/ground only, extra margin before unloading (haze hides beyond ~1.2 km)
 const GWLD={starters:[],index:null,data:new Map(),live:new Map(),pending:new Set(),queue:[],started:false,snapped:false,mapReady:false};
 const GW_ROADY={side:0.035,trunk:0.075,primary:0.07,secondary:0.065,tertiary:0.06,trunk_link:0.07,primary_link:0.068,secondary_link:0.063,tertiary_link:0.058,unclassified:0.055,residential:0.05,living_street:0.05,service:0.045,track:0.045};
-const GW_LAND={forest:'#4a7a35',quarry:'#a89070',residential:'#b9ae92',commercial:'#bdb1a0',retail:'#c4b39c',industrial:'#9c978d',railway:'#9a8f80',park:'#6f9e4f',garden:'#77a556',pitch:'#5f9e3e',
+const GW_LAND={forest:'#4a7a35',quarry:'#a89070',station_plaza:'#9e978a',residential:'#b9ae92',commercial:'#bdb1a0',retail:'#c4b39c',industrial:'#9c978d',railway:'#9a8f80',park:'#6f9e4f',garden:'#77a556',pitch:'#5f9e3e',
   playground:'#86ad5e',stadium:'#7aa05a',track:'#b5583a',grass:'#7fae5a',recreation_ground:'#7fae5a',cemetery:'#8a9a6a',farmland:'#9aa86a',meadow:'#8fae62',
   school:'#c9bfa8',college:'#c9bfa8',university:'#c9bfa8',hospital:'#d8cfc4',place_of_worship:'#d9c39a',marketplace:'#d1b98f',bus_station:'#a9a9a9',police:'#b8b2a6',
   religious:'#d9c39a',construction:'#a8957a',brownfield:'#a8957a',military:'#8d9178',orchard:'#86a35a',plant_nursery:'#7ea45a',basin:'#6f9cb8',reservoir:'#6f9cb8'};
@@ -37,7 +37,8 @@ function gwRibbon(r,pos,uv,line){const p=r.pts,n=p.length,W=r.width/2,base=GW_RO
   const cum=[0];for(let k=1;k<n;k++)cum.push(cum[k-1]+Math.hypot(p[k][0]-p[k-1][0],p[k][1]-p[k-1][1]));const L=cum[n-1];
   const L0=[],R0=[],Y=[];for(let k=0;k<n;k++){const a=p[Math.max(0,k-1)],b=p[Math.min(n-1,k+1)];let dx=b[0]-a[0],dz=b[1]-a[1];const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;
     let mx=-dz,mz=dx,s=1;if(k>0&&k<n-1){const ax=p[k][0]-p[k-1][0],az=p[k][1]-p[k-1][1],al=Math.hypot(ax,az)||1;const dot=(-az/al)*mx+(ax/al)*mz;s=1/Math.max(0.5,dot)}
-    const y=base+gwBridgeY(r,cum[k],L);Y.push(y);L0.push([p[k][0]+mx*W*s,y,p[k][1]+mz*W*s]);R0.push([p[k][0]-mx*W*s,y,p[k][1]-mz*W*s])}
+    const y=base+gwBridgeY(r,cum[k],L),lx=p[k][0]+mx*W*s,lz=p[k][1]+mz*W*s,rx=p[k][0]-mx*W*s,rz=p[k][1]-mz*W*s,gc=groundH(p[k][0],p[k][1]),lift=gc>0.3?0.1:0;
+    Y.push(y+gc);L0.push([lx,y+groundH(lx,lz)+lift,lz]);R0.push([rx,y+groundH(rx,rz)+lift,rz])}/* R2: on the ground (Silver Hill) */
   for(let k=1;k<n;k++){const a=L0[k-1],b=R0[k-1],c=R0[k],d=L0[k],u0=cum[k-1]/8,u1=cum[k]/8;
     pos.push(...a,...b,...c,...a,...c,...d);uv.push(u0,0,u0,1.2,u1,1.2,u0,0,u1,1.2,u1,0);
     if(line&&r.width>=8&&Math.floor(cum[k]/6)%2===0){const mx0=(a[0]+b[0])/2,mz0=(a[2]+b[2])/2,mx1=(c[0]+d[0])/2,mz1=(c[2]+d[2])/2,dx=mx1-mx0,dz=mz1-mz0,l=Math.hypot(dx,dz)||1,px=-dz/l*0.08,pz=dx/l*0.08,ya=a[1]+0.006,yb=d[1]+0.006;
@@ -128,7 +129,7 @@ function geoDeckH(x,z,y){const l=GW_DECK.get(Math.floor(x/GW_DC)+','+Math.floor(
 function geoInWater(x,z){const S=GWLD.index?GWLD.index.size_m:1000,d=GWLD.data.get(Math.floor(x/S)+','+Math.floor(z/S));if(!d||!d.water)return false;
   for(const w of d.water){const r=w.pts;let inside=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if((a[1]>z)!==(b[1]>z)&&x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0])inside=!inside}if(inside)return true}return false}
 function gwBuild(key,full){const d=GWLD.data.get(key),g=new THREE.Group();g.userData.full=full;g.userData.key=key;const cols=g.userData.cols=[];
-  {const pos=[],nor=[],col=[];for(const a of d.landuse||[])gwFlat(a.pts,0.012+0.02/(1+ringArea(a.pts)/2e4),pos,nor,col,GW_LAND[a.kind]||'#b3aa8e');
+  {const pos=[],nor=[],col=[];for(const a of d.landuse||[])if(!GW_TERRAIN_KIND[a.kind])gwFlat(a.pts,0.012+0.02/(1+ringArea(a.pts)/2e4),pos,nor,col,GW_LAND[a.kind]||'#b3aa8e');
     if(pos.length)g.add(new THREE.Mesh(gwGeom(pos,nor,null,col),gwMat.flat))}
   {const pos=[],nor=[];for(const w of d.water||[])gwFlat(w.pts,0.08,pos,nor,null,'#000');
     if(pos.length){if(!gwMat.water){gwMat.water=waterMaterial(true);gwMat.water.side=DS}g.add(new THREE.Mesh(gwGeom(pos,nor),gwMat.water))}}
@@ -155,6 +156,19 @@ function gwBuild(key,full){const d=GWLD.data.get(key),g=new THREE.Group();g.user
   if(full)gwTrees(d,g,cols);/* R1: trees (geolandmarks.js) */
   if(full)gwLife(d,key,g,cols);/* D7: lamps, parked cars, vendor carts, bus stops (geolife.js) */
   scene.add(g);return g}
+/* R2: the Silver Hill terrain mesh, built once over the forest's bounding box: a grid that follows groundH, coloured forest, quarry or grass.
+   Forest and quarry areas are drawn here instead of as flat patches in the chunks. */
+const GW_TERRAIN_KIND={forest:1,quarry:1};
+function buildTerrain(landuse){const areas=landuse.filter(a=>GW_TERRAIN_KIND[a.kind]);if(!areas.length)return;let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;
+  for(const a of areas)for(const q of a.pts){x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);z0=Math.min(z0,q[1]);z1=Math.max(z1,q[1])}x0-=20;x1+=20;z0-=20;z1+=20;
+  const S=8,nx=Math.ceil((x1-x0)/S),nz=Math.ceil((z1-z0)/S),pos=[],col=[],uv=[],idx=[],c=new THREE.Color(),grass=new THREE.Color(0x9fb27a);
+  const inPoly=(x,z,r)=>{let ins=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if((a[1]>z)!==(b[1]>z)&&x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0])ins=!ins}return ins};
+  for(let j=0;j<=nz;j++)for(let i=0;i<=nx;i++){const x=x0+i*S,z=z0+j*S;pos.push(x,groundH(x,z)+0.02,z);uv.push(x/14,z/14);const a=areas.find(a=>inPoly(x,z,a.pts));
+    c.copy(a?new THREE.Color(GW_LAND[a.kind]).multiplyScalar(1.15):grass);col.push(c.r,c.g,c.b)}
+  for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const a=j*(nx+1)+i,b=a+1,d=a+nx+1,e=d+1;idx.push(a,d,b,b,d,e)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
+  const t=TX.grass.clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({map:t,vertexColors:true,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));m.receiveShadow=true;scene.add(m)}
 function gwOffset(p,k,off){const a=p[Math.max(0,k-1)],b=p[Math.min(p.length-1,k+1)],dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1;return[p[k][0]-dz/l*off,p[k][1]+dx/l*off]}
 function ringArea(r){let s=0;for(let k=0;k<r.length;k++){const a=r[k],b=r[(k+1)%r.length];s+=a[0]*b[1]-b[0]*a[1]}return Math.abs(s)/2}
 function gwFree(g){removeColliders(g.userData.cols);if(g.userData.full)gwDropDecks(g.userData.key);scene.remove(g);g.traverse(o=>{if(o.geometry&&o.geometry!==GEO.box&&!o.geometry.userData.shared)o.geometry.dispose()});LIFE_SPOTS.delete(g.userData.key)}
@@ -170,7 +184,7 @@ function initGeoWorld(){GWLD.started=true;PLACES.length=0;/* grid-world place na
     const pos=[],nor=[];for(const w of j.water)gwFlat(w.pts,0.06,pos,nor,null,'#000');if(pos.length){if(!gwMat.water){gwMat.water=waterMaterial(true);gwMat.water.side=DS}scene.add(new THREE.Mesh(gwGeom(pos,nor),gwMat.water))}}).catch(()=>{});
   fetch(GW_DIR+'index.json',{cache:'no-cache'}).then(r=>r.json()).then(ix=>{GWLD.index=ix;geoMinimapBase()}).catch(e=>{console.error(e);toast('MAP DATA MISSING','Run the game through start-server.bat',6)});
   fetch('geodata/processed/kovai/landmarks.json',{cache:'no-cache'}).then(r=>r.json()).then(j=>{DISTRICTS.length=0;for(const L of j.landmarks)if(L.in_pilot&&(L.category==='district'||L.id==='town_hall'))DISTRICTS.push({n:L.name.replace('Victoria ',''),x:L.x,z:L.z});
-    for(const L of j.landmarks)if(L.in_pilot&&L.category!=='district'&&L.category!=='fuel'&&L.category!=='industry')PLACES.push({n:L.name,x:L.x,z:L.z});buildLandmarks(j.landmarks.filter(L=>L.model))}/* real places for friends' hangouts */).catch(()=>{})}
+    for(const L of j.landmarks)if(L.in_pilot&&L.category!=='district'&&L.category!=='fuel'&&L.category!=='industry')PLACES.push({n:L.name,x:L.x,z:L.z});GEO_LANDMARKS=j.landmarks;buildLandmarks(j.landmarks.filter(L=>L.model))}/* real places for friends' hangouts */).catch(()=>{})}
 function updateGeoWorld(){if(!GWLD.index)return;const P=playerP(),S=GWLD.index.size_m;
   for(const c of GWLD.index.chunks){const key=c.i+','+c.j,d=Math.hypot(P.x-(c.i+0.5)*S,P.z-(c.j+0.5)*S),want=d<GW_NEAR?2:d<GW_FAR?1:0,live=GWLD.live.get(key);
     if(want&&!GWLD.data.has(key)){if(!GWLD.pending.has(key)){GWLD.pending.add(key);fetch(GW_DIR+c.file,{cache:'no-cache'}).then(r=>r.json()).then(j=>{GWLD.data.set(key,j);GWLD.pending.delete(key);gwMapChunk(j)}).catch(e=>{console.warn('chunk '+key+' failed to load, retrying',e);setTimeout(()=>GWLD.pending.delete(key),2000)})}continue}/* G7: a failed download is retried instead of leaving a hole in the map */
@@ -190,12 +204,20 @@ function geoRoadName(x,z){const S=GWLD.index?GWLD.index.size_m:1000,d=GWLD.data.
 /* ---------- minimap: same data, drawn as chunks arrive ---------- */
 const GW_MS=0.25;
 function geoMinimapBase(){const R=GWLD.index.rect;MX0=R[0]-200;MZ0=R[1]-200;MX1=R[2]+200;MZ1=R[3]+200;OMS=GW_MS;
-  offMap=document.createElement('canvas');offMap.width=Math.ceil((MX1-MX0)*GW_MS);offMap.height=Math.ceil((MZ1-MZ0)*GW_MS);const o=offMap.getContext('2d');o.fillStyle='#b9b39a';o.fillRect(0,0,offMap.width,offMap.height);
-  GWLD.mapReady=true;for(const d of GWLD.data.values())gwMapChunk(d);
-  Promise.all(['landuse','water','roads'].map(n=>fetch('geodata/processed/kovai/'+n+'.json',{cache:'no-cache'}).then(r=>r.json()))).then(([lu,wa,rd])=>gwMapChunk({landuse:lu.landuse,water:wa.water,roads:rd.roads})).catch(()=>{})}/* G5: whole pilot on the map from the start; buildings fill in by chunk */
-function gwMapChunk(d){if(!GWLD.mapReady)return;const o=offMap.getContext('2d'),X=v=>(v-MX0)*GW_MS,Z=v=>(v-MZ0)*GW_MS;
-  const poly=(r,c)=>{o.fillStyle=c;o.beginPath();r.forEach((q,k)=>k?o.lineTo(X(q[0]),Z(q[1])):o.moveTo(X(q[0]),Z(q[1])));o.closePath();o.fill()};
-  for(const a of d.landuse||[])poly(a.pts,GW_LAND[a.kind]||'#b3aa8e');for(const w of d.water||[])poly(w.pts,'#4f93c4');
-  for(const b of d.buildings||[])if(!gwCleared(b))poly(b.pts,'#a29a88');
-  o.lineCap='round';o.strokeStyle='#6d655a';o.lineWidth=2.4*GW_MS*4;for(const r of d.rail||[]){o.beginPath();r.pts.forEach((q,k)=>k?o.lineTo(X(q[0]),Z(q[1])):o.moveTo(X(q[0]),Z(q[1])));o.stroke()}
-  for(const r of(d.roads||[]).slice().sort((a,b)=>a.width-b.width)){o.strokeStyle=r.width>=10?'#f4f1e8':'#e2ddd0';o.lineWidth=Math.max(1.2,r.width*GW_MS);o.beginPath();r.pts.forEach((q,k)=>k?o.lineTo(X(q[0]),Z(q[1])):o.moveTo(X(q[0]),Z(q[1])));o.stroke()}}
+  offMap=document.createElement('canvas');offMap.width=Math.ceil((MX1-MX0)*GW_MS);offMap.height=Math.ceil((MZ1-MZ0)*GW_MS);const o=offMap.getContext('2d');o.fillStyle='#6f9450';o.fillRect(0,0,offMap.width,offMap.height);GWLD.mapReady=true;
+  Promise.all(['landuse','water','roads','buildings','trees','rail'].map(n=>fetch('geodata/processed/kovai/'+n+'.json',{cache:'no-cache'}).then(r=>r.json()))).then(([lu,wa,rd,bl,tr,rl])=>{buildTerrain(lu.landuse);
+    gwMapChunk({whole:true,landuse:lu.landuse,water:wa.water,roads:rd.roads,buildings:bl.buildings,trees:tr.trees,rail:rl.rail})}).catch(()=>{})}/* R3: the whole city drawn once, every building included */
+/* R3: map colours after the concept map: green ground, fields, dark forest with trees, rooftops, cream roads with dark edges, railway with sleepers */
+const MAP_LAND={station_plaza:'#b3aa98',farmland:'#a7b95f',meadow:'#8fb052',orchard:'#6a9a42',forest:'#2e5a29',park:'#58a046',garden:'#58a046',pitch:'#4f9a3e',stadium:'#cdbb9e',quarry:'#a48b6a',railway:'#5f584e',marketplace:'#cbb58e',bus_station:'#a3a3a3'};
+const MAP_ROOF=['#b8a48a','#a39380','#c6b49b','#8e8478','#d1c3a9','#9b8977','#b07a5c','#c9a47e'];
+function gwMapChunk(d){if(!GWLD.mapReady||!d.whole)return;/* only the whole-city drawing (chunks no longer draw themselves) */const o=offMap.getContext('2d'),X=v=>(v-MX0)*GW_MS,Z=v=>(v-MZ0)*GW_MS;
+  const path=r=>{o.beginPath();r.forEach((q,k)=>k?o.lineTo(X(q[0]),Z(q[1])):o.moveTo(X(q[0]),Z(q[1])))},poly=(r,c)=>{o.fillStyle=c;path(r);o.closePath();o.fill()};
+  for(const a of d.landuse||[])poly(a.pts,MAP_LAND[a.kind]||GW_LAND[a.kind]||'#7d9a5a');
+  for(const t of d.trees||[]){o.fillStyle=t[2]?'#5f8f3a':'#244f22';o.beginPath();o.arc(X(t[0]),Z(t[1]),1.5,0,7);o.fill()}
+  for(const w of d.water||[]){poly(w.pts,'#2f78b7');o.strokeStyle='#8cc8ec';o.lineWidth=2;path(w.pts);o.closePath();o.stroke()}
+  o.lineWidth=0.5;o.strokeStyle='#4d463d';for(const b of d.buildings||[]){if(gwCleared(b))continue;poly(b.pts,MAP_ROOF[(gwHash(b.id)*MAP_ROOF.length)|0]);path(b.pts);o.closePath();o.stroke()}
+  o.lineCap='round';o.lineJoin='round';const rs=(d.roads||[]).slice().sort((a,b)=>a.width-b.width);
+  for(const r of rs){o.strokeStyle='#3f3a33';o.lineWidth=Math.max(1.6,r.width*GW_MS)+1.6;path(r.pts);o.stroke()}
+  for(const r of rs){o.strokeStyle=r.width>=10?'#ece5d3':'#d2cab8';o.lineWidth=Math.max(1.2,r.width*GW_MS);path(r.pts);o.stroke()}
+  for(const r of d.rail||[]){o.strokeStyle='#1e1e1e';o.lineWidth=3;path(r.pts);o.stroke()}
+  o.setLineDash([1.5,2.5]);for(const r of d.rail||[]){o.strokeStyle='#e8e8e8';o.lineWidth=1.2;path(r.pts);o.stroke()}o.setLineDash([])}

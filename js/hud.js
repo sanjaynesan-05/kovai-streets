@@ -28,13 +28,37 @@ function drawMinimap(){const P=playerP();const c=mctx;c.save();c.clearRect(0,0,1
   c.save();c.translate(90,90);const ry=player.vehicle?angDiff(camYaw,player.vehicle.heading):angDiff(camYaw,player.yaw);c.rotate(-ry);
   c.fillStyle='#fff';c.strokeStyle='#000';c.lineWidth=1.5;c.beginPath();c.moveTo(0,-8);c.lineTo(6,6);c.lineTo(0,3);c.lineTo(-6,6);c.closePath();c.fill();c.stroke();c.restore()}
 let bigMapOpen=false;
-function drawBigMap(){const cv=$('bigmapC'),c=cv.getContext('2d'),S=cv.width,k=S/(MX1-MX0),Hh=(MZ1-MZ0)*k,oy=(S-Hh)/2,X=v=>(v-MX0)*k,Z=v=>oy+(v-MZ0)*k;
-  c.fillStyle='#0b0f14';c.fillRect(0,0,S,S);c.drawImage(offMap,0,oy,S,Hh);c.textAlign='center';c.textBaseline='middle';c.font='600 11px Rajdhani,sans-serif';
-  for(const d of DISTRICTS){if(d.x<MX0||d.x>MX1||d.z<MZ0||d.z>MZ1)continue;c.fillStyle='rgba(0,0,0,.6)';c.fillText(d.n.toUpperCase(),X(d.x),Z(d.z)-10)}
+/* R3: the city map in the concept map's style: map image, route, landmark badges, district name boxes, jobs, story marker, GPS pin, player;
+   legend, north arrow, scale bar and title. Click the map to set a GPS destination (geonav.js geoMapClick uses the same frame). */
+function bigMapFrame(){const cv=$('bigmapC'),W=cv.width,H=cv.height,k=Math.min(W/(MX1-MX0),H/(MZ1-MZ0));return{cv,W,H,k,ox:(W-(MX1-MX0)*k)/2,oy:(H-(MZ1-MZ0)*k)/2}}
+function rrect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function mapBadge(c,x,y,glyph,bg,s){s=s||22;c.save();c.fillStyle=bg;c.strokeStyle='#fff';c.lineWidth=2;rrect(c,x-s/2,y-s/2,s,s,5);c.fill();c.stroke();
+  c.font=Math.round(s*0.62)+'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText(glyph,x,y+1);c.restore()}
+function mapLabel(c,x,y,t,size){size=size||14;c.save();c.font='700 '+size+'px Rajdhani,sans-serif';const w=c.measureText(t).width+14,h=size+8;c.fillStyle='rgba(14,17,19,.85)';rrect(c,x-w/2,y-h/2,w,h,4);c.fill();
+  c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+1);c.restore()}
+const MAP_BADGE={terminus:['🚌','#1d4ed8','EAST JUNCTION BUS TERMINUS'],station:['🚆','#1d4ed8','KOVAI CENTRAL'],viewpoint:['🔭','#222','SILVER HILL VIEWPOINT'],stadium:['🏆','#8a6d00','KOVAI MUNICIPAL CRICKET STADIUM'],gopuram:['🛕','#b45309',''],church:['⛪','#6b21a8',''],mosque:['🕌','#15803d','']};
+const MAP_LEGEND=[['★','#d4a017','Story mission'],['J','#2a9d8f','Job (side activity)'],['🚆','#1d4ed8','Railway station'],['═','#1e1e1e','Railway line'],['✚','#d62828','Hospital'],['🛡','#1d4ed8','Police station'],['🚒','#c1121f','Fire station'],
+  ['⛽','#f77f00','Petrol bunk'],['🔭','#222','Viewpoint'],['🏆','#8a6d00','Sports'],['🌳','#2b9348','Park'],['📍','#e63946','GPS destination']];
+function drawBigMap(){if(!offMap)return;const F=bigMapFrame(),c=F.cv.getContext('2d'),W=F.W,H=F.H,k=F.k,ox=F.ox,oy=F.oy,X=v=>ox+(v-MX0)*k,Z=v=>oy+(v-MZ0)*k;
+  c.fillStyle='#1c2b17';c.fillRect(0,0,W,H);c.drawImage(offMap,ox,oy,(MX1-MX0)*k,(MZ1-MZ0)*k);
   drawRoute(c,(x,z)=>[X(x),Z(z)],true);
-  for(const ic of mapIcons()){if(!ic.edge&&!ic.near)continue;c.drawImage(ic.img,X(ic.x)-8,Z(ic.z)-8,16,16)}
+  for(const L of GEO_LANDMARKS){const b=MAP_BADGE[L.model];if(!b)continue;mapBadge(c,X(L.x),Z(L.z),b[0],b[1]);if(b[2])mapLabel(c,X(L.x),Z(L.z)+24,b[2],11)}
+  const lake=GEO_LANDMARKS.find(l=>l.id==='silver_lake');if(lake){mapBadge(c,X(lake.x)-52,Z(lake.z),'🌳','#2b9348',20);mapLabel(c,X(lake.x)+12,Z(lake.z),'SILVER LAKE',13)}
+  for(const d of DISTRICTS)if(d.n!=='Town Hall')mapLabel(c,X(d.x),Z(d.z),d.n.toUpperCase(),15);
+  for(const ic of mapIcons()){if(!ic.edge&&!ic.near)continue;c.drawImage(ic.img,X(ic.x)-10,Z(ic.z)-10,20,20)}
+  c.textAlign='center';c.textBaseline='middle';
   if(!mission)for(const o of offers){c.fillStyle=JOBT[o.type].c;c.strokeStyle='#000';c.lineWidth=2;c.beginPath();c.arc(X(o.x),Z(o.z),8,0,7);c.fill();c.stroke();c.fillStyle='#111';c.font='bold 12px Rajdhani,sans-serif';c.fillText(JOBT[o.type].L,X(o.x),Z(o.z)+1)}
-  if(mission&&marker.visible){c.fillStyle='#ffd23f';c.beginPath();c.arc(X(marker.position.x),Z(marker.position.z),7,0,7);c.fill();c.stroke()}
+  if(mission&&marker.visible){c.fillStyle='#ffd23f';c.strokeStyle='#000';c.font='bold 22px sans-serif';c.lineWidth=3;c.strokeText('★',X(marker.position.x),Z(marker.position.z));c.fillText('★',X(marker.position.x),Z(marker.position.z))}
+  if(GPS.manual){const x=X(GPS.manual.x),y=Z(GPS.manual.z);c.save();c.fillStyle='#e63946';c.strokeStyle='#fff';c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.bezierCurveTo(x-10,y-12,x-9,y-24,x,y-24);c.bezierCurveTo(x+9,y-24,x+10,y-12,x,y);c.fill();c.stroke();
+    c.fillStyle='#fff';c.beginPath();c.arc(x,y-16,3.5,0,7);c.fill();c.restore()}
+  c.save();const lw=190,lh=34+MAP_LEGEND.length*24;c.fillStyle='rgba(12,15,17,.88)';rrect(c,14,14,lw,lh,10);c.fill();c.fillStyle='#fff';c.font='700 18px Rajdhani,sans-serif';c.textAlign='left';c.textBaseline='middle';c.fillText('LEGEND',28,34);
+  MAP_LEGEND.forEach((e,i)=>{const y=58+i*24;mapBadge(c,38,y,e[0],e[1],18);c.fillStyle='#fff';c.font='600 14px Rajdhani,sans-serif';c.textAlign='left';c.textBaseline='middle';c.fillText(e[2],56,y+1)});c.restore();
+  c.save();c.fillStyle='#fff';c.strokeStyle='#000';c.lineWidth=1.5;c.beginPath();c.moveTo(W-40,26);c.lineTo(W-26,68);c.lineTo(W-40,58);c.lineTo(W-54,68);c.closePath();c.fill();c.stroke();
+  c.font='700 18px Rajdhani,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('N',W-40,14);
+  const sx=W/2-750*k,sy=H-30;c.strokeStyle='#fff';c.lineWidth=3;c.beginPath();c.moveTo(sx,sy);c.lineTo(sx+1500*k,sy);c.stroke();c.font='600 13px Rajdhani,sans-serif';
+  for(const m of[0,500,1000,1500]){c.beginPath();c.moveTo(sx+m*k,sy-6);c.lineTo(sx+m*k,sy+6);c.stroke();c.fillText(m?(m/1000).toFixed(1)+(m===1500?' km':''):'0',sx+m*k,sy-16)}
+  c.textAlign='left';c.textBaseline='alphabetic';c.font='italic 900 44px Rajdhani,sans-serif';c.lineWidth=5;c.strokeStyle='#000';c.strokeText('KOVAI',22,H-76);c.fillText('KOVAI',22,H-76);c.fillStyle='#f5b700';c.strokeText('STREETS',22,H-34);c.fillText('STREETS',22,H-34);
+  c.fillStyle='#fff';c.font='600 13px Rajdhani,sans-serif';c.fillText('EXPLORE · DRIVE · LIVE',26,H-12);c.textAlign='right';c.fillText('KOVAI · TAMIL NADU · INDIA',W-18,H-12);c.restore();
   const P=playerP(),yaw=player.vehicle?player.vehicle.heading:player.yaw;c.save();c.translate(X(P.x),Z(P.z));c.rotate(-yaw+Math.PI);c.fillStyle='#fff';c.strokeStyle='#000';c.lineWidth=2;c.beginPath();c.moveTo(0,-9);c.lineTo(7,7);c.lineTo(0,3);c.lineTo(-7,7);c.closePath();c.fill();c.stroke();c.restore()}
 let areaT=0,toastT=0,floatT=0;
 function toast(big,small,dur){const el=$('toast');el.innerHTML=esc(big)+(small?'<small>'+esc(small)+'</small>':'');el.style.opacity=1;toastT=dur||2.5}

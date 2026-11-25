@@ -35,22 +35,23 @@ DISTRICTS = {   # centre, look
 # share of shopfronts, the district's building kind, chance a plot is built at all, chance of a second row
 STYLE = {
     "central": dict(gap=(60, 80), cross=(55, 70), jit=3, w=7.0, lot=(10, 16), dep=(14, 22), h=(14, 32), shop=0.9, kind="commercial", fill=1.0, row2=0.85),
-    "old": dict(gap=(34, 46), cross=(30, 42), jit=12, w=5.0, lot=(5, 9), dep=(8, 11), h=(6, 11), shop=0.8, kind="house", fill=1.0, row2=0.95),   # narrow lanes, small shophouses
+    "old": dict(gap=(34, 46), cross=(30, 42), jit=5, w=5.0, lot=(5, 9), dep=(8, 11), h=(6, 11), shop=0.8, kind="house", fill=1.0, row2=0.95),   # narrow lanes, small shophouses
     "campus": dict(gap=(90, 120), cross=(80, 100), jit=4, w=7.0, lot=(14, 22), dep=(14, 20), h=(9, 16), shop=0.25, kind="apartments", fill=0.8, row2=0.5),
     "mill": dict(gap=(120, 160), cross=(100, 130), jit=2, w=9.0, lot=(28, 46), dep=(22, 34), h=(8, 13), shop=0.08, kind="industrial", fill=0.9, row2=0.6),
     "east": dict(gap=(85, 115), cross=(75, 95), jit=4, w=8.0, lot=(12, 22), dep=(14, 24), h=(9, 18), shop=0.55, kind="commercial", fill=0.95, row2=0.6),
-    "hill": dict(gap=(85, 115), cross=(80, 100), jit=13, w=6.5, lot=(12, 18), dep=(12, 18), h=(6, 10), shop=0.05, kind="house", fill=0.85, row2=0.45),
+    "hill": dict(gap=(85, 115), cross=(80, 100), jit=6, w=6.5, lot=(12, 18), dep=(12, 18), h=(6, 10), shop=0.05, kind="house", fill=0.85, row2=0.45),
     "lake": dict(gap=(75, 100), cross=(70, 90), jit=3, w=7.0, lot=(11, 15), dep=(12, 17), h=(10, 24), shop=0.35, kind="apartments", fill=0.95, row2=0.7),
-    "green": dict(gap=(140, 190), cross=(120, 160), jit=6, w=7.0, lot=(16, 32), dep=(16, 30), h=(6, 10), shop=0.1, kind="warehouse", fill=0.5, row2=0.3),
+    "green": dict(gap=(140, 190), cross=(120, 160), jit=3, w=7.0, lot=(16, 32), dep=(16, 30), h=(6, 10), shop=0.1, kind="warehouse", fill=0.5, row2=0.3),
 }
 RING = [(-2000, 0), (-1880, -700), (-1500, -1300), (-750, -1470), (0, -1440), (850, -1420), (1650, -1260), (1990, -650), (2060, 0),
         (1960, 720), (1700, 1340), (850, 1520), (0, 1520), (-850, 1430), (-1580, 1180), (-1900, 600)]
-INNER = [(-280, -330), (-180, -700), (250, -820), (700, -690), (820, -320), (700, -60), (250, 0), (-150, -60)]
+INNER = [(-280, -330), (-180, -700), (250, -820), (700, -690), (820, -320), (720, -200), (250, -205), (-160, -200)]   # south side runs just north of the Kovai Central precinct
 RAIL = [(-2700, -498), (2700, 458)]          # straight, through Kovai Central
 STATION = (200, 15)   # on the line
 LAKE = dict(c=(400, 860), r=(600, 230))
 HILL = dict(c=(120, -1830), r=(720, 400))   # Silver Hill forest
 VIEWPOINT = (100, -1760)
+# Silver Hill height (R2) lives in js/core.js (HILL, groundH): about 55 m at the viewpoint, zero at the ring road and over the quarry floor
 QUARRY = dict(c=(-420, -1760), r=(170, 115))
 STADIUM = dict(c=(-830, 540), r=(150, 115))
 
@@ -193,21 +194,21 @@ def main():
         (ax_, az_), (bx_, bz_) = p[-2], p[-1]; l = math.hypot(bx_ - ax_, bz_ - az_) or 1; s1 = [round(bx_ + (bx_ - ax_) / l * m, 1), round(bz_ + (bz_ - az_) / l * m, 1)]
         clampq = lambda q: [min(max(q[0], RECT[0]), RECT[2]), min(max(q[1], RECT[1]), RECT[3])]
         return [clampq(s0)] + p + [clampq(s1)]
-    def R(pts, cls, w, name, extend=True): roads.append(road(ext(spline(pts)) if extend else spline(pts), cls, w, name))
+    def R(pts, cls, w, name, extend=True, step=22.0): roads.append(road(ext(spline(pts, step=step)) if extend else spline(pts, step=step), cls, w, name))
     R([(-190, -690), (-500, -760), (-800, -790), (-1150, -1000), (-1520, -1320)], "primary", 12, "Campus Road")
     R([(-290, -260), (-800, -120), (-1410, 60), (-2010, 20), (-2700, 120)], "primary", 12, "Mill Road")
-    R([(-160, -40), (-420, 260), (-830, 380), (-1250, 820), (-1600, 1200), (-2200, 1700), (-2700, 1900)], "primary", 12, "Stadium Road")
+    R([(-170, -200), (-420, 260), (-830, 380), (-1250, 820), (-1600, 1200), (-2200, 1700), (-2700, 1900)], "primary", 12, "Stadium Road")
     R([(820, -330), (1140, -400), (1450, -100), (1570, 160), (2070, 10), (2700, 160)], "primary", 12, "East Junction Road")
     R([(700, -680), (1100, -950), (1660, -1280), (2200, -1700), (2700, -1950)], "primary", 12, "Old Kovai Road")
-    R([(720, -40), (1050, 400), (1250, 760), (1810, 980), (1720, 1350), (1900, 1900), (2000, 2100)], "primary", 12, "Greenfield Road")
-    R([(-30, -80), (-60, 420), (-320, 700), (-150, 1150), (0, 1530), (0, 2100)], "primary", 12, "Lake Road")
+    R([(720, -200), (1050, 400), (1250, 760), (1810, 980), (1720, 1350), (1900, 1900), (2000, 2100)], "primary", 12, "Greenfield Road")
+    R([(-60, -200), (-60, 420), (-320, 700), (-150, 1150), (0, 1530), (0, 2100)], "primary", 12, "Lake Road")
     R([(-2700, 1050), (-2200, 1720), (-800, 1960), (800, 1960), (2200, 1720), (2700, 1050)], "trunk", 14, "Outer Highway")
     R([(-480, 1020), (-120, 1180), (400, 1200), (900, 1170), (1260, 980), (1300, 700)], "tertiary", 9, "Lakeview Promenade")
     R([(1450, -100), (1700, -500), (2010, -640)], "secondary", 10, "Market Road")
     R([(-800, -790), (-700, -300), (-420, 255)], "secondary", 10, "College Road")
-    R([(1140, -400), (1000, -150), (720, -40)], "secondary", 10, "Church Street")
-    R([(250, -830), (300, -1150), (320, -1470), (440, -1540), (200, -1600), (380, -1680), (150, -1730), VIEWPOINT], "secondary", 9, "Silver Hill Road")
-    R([(440, -1540), (40, -1590), (-250, -1690), (-420, -1760)], "tertiary", 7, "Quarry Road")
+    R([(1140, -400), (1000, -150), (720, -200)], "secondary", 10, "Church Street")
+    R([(250, -830), (300, -1150), (320, -1470), (440, -1540), (200, -1600), (380, -1680), (150, -1730), VIEWPOINT], "secondary", 9, "Silver Hill Road", step=8.0)   # dense points: it follows the hill (R2)
+    R([(440, -1540), (40, -1590), (-250, -1690), (-420, -1760)], "tertiary", 7, "Quarry Road", step=8.0)
     # Central avenue: crosses the railway on a flyover (layer 1, ramps at both ends; it joins the ground roads at its ends like a real flyover)
     R([(620, -690), (630, -360), (640, -160)], "secondary", 12, "Station Avenue", extend=False)
     roads.append(road(spline([(640, -160), (650, 90), (660, 330)]), "secondary", 12, "Station Flyover", bridge=True, layer=1))
@@ -229,9 +230,9 @@ def main():
     lu("pitch", blob((-480, -590), (70, 48), 24, 0.0, 9), "College ground")
     parks = [lu("park", blob((80, -470), (90, 70), 28, 0.12, 11), "Town Hall Park"), lu("park", blob((450, 1080), (260, 45), 28, 0.08, 12), "Lakeside Park"),
              lu("park", blob((1150, -560), (55, 45), 20, 0.1, 13), "Church Green"), lu("park", blob((-1050, 1000), (90, 70), 24, 0.12, 14))]
-    plaza = lu("marketplace", blob((180, -230), (55, 40), 20, 0.0, 15), "Town Hall Square")
+    plaza = lu("marketplace", blob((180, -262), (55, 36), 20, 0.0, 15), "Town Hall Square")
     lu("marketplace", blob((1230, -300), (45, 30), 16, 0.0, 16), "Old Kovai market")
-    terminus = lu("bus_station", [[1600, 170], [1760, 170], [1760, 250], [1600, 250], [1600, 170]], "East Junction bus terminus")
+    terminus = lu("bus_station", [[1595, 140], [1765, 140], [1765, 230], [1595, 230], [1595, 140]], "East Junction bus terminus")
     RL = []; rail_corr = []
     (ax, az), (bx, bz) = RAIL; L = math.hypot(bx - ax, bz - az); nx, nz = -(bz - az) / L, (bx - ax) / L
     for k, off in enumerate((-2.2, 2.2)): RL.append(dict(id=k + 1, kind="rail", service=None, bridge=False, pts=[[round(ax + nx * off, 1), round(az + nz * off, 1)], [round(bx + nx * off, 1), round(bz + nz * off, 1)]]))
@@ -247,17 +248,26 @@ def main():
     lm("gopuram", "Kovai Temple", "landmark", "gopuram", 200, -620, 46, 46)
     lm("church", "Old Kovai Church", "landmark", "church", 1140, -640, 26, 44)
     lm("mosque", "East Mosque", "landmark", "mosque", 1760, -420, 34, 34)
-    lm("station", "Kovai Central", "transport", "station", STATION[0], STATION[1] - 37, 190, 22, math.atan2(bz - az, bx - ax))
+    ra = math.atan2(bz - az, bx - ax); rz_at = lambda x: az + (x - ax) * (bz - az) / (bx - ax)
+    precinct = [[0, -205], [400, -205], [400, round(rz_at(400) + 32, 1)], [0, round(rz_at(0) + 32, 1)], [0, -205]]
+    mark_poly(precinct, 1)
+    LM.append(dict(id="station", name="Kovai Central", category="transport", model="station", x=STATION[0], z=round(rz_at(STATION[0]), 1), w=380, d=0, angle=round(ra, 4), h=0, in_pilot=True))
+    lu("station_plaza", [[15, -198], [385, -198], [385, round(rz_at(385) - 50, 1)], [15, round(rz_at(15) - 50, 1)], [15, -198]], "Kovai Central forecourt")
+    ux_, uz_ = math.cos(ra), math.sin(ra); nx_, nz_ = -uz_, ux_
+    SP = lambda u, v: [round(STATION[0] + ux_ * u + nx_ * v, 1), round(rz_at(STATION[0]) + uz_ * u + nz_ * v, 1)]
+    for k, v in enumerate((-14, 14)):   # platform loop lines, joining the main lines beyond the platforms
+        RL.append(dict(id=10 + k, kind="rail", service="siding", bridge=False, pts=[SP(-235, v / abs(v) * 2.2), SP(-175, v), SP(175, v), SP(235, v / abs(v) * 2.2)]))
+    lm("terminus", "East Junction bus terminus", "transport", "terminus", 1680, 185, 170, 90)
     lm("stadium", "Kovai Municipal Cricket Stadium", "sports", "stadium", STADIUM["c"][0], STADIUM["c"][1], STADIUM["r"][0] * 2, STADIUM["r"][1] * 2)
     lm("viewpoint", "Silver Hill Viewpoint", "viewpoint", "viewpoint", VIEWPOINT[0], VIEWPOINT[1] - 22, 18, 18)
     for i, (x, z) in enumerate([(-1530, -40), (-1330, 260), (-1600, 230), (-1200, -60)]): lm(f"chimney_{i}", "Mill chimney", "industry", "chimney", x, z, 5, 5, h=38 + i * 3)
-    lm("town_hall", "Town Hall", "civic", "townhall", 180, -300, 40, 26)
+    lm("town_hall", "Town Hall", "civic", "townhall", 180, -330, 40, 26)
     # named buildings drawn with the normal building look (mission places)
-    named = [("Devarajan Tower", "office", 340, -140, 30, 30, 62), ("Royal Grand Hotel", "hotel", 60, -140, 46, 26, 36), ("Kovai Central Mall", "retail", 430, 160, 90, 50, 18),
+    named = [("Devarajan Tower", "office", 420, -300, 30, 30, 62), ("Royal Grand Hotel", "hotel", -40, -300, 46, 26, 36),
              ("Government Hospital", "hospital", -430, -430, 60, 34, 16), ("Old Kovai Hospital", "hospital", 930, -90, 44, 30, 14),
-             ("Mill Estate Police Station", "civic", -1460, -140, 34, 22, 10), ("East Junction Police Station", "civic", 1400, -50, 36, 24, 12),
+             ("Mill Estate Police Station", "civic", -1460, -140, 34, 22, 10),
              ("Fire Station", "civic", -40, -600, 30, 22, 9), ("Kovai Arts College", "college", -820, -700, 80, 26, 18), ("Communications Facility", "industrial", 1880, 330, 50, 34, 12),
-             ("Podanur Mill", "industrial", -1380, 120, 90, 40, 12), ("Old Kovai Mills", "industrial", -420, 120, 110, 46, 14)]
+             ]
     nb = []; bid = [0]
     def bld(pts, kind, h, name=None):
         bid[0] += 1; b = dict(id=bid[0], kind=kind, name=name, h=round(h, 1), pts=[[round(q[0], 2), round(q[1], 2)] for q in pts]); nb.append(b); return b
@@ -416,8 +426,9 @@ def main():
         lx, lz = -uz, ux
         ring_ = [[cx + ux * w / 2 + lx * d / 2, cz + uz * w / 2 + lz * d / 2], [cx - ux * w / 2 + lx * d / 2, cz - uz * w / 2 + lz * d / 2],
                  [cx - ux * w / 2 - lx * d / 2, cz - uz * w / 2 - lz * d / 2], [cx + ux * w / 2 - lx * d / 2, cz + uz * w / 2 - lz * d / 2]]
-        for f1 in (0.1, 0.5, 0.9):
-            for f2 in (0.1, 0.5, 0.9):
+        n1, n2 = max(2, math.ceil(w / 4)), max(2, math.ceil(d / 4))   # check the plot every 4 m or closer, so no road corridor slips between the checks
+        for f1 in [0.05 + 0.9 * i / n1 for i in range(n1 + 1)]:
+            for f2 in [0.05 + 0.9 * j / n2 for j in range(n2 + 1)]:
                 x = ring_[0][0] + (ring_[1][0] - ring_[0][0]) * f1 + (ring_[3][0] - ring_[0][0]) * f2
                 z = ring_[0][1] + (ring_[1][1] - ring_[0][1]) * f1 + (ring_[3][1] - ring_[0][1]) * f2
                 if blocked(x, z, 1 | 2 | 4): return False
@@ -449,6 +460,32 @@ def main():
                         if rnd.random() < st["row2"]: try_lot(cx - uz * (d + 1.5) * side, cz + ux * (d + 1.5) * side, ux, uz, w, d, round(h * rnd.uniform(0.7, 1.05), 1), st["kind"])
                         s += w + rnd.uniform(0.0, 1.5 if st["fill"] >= 0.9 else 6)
                     else: s += 3
+    # R3: fill what is left inside the ring: every open plot gets a building, turned to the nearest street, so there is no empty land to cut across
+    SC = defaultdict(list)
+    for r in roads:
+        if r["layer"]: continue
+        p = r["pts"]
+        for k in range(1, len(p)):
+            a, b = p[k - 1], p[k]; L = math.hypot(b[0] - a[0], b[1] - a[1])
+            if L < 1: continue
+            for i in range(int(min(a[0], b[0]) // 60) - 1, int(max(a[0], b[0]) // 60) + 2):
+                for j in range(int(min(a[1], b[1]) // 60) - 1, int(max(a[1], b[1]) // 60) + 2): SC[(i, j)].append((a, b, (b[0] - a[0]) / L, (b[1] - a[1]) / L))
+    def street_dir(x, z):
+        best, bd = (1.0, 0.0), 1e9
+        for a, b, ux, uz in SC.get((int(x // 60), int(z // 60)), ()):
+            d = seg_dist((x, z), a, b)
+            if d < bd: bd, best = d, (ux, uz)
+        return best
+    filled = 0
+    for gz in range(int(RECT[1]), int(RECT[3]), 8):
+        for gx in range(int(RECT[0]), int(RECT[2]), 8):
+            if not in_city(gx, gz) or blocked(gx, gz, 1 | 2 | 4): continue
+            st = STYLE[district(gx, gz)]; ux, uz = street_dir(gx, gz)
+            for f in (1.0, 0.7, 0.45):
+                w, d = rnd.uniform(*st["lot"]) * f, rnd.uniform(*st["dep"]) * f
+                if w < 4 or d < 4: break
+                if try_lot(gx, gz, ux, uz, w, d, round(rnd.uniform(*st["h"]), 1), st["kind"]): filled += 1; break
+    print("open plots filled:", filled)
     for b in nb:   # one winding for every outline, so facade textures and shop signs read the right way round
         q = b["pts"]
         if sum(q[i][0] * q[i + 1][1] - q[i + 1][0] * q[i][1] for i in range(len(q) - 1)) > 0: b["pts"] = q[::-1]
@@ -475,6 +512,7 @@ def main():
             z = min(zs)
             while z < max(zs):
                 px, pz = x + rnd.uniform(-gap * 0.4, gap * 0.4), z + rnd.uniform(-gap * 0.4, gap * 0.4)
+                if poly is forest and math.hypot(px - VIEWPOINT[0], (pz - VIEWPOINT[1]) * 1.6) < 110 and pz > VIEWPOINT[1] - 30: z += gap; continue   # a clearing below the viewpoint: the city stays in view
                 if inside_poly(px, pz, poly) and not blocked(px, pz, avoid & ~1 if poly is forest or poly in parks else avoid) and not inside_poly(px, pz, quarry):
                     trees.append([round(px, 1), round(pz, 1), kind])
                 z += gap
@@ -494,8 +532,8 @@ def main():
 
     # ---- points of interest and signals ----
     pois = [dict(kind="hospital", name=n, x=x + 0.0, z=z + 0.0) for n, k, x, z, *_ in named if k == "hospital"]
-    pois += [dict(kind="police", name=n, x=x + 0.0, z=z + 0.0) for n, k, x, z, *_ in named if "Police" in n]
-    pois += [dict(kind="bus_station", name="East Junction bus terminus", x=1680.0, z=210.0), dict(kind="fire", name="Fire Station", x=-40.0, z=-600.0)]
+    pois += [dict(kind="police", name=n, x=x + 0.0, z=z + 0.0) for n, k, x, z, *_ in named if "Police" in n] + [dict(kind="police", name="East Junction Police Station", x=1400.0, z=-50.0)]   # the station itself is the police mission site
+    pois += [dict(kind="bus_station", name="East Junction bus terminus", x=1680.0, z=185.0), dict(kind="fire", name="Fire Station", x=-40.0, z=-600.0)]
     pois += [dict(kind="fuel", name="Petrol bunk", x=L_["x"], z=L_["z"]) for L_ in LM if L_["model"] == "fuel"]
     for k, dd in DISTRICTS.items(): LM.append(dict(id="district_" + k, name=dd["name"], category="district", model=None, x=dd["c"][0], z=dd["c"][1], in_pilot=True))
     LM.append(dict(id="silver_lake", name="Silver Lake", category="landmark", model=None, x=LAKE["c"][0], z=LAKE["c"][1], in_pilot=True))

@@ -93,7 +93,13 @@ function rayBoxes(origin,dir,maxD,minT){_ray.origin.copy(origin);_ray.direction.
   return best}
 const _la=new THREE.Vector3(),_lb=new THREE.Vector3(),_ld=new THREE.Vector3();
 function los(ax,ay,az,bx,by,bz){_la.set(ax,ay,az);_lb.set(bx,by,bz);_ld.subVectors(_lb,_la);const d=_ld.length();_ld.divideScalar(d);return rayBoxes(_la,_ld,d-0.4,0.3)>=d-0.4}
-function groundH(){return 0}   /* flat until elevation data (Copernicus DEM) is approved */
+/* R2: Silver Hill (REBUILD_SPEC.md): a smooth hill north of the ring road, about 55 m high at the viewpoint, with gentle unevenness.
+   Zero at its edge (the city and farmland stay flat) and over the quarry floor (level for the quarry yard). Same numbers as HILL in tools/geo/build_kovai.py. */
+const HILL={x:110,z:-1800,rx:600,rz:340,peak:55,qx:-420,qz:-1760,qrx:190,qrz:130};
+function groundH(x,z){const dx=(x-HILL.x)/HILL.rx,dz=(z-HILL.z)/HILL.rz,d=Math.sqrt(dx*dx+dz*dz);if(d>=1)return 0;
+  let h=HILL.peak*0.5*(1+Math.cos(Math.PI*d))+3*(1-d)*Math.sin(x*0.021+1.3)*Math.cos(z*0.017);
+  const qd=Math.hypot((x-HILL.qx)/HILL.qrx,(z-HILL.qz)/HILL.qrz);if(qd<1.5)h*=clamp((qd-1)/0.5,0,1);
+  return Math.max(0,h)}
 
 /* ================= static geometry batching ================= */
 function batch(){return{pos:[],nor:[],uv:[],col:[]}}

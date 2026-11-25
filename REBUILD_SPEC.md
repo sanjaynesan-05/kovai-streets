@@ -151,8 +151,8 @@ Approve this spec (or mark changes) before any code is written.
 |---|---|
 | **R0** Spec | You approve this document |
 | **R1** City ✓ (2026-11-26; details in `EXECUTION_PLAN.md`) | Top-down plan matches the concept map; every district reads differently at street level; traffic, pedestrians and GPS work on the new roads; regression suite passes, with tests moved to new places |
-| **R2** Silver Hill | Car, bike and bus climb to the viewpoint and come down; pedestrians and traffic follow slopes; nothing floats or sinks; collisions hold on slopes |
-| **R3** Map and HUD | Full map matches the concept's style and legend; minimap matches |
+| **R2** Silver Hill ✓ (2026-11-26) | Car, bike and bus climb to the viewpoint and come down; pedestrians and traffic follow slopes; nothing floats or sinks; collisions hold on slopes |
+| **R3** Map and HUD ✓ (2026-11-26) | Full map matches the concept's style and legend; minimap matches |
 | **R4** Act 1 | Every mission in the storyline doc playable end to end, including its optional objective; tests for each mission |
 | **R5** Act 2 | The same, plus the evidence board, and every choice path reaches the finale |
 | **R6** Act 3 | Both heist approaches finish; every crew combination reaches the ending |
