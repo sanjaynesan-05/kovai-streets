@@ -171,7 +171,7 @@ function buildTerrain(landuse){const areas=landuse.filter(a=>GW_TERRAIN_KIND[a.k
   const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({map:t,vertexColors:true,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));m.receiveShadow=true;scene.add(m)}
 function gwOffset(p,k,off){const a=p[Math.max(0,k-1)],b=p[Math.min(p.length-1,k+1)],dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1;return[p[k][0]-dz/l*off,p[k][1]+dx/l*off]}
 function ringArea(r){let s=0;for(let k=0;k<r.length;k++){const a=r[k],b=r[(k+1)%r.length];s+=a[0]*b[1]-b[0]*a[1]}return Math.abs(s)/2}
-function gwFree(g){removeColliders(g.userData.cols);if(g.userData.full)gwDropDecks(g.userData.key);scene.remove(g);g.traverse(o=>{if(o.geometry&&o.geometry!==GEO.box&&!o.geometry.userData.shared)o.geometry.dispose()});LIFE_SPOTS.delete(g.userData.key)}
+function gwFree(g){removeColliders(g.userData.cols);if(g.userData.full)gwDropDecks(g.userData.key);scene.remove(g);g.traverse(o=>{if(o.geometry&&o.geometry!==GEO.box&&!o.geometry.userData.shared)o.geometry.dispose()});LIFE_SPOTS.delete(g.userData.key);dropSlots(g.userData.key)}
 
 /* ---------- streaming ---------- */
 function initGeoWorld(){GWLD.started=true;PLACES.length=0;/* grid-world place names; real landmarks are added below */
@@ -206,7 +206,7 @@ const GW_MS=0.25;
 function geoMinimapBase(){const R=GWLD.index.rect;MX0=R[0]-200;MZ0=R[1]-200;MX1=R[2]+200;MZ1=R[3]+200;OMS=GW_MS;
   offMap=document.createElement('canvas');offMap.width=Math.ceil((MX1-MX0)*GW_MS);offMap.height=Math.ceil((MZ1-MZ0)*GW_MS);const o=offMap.getContext('2d');o.fillStyle='#6f9450';o.fillRect(0,0,offMap.width,offMap.height);GWLD.mapReady=true;
   Promise.all(['landuse','water','roads','buildings','trees','rail'].map(n=>fetch('geodata/processed/kovai/'+n+'.json',{cache:'no-cache'}).then(r=>r.json()))).then(([lu,wa,rd,bl,tr,rl])=>{buildTerrain(lu.landuse);
-    gwMapChunk({whole:true,landuse:lu.landuse,water:wa.water,roads:rd.roads,buildings:bl.buildings,trees:tr.trees,rail:rl.rail})}).catch(()=>{})}/* R3: the whole city drawn once, every building included */
+    initRailway(rl);gwMapChunk({whole:true,landuse:lu.landuse,water:wa.water,roads:rd.roads,buildings:bl.buildings,trees:tr.trees,rail:rl.rail})}).catch(()=>{})}/* R3: the whole city drawn once, every building included */
 /* R3: map colours after the concept map: green ground, fields, dark forest with trees, rooftops, cream roads with dark edges, railway with sleepers */
 const MAP_LAND={station_plaza:'#b3aa98',farmland:'#a7b95f',meadow:'#8fb052',orchard:'#6a9a42',forest:'#2e5a29',park:'#58a046',garden:'#58a046',pitch:'#4f9a3e',stadium:'#cdbb9e',quarry:'#a48b6a',railway:'#5f584e',marketplace:'#cbb58e',bus_station:'#a3a3a3'};
 const MAP_ROOF=['#b8a48a','#a39380','#c6b49b','#8e8478','#d1c3a9','#9b8977','#b07a5c','#c9a47e'];

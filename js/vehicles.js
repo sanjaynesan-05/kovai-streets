@@ -45,7 +45,7 @@ function updAI(v,dt){const a=v.ai;if(!a.wps.length)aiNext(v);let wp=a.wps[0];
   if(d<3.4){a.wps.shift();if(!a.wps.length)aiNext(v);wp=a.wps[0];dx=wp.x-v.pos.x;dz=wp.z-v.pos.z;d=Math.hypot(dx,dz)}
   const diff=angDiff(v.heading,Math.atan2(dx,dz));
   let target=a.cruise;const slow=a.reckless?13:7.5;if(wp===a.turnWp||(a.wps.length===1&&d<16))target=Math.min(target,slow);if(Math.abs(diff)>0.6)target=Math.min(target,a.reckless?9:5);
-  const blocked=!a.reckless&&(blockedAhead(v)||(a.geo&&geoRed(v)));/* geo: stop at red lights */
+  const blocked=!a.reckless&&(blockedAhead(v)||(a.geo&&geoRed(v))||gateAhead(v));/* geo: stop at red lights and closed railway gates */
   if(blocked){a.blockT+=dt;target=0}else a.blockT=0;
   if(a.hitT>0){a.hitT-=dt;target=0}
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);

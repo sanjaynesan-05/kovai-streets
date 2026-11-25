@@ -70,10 +70,10 @@ function gwLife(d,key,g,cols){const lamps=[],cars=[],carts=[],stops=[],spots=[],
   inst(LIFE_GEO.head,lampHeadMat,lamps,q=>{o.rotation.set(0,q[2],0);o.position.set(q[0]+Math.cos(q[2])*1.8,6.85,q[1]-Math.sin(q[2])*1.8)});
   inst(LIFE_GEO.pool,poolMat,lamps,q=>{o.rotation.set(0,0,0);o.position.set(q[0]+Math.cos(q[2])*2.6,0.09,q[1]-Math.sin(q[2])*2.6)});
   for(const q of lamps)cols.push(addCollider(q[0]-0.15,q[1]-0.15,q[0]+0.15,q[1]+0.15,7));
-  /* parked cars: body + cabin, a colour each; two small colliders along the car */
-  for(const part of['body','cabin']){const m=inst(LIFE_GEO[part],LIFE_MAT.white,cars,q=>{o.rotation.set(0,q[2],0);o.position.set(q[0],0,q[1])});
-    if(m){const c=new THREE.Color();cars.forEach((q,i)=>{c.set(CAR_COLS[(gwHash(Math.round(q[0]*7+q[1]*13))*CAR_COLS.length)|0]);if(part==='cabin')c.multiplyScalar(0.55);m.setColorAt(i,c)});m.instanceColor.needsUpdate=true}}
-  for(const q of cars)for(const f of[-1.2,1.2]){const x=q[0]+Math.sin(q[2])*f,z=q[1]+Math.cos(q[2])*f;cols.push(addCollider(x-0.9,z-0.9,x+0.9,z+0.9,1.5))}
+  /* parked cars: body + cabin, a colour each. Each is a parking slot (transport.js): a real car you can drive when you are near */
+  const carParts=[];for(const part of['body','cabin']){const m=inst(LIFE_GEO[part],LIFE_MAT.white,cars,q=>{o.rotation.set(0,q[2],0);o.position.set(q[0],0,q[1])});
+    if(m){carParts.push(m);const c=new THREE.Color();cars.forEach((q,i)=>{c.set(CAR_COLS[(gwHash(Math.round(q[0]*7+q[1]*13))*CAR_COLS.length)|0]);if(part==='cabin')c.multiplyScalar(0.55);m.setColorAt(i,c)});m.instanceColor.needsUpdate=true}}
+  cars.forEach((q,i)=>addSlot({key,x:q[0],z:q[1],h:q[2],r:80,type:gwHash(Math.round(q[0]*3+q[1]*5))<0.6?'car':'hatch',color:CAR_COLS[(gwHash(Math.round(q[0]*7+q[1]*13))*CAR_COLS.length)|0],scen:carParts.map(im=>({im,i}))}))
   /* vendor carts and bus stops */
   inst(LIFE_GEO.cart,LIFE_MAT.cart,carts,q=>{o.rotation.set(0,q[2],0);o.position.set(q[0],0,q[1])});inst(LIFE_GEO.canopy,M('#e76f51'),carts,q=>{o.rotation.set(0,q[2],0);o.position.set(q[0],0,q[1])});
   for(const q of carts){cols.push(addCollider(q[0]-1.1,q[1]-1.1,q[0]+1.1,q[1]+1.1,1.2));spots.push({x:q[0]+Math.cos(q[2])*1.2,z:q[1]-Math.sin(q[2])*1.2,kind:'cart',yaw:q[2]-Math.PI/2})}

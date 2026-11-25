@@ -34,7 +34,9 @@ The full spec is `REBUILD_SPEC.md`. Decisions made:
 | R1 | The new city | ✓ built (details below); needs your playtest |
 | R2 | Silver Hill: terrain height for driving, people, traffic, collisions and missions on slopes | ✓ built (details below); needs your playtest |
 | R3 | Full map and minimap in the concept map's style (legend, district labels, icons); M key and GPS pin fixed; no empty land in the city | ✓ built (details below); needs your playtest |
-| R4 | Act 1 rewritten (missions 01–06, multi-stage, per Storyline 2.0) | **next** |
+| R3b | Living transport: parked vehicles you can drive, buses running from the terminus, trains you can ride, railway gates and Ring Road overbridges (plan below) | ✓ built (details below); needs your playtest |
+| R3c | Interiors: hand-built interiors for key places, enterable shops, other buildings closed (plan below) | ✓ first part built (details below): station, terminus, shops. Mission interiors come with R4–R6 |
+| R4 | Act 1 rewritten (missions 01–06, multi-stage, per Storyline 2.0) | |
 | R5 | Act 2 rewritten (missions 07–14) with the evidence board | |
 | R6 | Act 3 (missions 15–21): Arjun Varadhan, heist board, hacking puzzle, the Vault Job, escape, ending. Replaces Phase A below | |
 | R7 | Optional content: 12 character side missions, district activities, 10 random world events | |
@@ -146,6 +148,103 @@ The full spec is `REBUILD_SPEC.md`. Decisions made:
 *Code:*
 - `parkedVehicles()` (`js/geolandmarks.js`) parks real vehicle models as scenery, a few draw calls for many vehicles.
 - Landmark models can add signs, parked vehicles, walkable platforms (`SURF`) and waiting-passenger spots.
+
+### Plan: R3b and R3c (agreed 2026-11-26)
+
+Decisions:
+- Ring Road crossings get **overbridges**.
+- Trains can be **ridden**.
+- Interiors in **three levels**.
+- Done **now**, before R4.
+
+**R3b-1: parked vehicles you can drive**
+- Every parked spot is a parking slot: the Kovai Central forecourt (autos, cars, taxis), the terminus bays (buses) and the kerbs city-wide (cars).
+- Near the player, a slot holds a real vehicle you can enter, drive, crash or steal; far away it is cheap scenery.
+- **How near:** about 140 m at the station and terminus, 80 m on kerbs.
+- **Taken vehicles** stay where you leave them; their slot refills later.
+- Parked vehicles no longer have fixed colliders: the real vehicle collides.
+
+**R3b-2: buses that run**
+- **Terminus layout:** drive-through. Buses enter at the gate, stop at a bay alongside the platform, leave forward, loop round and exit to East Junction Road.
+- **Bus lines:** routes to Kovai Central, Mill Estate, Campus Nagar, Lakeview, Greenfield and Old Kovai, and back.
+- **Timing:** a departure about every 45 seconds; a bus coming back parks in a free bay.
+- **On the road:** buses stop at their destination and on the way, and halt behind traffic and at closed railway gates.
+- **Kovai Central forecourt:** taxis and autos arrive, drop off and leave.
+
+**R3b-3: trains, gates and overbridges**
+- **Trains:** passenger trains and goods trains on both main lines.
+  - Passenger trains stop at Kovai Central (about 40 s) and at two new halts: Mill Estate Halt (west) and East Junction Halt (by the bus terminus, as an interchange).
+  - Trains wreck cars and knock down people in their way.
+- **Riding:** press E at a stopped train to board. The camera follows the train; press E at a station stop to get off. Small fare.
+- **The two Ring Road crossings** become overbridges over the line (decks in the road network, so traffic and GPS use them).
+- **The other five crossings** (Mill Road, College Road, Stadium Road, Lake Road, Greenfield Road) get level-crossing gates:
+  - boom barriers both sides, flashing red lights and a bell
+  - a gatekeeper's hut with a gatekeeper
+  - gates close about 25 s before a train and open after it has passed
+  - traffic and buses stop at closed gates; the booms are solid
+- **Fence:** along the line between crossings; the tracks can only be crossed at gates, bridges and the flyover.
+
+**R3c: interiors**
+1. **Hand-built interiors**, walked into with no loading:
+   - first, Kovai Central (concourse, ticket counters, waiting hall, stairs to the footbridge) and the bus terminus (ticket office, waiting hall)
+   - then, with the acts: safehouse, police stations, hospitals, gun shop, mall, hotel lobby, Devarajan Tower and its vault floor, mills, godown
+2. **Enterable shops:** every ground-floor shop has a door into a small shop interior from a few templates (tea stall, textiles, electricals, bakery, hardware) with a shopkeeper.
+3. **Other buildings** (homes, upper floors): closed.
+
+**R3b result (2026-11-26).** New file `js/transport.js`.
+
+*Parking slots:*
+- About 480 parked vehicles (forecourt, terminus, kerbs) are slots.
+- Near you they are real vehicles you can drive: 43 were real near Kovai Central in Chrome.
+- A taken vehicle stays where you leave it; the slot refills when you are far away.
+
+*Buses:*
+- The terminus is now drive-through: 20 bays, through lanes and a gate on East Junction Road.
+- Buses leave about every 45 s for 6 lines (Kovai Central, Mill Estate, Campus Nagar, Lakeview, Greenfield, Old Kovai). They drive the left lane, stop at their destination and halfway, come back and park in a free bay.
+- A hijacked or wrecked bus leaves service.
+- Taxis and autos drop off at Kovai Central and leave.
+
+*Trains:*
+- Passenger trains stop at Kovai Central (40 s), Mill Estate Halt and East Junction Halt (20 s); goods trains run through.
+- Trains wreck cars and knock people down.
+- **Riding:** E at a stopped train boards it (₹20); E at a station gets off. In Chrome: boarded at Kovai Central, rode 118 s, got off on the East Junction Halt platform.
+
+*Railway crossings:*
+- The two Ring Road crossings are overbridges in the road network; the whole network is now one connected piece, the Station Flyover included.
+- The five other crossings have gates: booms both sides, flashing lights, a bell, and a gatekeeper and hut.
+- Gates close 25 s before a train and open after it. Closed booms are solid. Traffic, buses and taxis stop at them. In Chrome: the gates ahead of a train closed, and the passed or distant ones stayed open.
+- A fence runs along both sides of the line, with gaps at crossings, stations, overbridges and the flyover.
+
+*Not yet checked in a playtest:*
+- seeing AI cars queue at a closed gate
+- a full bus round trip
+- the regression suite after R3b
+
+**R3c result, first part (2026-11-26).** New file `js/interiors.js`.
+
+*Kovai Central's concourse:*
+- The building is a hollow shell. You walk in from the porch, and the floor is at platform height.
+- Inside: three doors to platform 1, ticket counters with three clerks, pillars, benches, ceiling lights, waiting passengers.
+- Two live departures boards show the next trains (destination, platform, minutes or "at platform"). In Chrome: "EAST JUNCTION HALT · PF 3 · 1 MIN".
+
+*The terminus ticket office* is a waiting hall: door on the platform side, a counter with three clerks, benches, passengers.
+
+*Shops:*
+- At any open shopfront, E takes you into a shop matching its sign: Sakthi Mobiles, Kovai Textiles, Hotel Arul, Selvam Hardwares or Velan Opticals. Each has a shopkeeper; at Hotel Arul you can buy a meal for ₹40, which restores health.
+- E at the door, or walking out, returns you to the same spot on the street.
+- Shutters-down shops (Ganesh Sweets, Anbu Electricals, New Modern Bakery) say they are closed. You can't go in while wanted.
+- In Chrome: entered Hotel Arul and came back out to the street.
+
+*Not yet:* mission interiors (mills, godown, police station, hotel lobby, Devarajan Tower and vault, safehouse, hospital, gun shop, mall) are built with their acts in R4–R6.
+
+**Checks:**
+- Every parked vehicle near you can be entered and driven.
+- Buses finish their routes and return.
+- Gates close before every train and reopen.
+- Nothing crosses the tracks through the fence.
+- Riding a train between stations works.
+- Each interior can be entered and left.
+- The frame rate in Central Kovai holds.
 
 ---
 

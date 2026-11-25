@@ -122,18 +122,20 @@ def blocked(x, z, bits):
     k = gi(x, z); return k < 0 or grid[k] & bits
 
 
-def build_graph(roads):
-    """Same method as build_pilot.py: shared points on the same layer are junctions."""
+def build_graph(roads, bridge_ends=False):
+    """Same method as build_pilot.py: shared points on the same layer are junctions.
+    bridge_ends: a bridge's two end points count as ground level, so overbridges and flyovers join the roads at their ends (build_kovai.py)."""
     key = lambda q, layer: (round(q[0], 1), round(q[1], 1), layer)
-    use = Counter(key(q, r["layer"]) for r in roads for q in r["pts"])
+    lay = lambda r, i: 0 if (bridge_ends and r["bridge"] and i in (0, len(r["pts"]) - 1)) else r["layer"]
+    use = Counter(key(q, lay(r, i)) for r in roads for i, q in enumerate(r["pts"]))
     nid, nodes, edges = {}, [], []
     def node(k):
         if k not in nid: nid[k] = len(nodes); nodes.append([k[0], k[1], k[2]])
         return nid[k]
     for ri, r in enumerate(roads):
-        p = r["pts"]; cut = [0] + [i for i in range(1, len(p) - 1) if use[key(p[i], r["layer"])] > 1] + [len(p) - 1]
+        p = r["pts"]; cut = [0] + [i for i in range(1, len(p) - 1) if use[key(p[i], lay(r, i))] > 1] + [len(p) - 1]
         for a, b in zip(cut, cut[1:]):
-            na, nb = node(key(p[a], r["layer"])), node(key(p[b], r["layer"])); Ls = round(length(p[a:b + 1]), 1)
+            na, nb = node(key(p[a], lay(r, a))), node(key(p[b], lay(r, b))); Ls = round(length(p[a:b + 1]), 1)
             if na == nb: continue
             if r["oneway"] >= 0: edges.append([na, nb, Ls, ri, a, b])
             if r["oneway"] <= 0: edges.append([nb, na, Ls, ri, a, b])

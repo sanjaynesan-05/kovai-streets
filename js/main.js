@@ -37,7 +37,7 @@ function updatePlay(dt){
 
 
 /* ================= main loop ================= */
-function sim(dt){updateGeoWorld();updateGeoSignals(dt);updateGPS(dt);updateGeoLife(dt);updateWorldFX(dt);updateGrenades(dt);updateVehicles(dt);updatePeds(dt);updateGoons(dt);updateFriends(dt);updateRockets(dt);updateFx(dt)}
+function sim(dt){updateGeoWorld();updateGeoSignals(dt);updateGPS(dt);updateGeoLife(dt);updateTransport(dt);updateInteriors(dt);updateWorldFX(dt);updateGrenades(dt);updateVehicles(dt);updatePeds(dt);updateGoons(dt);updateFriends(dt);updateRockets(dt);updateFx(dt)}
 function update(dt){dt*=slowMo();if(wheelOpen){if(wheelMode==='scroll'&&performance.now()>wheelT)closeWheel(true);dt*=0.3}time+=dt;hornCD-=dt;player.tankCD-=dt;
   if(!player.dead){lookKeys(dt);if(!player.vehicle)updateFoot(dt);else if(mouseL&&player.vehicle.type==='tank')fire();
     if(time-player.lastDmg>6&&player.hp<100)player.hp=Math.min(100,player.hp+4*dt)}

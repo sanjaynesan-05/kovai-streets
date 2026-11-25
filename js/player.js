@@ -5,14 +5,14 @@
 'use strict';
 
 /* ================= player on foot ================= */
-function tryEnterExit(){if(player.dead)return;if(player.vehicle){exitVehicle();return}const v=nearestVehicle();if(v)enterVehicle(v)}
+function tryEnterExit(){if(player.dead)return;if(trainBoardOrAlight())return;/* R3b: trains */if(shopEnterExit())return;/* R3c: shops */if(player.vehicle){exitVehicle();return}const v=nearestVehicle();if(v)enterVehicle(v)}
 function nearestVehicle(){let best=null,bd=1e9;for(const v of vehicles){if(v.wrecked)continue;const d=Math.hypot(v.pos.x-player.pos.x,v.pos.z-player.pos.z);if(d<v.s.len/2+2.3&&d<bd){best=v;bd=d}}return best}
 function enterVehicle(v){if(talk)closeTalk();player.vehicle=v;if(v.ai&&v.ai.reckless&&mission&&mission.target===v)missionDone();v.ai=null;if(v.policeAI){v.policeAI=null;addWanted(2)}
   if(v.rider){v.rider.g.visible=false}player.human.g.visible=true;if(!v.s.two){const fx=Math.sin(v.heading),fz=Math.cos(v.heading),o=v.s.w/2;EA={t:0,dur:0.35,ax:player.pos.x,az:player.pos.z,bx:v.pos.x+fz*o,bz:v.pos.z-fx*o,y:player.pos.y,hide:true,v}}camYaw=v.heading;player.reloading=0;aiming=false;noise(0.08,700,0.2,1);if(v.type==='tank')floatMsg(isTouch?'FIRE: cannon · swipe to aim the turret':'Left-click: fire cannon · mouse aims the turret')}
 function exitVehicle(){const v=player.vehicle;if(!v)return;player.vehicle=null;const fx=Math.sin(v.heading),fz=Math.cos(v.heading),off=v.s.w/2+0.9;
   player.pos.set(v.pos.x+fz*off,v.y,v.pos.z-fx*off);_pp.x=player.pos.x;_pp.z=player.pos.z;pushCircle(_pp,0.4,v.y);player.human.g.rotation.z=0;player.pos.x=_pp.x;player.pos.z=_pp.z;
   player.human.g.visible=!player.dead;player.yaw=v.heading;camYaw=v.heading;if(!v.s.two&&!player.dead)EA={t:0,dur:0.3,ax:v.pos.x+fz*v.s.w*0.25,az:v.pos.z-fx*v.s.w*0.25,hide:false}}
-function updateFoot(dt){const f=[Math.sin(camYaw),Math.cos(camYaw)],r=[-Math.cos(camYaw),Math.sin(camYaw)];const frozen=!!talk||player.down>0;
+function updateFoot(dt){if(rideTrain())return;/* R3b: riding a train */const f=[Math.sin(camYaw),Math.cos(camYaw)],r=[-Math.cos(camYaw),Math.sin(camYaw)];const frozen=!!talk||player.down>0;
   let fw=frozen?0:(K.KeyW?1:0)-(K.KeyS?1:0),sd=frozen?0:(K.KeyD?1:0)-(K.KeyA?1:0);if(joy.on&&!frozen){fw=-joy.y;sd=joy.x}let mx=f[0]*fw+r[0]*sd,mz=f[1]*fw+r[1]*sd;const ml=Math.hypot(mx,mz);
   const moving=ml>0.12;const run=!player.crouch&&(K.ShiftLeft||K.ShiftRight||(joy.on&&Math.hypot(joy.x,joy.y)>0.92));const W=WEAPONS[player.weapon];const sp=player.swim?(run?3.6:2.4):player.crouch?2.0:aiming?2.6:run?7.6:(W.heavy)?3.6:4.3;
   if(moving){const amt=joy.on?Math.min(1,ml):1;mx/=ml;mz/=ml;player.pos.x+=mx*sp*amt*dt;player.pos.z+=mz*sp*amt*dt}
@@ -44,7 +44,7 @@ function updateCamera(dt){let dist,fovT=65;const sc=scoped();
     if(time-lastMouseT>1.3&&v.type!=='tank'){camYaw+=angDiff(camYaw,v.heading)*Math.min(1,dt*2.8);camPitch+=(-0.2-camPitch)*Math.min(1,dt*2)}
     _tgt.set(v.pos.x,v.pos.y+v.s.camH*0.6,v.pos.z);dist=v.s.cam+Math.abs(v.speed)*0.06;fovT=65+Math.min(14,Math.abs(v.speed)*0.3)}
   else if(sc){_tgt.set(player.pos.x,player.pos.y+(player.crouch?1.2:1.66),player.pos.z);dist=0.05;fovT=14}
-  else{_tgt.set(player.pos.x-Math.cos(camYaw)*0.6,player.pos.y+(player.crouch?1.15:1.6),player.pos.z+Math.sin(camYaw)*0.6);dist=aiming?2.3:4.2;if(aiming)fovT=50}
+  else{_tgt.set(player.pos.x-Math.cos(camYaw)*0.6,player.pos.y+(player.crouch?1.15:1.6),player.pos.z+Math.sin(camYaw)*0.6);dist=aiming?2.3:player.inShop?2.4:4.2;/* R3c: closer inside a shop room */if(aiming)fovT=50}
   if(!player.vehicle&&!player.dead)player.human.g.visible=!sc;$('scope').classList.toggle('hidden',!sc);
   _f3.set(Math.sin(camYaw)*Math.cos(camPitch),Math.sin(camPitch),Math.cos(camYaw)*Math.cos(camPitch));
   _ld.copy(_f3).negate();_ray.origin.copy(_tgt);_ray.direction.copy(_ld);

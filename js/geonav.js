@@ -41,7 +41,7 @@ function navDir(e,end){const p=e.pts,n=p.length,a=end?p[n-2]:p[0],b=end?p[n-1]:p
 /* ---------- traffic ---------- */
 function geoSpawnAI(type,minDist){if(!NAV.ready)return null;const P=playerP(),cand=navNear(P.x,P.z,260);
   for(let t=0;t<60&&cand.length;t++){const k=cand[(Math.random()*cand.length)|0],e=NAV.E[k],n=NAV.nodes[e.f],d=Math.hypot(n[0]-P.x,n[1]-P.z);
-    if((d<minDist&&!(d>50&&navBehind(n[0],n[1],P)))||d>260||Math.random()>(NAV_W[e.cls]||0.5)/3||e.len<12)continue;/* traffic stays within 260 m of you */
+    if(e.bridge||(d<minDist&&!(d>50&&navBehind(n[0],n[1],P)))||d>260||Math.random()>(NAV_W[e.cls]||0.5)/3||e.len<12)continue;/* traffic stays within 260 m of you */
     type=geoMix(type,e);/* D7: local vehicle mix (geolife.js) */const two=!!(VT[type]&&VT[type].two),lane=navLane(e,two),w=navWps(e,lane,0);if(vehicles.some(v=>Math.abs(v.pos.x-w[0].x)<8&&Math.abs(v.pos.z-w[0].z)<8))continue;
     const v=spawnVehicle(type,w[0].x,w[0].z,navDir(e,false)),cr=CRUISE[type]||[9,11],base=RR(cr[0],cr[1]);
     v.ai={geo:true,e:k,lane,two,base,cruise:base*(NAV_V[e.cls]||0.7),wps:w.slice(1),turnWp:null,blockT:0,stuck:0,hitT:0,i:0,j:0,dx:0,dz:0};v.speed=v.ai.cruise*0.6;v.vx=Math.sin(v.heading)*v.speed;v.vz=Math.cos(v.heading)*v.speed;

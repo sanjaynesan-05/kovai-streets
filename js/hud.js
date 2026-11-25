@@ -36,7 +36,7 @@ function mapBadge(c,x,y,glyph,bg,s){s=s||22;c.save();c.fillStyle=bg;c.strokeStyl
   c.font=Math.round(s*0.62)+'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText(glyph,x,y+1);c.restore()}
 function mapLabel(c,x,y,t,size){size=size||14;c.save();c.font='700 '+size+'px Rajdhani,sans-serif';const w=c.measureText(t).width+14,h=size+8;c.fillStyle='rgba(14,17,19,.85)';rrect(c,x-w/2,y-h/2,w,h,4);c.fill();
   c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+1);c.restore()}
-const MAP_BADGE={terminus:['🚌','#1d4ed8','EAST JUNCTION BUS TERMINUS'],station:['🚆','#1d4ed8','KOVAI CENTRAL'],viewpoint:['🔭','#222','SILVER HILL VIEWPOINT'],stadium:['🏆','#8a6d00','KOVAI MUNICIPAL CRICKET STADIUM'],gopuram:['🛕','#b45309',''],church:['⛪','#6b21a8',''],mosque:['🕌','#15803d','']};
+const MAP_BADGE={halt:['🚉','#1d4ed8',''],terminus:['🚌','#1d4ed8','EAST JUNCTION BUS TERMINUS'],station:['🚆','#1d4ed8','KOVAI CENTRAL'],viewpoint:['🔭','#222','SILVER HILL VIEWPOINT'],stadium:['🏆','#8a6d00','KOVAI MUNICIPAL CRICKET STADIUM'],gopuram:['🛕','#b45309',''],church:['⛪','#6b21a8',''],mosque:['🕌','#15803d','']};
 const MAP_LEGEND=[['★','#d4a017','Story mission'],['J','#2a9d8f','Job (side activity)'],['🚆','#1d4ed8','Railway station'],['═','#1e1e1e','Railway line'],['✚','#d62828','Hospital'],['🛡','#1d4ed8','Police station'],['🚒','#c1121f','Fire station'],
   ['⛽','#f77f00','Petrol bunk'],['🔭','#222','Viewpoint'],['🏆','#8a6d00','Sports'],['🌳','#2b9348','Park'],['📍','#e63946','GPS destination']];
 function drawBigMap(){if(!offMap)return;const F=bigMapFrame(),c=F.cv.getContext('2d'),W=F.W,H=F.H,k=F.k,ox=F.ox,oy=F.oy,X=v=>ox+(v-MX0)*k,Z=v=>oy+(v-MZ0)*k;

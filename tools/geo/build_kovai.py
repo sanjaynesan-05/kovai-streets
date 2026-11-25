@@ -188,7 +188,24 @@ def main():
 
     # ---- designed main roads ----
     ring = spline(RING, closed=True)
-    roads = [road(ring, "trunk", 16, "Kovai Ring Road", closed=True), road(spline(INNER, closed=True, step=18), "secondary", 10, "Temple Loop", closed=True)]
+    # R3b: the Ring Road crosses the railway on two 300 m overbridges; the ground pieces between them keep "closed" so their ends are never trimmed
+    cum = [0.0]
+    for k in range(1, len(ring)): cum.append(cum[-1] + math.hypot(ring[k][0] - ring[k - 1][0], ring[k][1] - ring[k - 1][1]))
+    def at(d):
+        for k in range(1, len(ring)):
+            if cum[k] >= d: t = (d - cum[k - 1]) / ((cum[k] - cum[k - 1]) or 1); return [round(ring[k - 1][0] + (ring[k][0] - ring[k - 1][0]) * t, 1), round(ring[k - 1][1] + (ring[k][1] - ring[k - 1][1]) * t, 1)]
+        return ring[-1]
+    def piece(d0, d1): return [at(d0)] + [q for q, c in zip(ring, cum) if d0 < c < d1] + [at(d1)]
+    xs = []
+    for k in range(1, len(ring)):
+        h = seg_x(ring[k - 1], ring[k], RAIL[0], RAIL[1])
+        if h: xs.append(cum[k - 1] + (cum[k] - cum[k - 1]) * h[0])
+    xs.sort(); cuts = [0.0] + [c for x in xs for c in (x - 150, x + 150)] + [cum[-1]]
+    roads = []
+    for k in range(len(cuts) - 1):
+        br = k % 2 == 1
+        roads.append(road(piece(cuts[k], cuts[k + 1]), "trunk", 16, "Kovai Ring Road", bridge=br, layer=1 if br else 0, closed=not br))
+    roads.append(road(spline(INNER, closed=True, step=18), "secondary", 10, "Temple Loop", closed=True))
     def ext(p, m=40.0):
         (ax_, az_), (bx_, bz_) = p[1], p[0]; l = math.hypot(bx_ - ax_, bz_ - az_) or 1; s0 = [round(bx_ + (bx_ - ax_) / l * m, 1), round(bz_ + (bz_ - az_) / l * m, 1)]
         (ax_, az_), (bx_, bz_) = p[-2], p[-1]; l = math.hypot(bx_ - ax_, bz_ - az_) or 1; s1 = [round(bx_ + (bx_ - ax_) / l * m, 1), round(bz_ + (bz_ - az_) / l * m, 1)]
@@ -249,6 +266,7 @@ def main():
     lm("church", "Old Kovai Church", "landmark", "church", 1140, -640, 26, 44)
     lm("mosque", "East Mosque", "landmark", "mosque", 1760, -420, 34, 34)
     ra = math.atan2(bz - az, bx - ax); rz_at = lambda x: az + (x - ax) * (bz - az) / (bx - ax)
+    SP_ = lambda x0, u, v: [round(x0 + math.cos(ra) * u - math.sin(ra) * v, 1), round(rz_at(x0) + math.sin(ra) * u + math.cos(ra) * v, 1)]
     precinct = [[0, -205], [400, -205], [400, round(rz_at(400) + 32, 1)], [0, round(rz_at(0) + 32, 1)], [0, -205]]
     mark_poly(precinct, 1)
     LM.append(dict(id="station", name="Kovai Central", category="transport", model="station", x=STATION[0], z=round(rz_at(STATION[0]), 1), w=380, d=0, angle=round(ra, 4), h=0, in_pilot=True))
@@ -258,6 +276,9 @@ def main():
     for k, v in enumerate((-14, 14)):   # platform loop lines, joining the main lines beyond the platforms
         RL.append(dict(id=10 + k, kind="rail", service="siding", bridge=False, pts=[SP(-235, v / abs(v) * 2.2), SP(-175, v), SP(175, v), SP(235, v / abs(v) * 2.2)]))
     lm("terminus", "East Junction bus terminus", "transport", "terminus", 1680, 185, 170, 90)
+    for hid, hname, hx in (("halt_west", "Mill Estate Halt", -1100), ("halt_east", "East Junction Halt", 1460)):   # R3b: two halts on the line, platforms both sides
+        mark_poly([SP_(hx, u, v) for u, v in ((-90, -26), (90, -26), (90, 26), (-90, 26), (-90, -26))], 1)
+        LM.append(dict(id=hid, name=hname, category="transport", model="halt", x=hx, z=round(rz_at(hx), 1), w=120, d=0, angle=round(ra, 4), h=0, in_pilot=True))
     lm("stadium", "Kovai Municipal Cricket Stadium", "sports", "stadium", STADIUM["c"][0], STADIUM["c"][1], STADIUM["r"][0] * 2, STADIUM["r"][1] * 2)
     lm("viewpoint", "Silver Hill Viewpoint", "viewpoint", "viewpoint", VIEWPOINT[0], VIEWPOINT[1] - 22, 18, 18)
     for i, (x, z) in enumerate([(-1530, -40), (-1330, 260), (-1600, 230), (-1200, -60)]): lm(f"chimney_{i}", "Mill chimney", "industry", "chimney", x, z, 5, 5, h=38 + i * 3)
@@ -393,7 +414,7 @@ def main():
         if "trim_at" in r and not r.get("drop"):
             k, t, pnt = point_at(r["pts"], r["trim_at"]); r["pts"] = r["pts"][:k] + ([pnt] if pnt != r["pts"][k - 1] else [])
     roads = [r for r in roads if not r.get("drop") and len(r["pts"]) >= 2]
-    nodes, edges, comp, sizes = build_graph(roads); big = sizes.index(max(sizes))
+    nodes, edges, comp, sizes = build_graph(roads, True); big = sizes.index(max(sizes))
     linked = {e[3] for e in edges if comp[e[0]] == big}
     roads = [r for i, r in enumerate(roads) if i in linked or r["bridge"]]
 
@@ -410,8 +431,8 @@ def main():
         return None
     fuel_n = 0
     for r in roads:
-        if r["name"] not in ("Kovai Ring Road", "Outer Highway"): continue
-        L = length(r["pts"]); n = 5 if r["name"] == "Kovai Ring Road" else 3
+        if r["name"] not in ("Kovai Ring Road", "Outer Highway") or r["bridge"]: continue
+        L = length(r["pts"]); n = max(1, round(5 * L / 11000)) if r["name"] == "Kovai Ring Road" else 3   # about 5 round the whole ring (it is in pieces between its overbridges)
         for i in range(n):
             for tries in range(12):
                 q = point_on(r["pts"], (i + 0.5) * L / n + tries * 37)
@@ -537,18 +558,24 @@ def main():
     pois += [dict(kind="fuel", name="Petrol bunk", x=L_["x"], z=L_["z"]) for L_ in LM if L_["model"] == "fuel"]
     for k, dd in DISTRICTS.items(): LM.append(dict(id="district_" + k, name=dd["name"], category="district", model=None, x=dd["c"][0], z=dd["c"][1], in_pilot=True))
     LM.append(dict(id="silver_lake", name="Silver Lake", category="landmark", model=None, x=LAKE["c"][0], z=LAKE["c"][1], in_pilot=True))
-    nodes, edges, comp, sizes = build_graph(roads)
+    nodes, edges, comp, sizes = build_graph(roads, True)
     des = defaultdict(set)
     for e in edges:
         if not roads[e[3]].get("gen"): des[e[0]].add(e[3])
     signals = [[nodes[i][0], nodes[i][1]] for i, s_ in des.items() if len(s_) >= 2 and nodes[i][2] == 0]
-    crossings = []
+    crossings, gates, overs = [], [], []   # R3b: every ground road that crosses the line gets a level-crossing gate (heading and width for the booms)
     for r in roads:
-        if r["layer"]: continue
         p = r["pts"]
+        if r["layer"]:   # overbridges and the flyover: the fence leaves a gap under them
+            for k in range(1, len(p)):
+                h = seg_x(p[k - 1], p[k], RAIL[0], RAIL[1])
+                if h: q = lerp(p[k - 1], p[k], h[0]); overs.append(dict(x=q[0], z=q[1], h=round(math.atan2(p[k][0] - p[k - 1][0], p[k][1] - p[k - 1][1]), 4), w=r["width"], road=r["name"]))
+            continue
         for k in range(1, len(p)):
             h = seg_x(p[k - 1], p[k], RAIL[0], RAIL[1])
-            if h: crossings.append(lerp(p[k - 1], p[k], h[0]))
+            if h:
+                q = lerp(p[k - 1], p[k], h[0]); crossings.append(q)
+                gates.append(dict(x=q[0], z=q[1], h=round(math.atan2(p[k][0] - p[k - 1][0], p[k][1] - p[k - 1][1]), 4), w=r["width"], road=r["name"]))
 
     w = lambda name, obj: json.dump(obj, open(os.path.join(OUT, name), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     for r in roads:
@@ -556,7 +583,8 @@ def main():
     w("roads.json", {"meta": meta, "roads": roads, "signals": signals})
     w("buildings.json", {"meta": meta, "buildings": nb})
     w("water.json", {"meta": meta, "water": W, "waterways": []}); w("landuse.json", {"meta": meta, "landuse": LU})
-    w("rail.json", {"meta": meta, "rail": RL, "stations": [dict(p=list(STATION), name="Kovai Central")], "crossings": crossings})
+    w("rail.json", {"meta": meta, "rail": RL, "stations": [dict(p=list(STATION), name="Kovai Central")] + [dict(p=[L_["x"], L_["z"]], name=L_["name"]) for L_ in LM if L_.get("model") == "halt"],
+                    "crossings": crossings, "gates": gates, "overs": overs, "line": [list(RAIL[0]), list(RAIL[1])]})
     w("paths.json", {"meta": meta, "paths": []}); w("pois.json", {"meta": meta, "pois": pois}); w("landmarks.json", {"meta": meta, "landmarks": LM})
     w("trees.json", {"meta": meta, "fields": ["x", "z", "kind (0 broadleaf, 1 palm)"], "trees": trees})
     w("graph.json", {"meta": meta, "nodes": nodes, "edges": edges, "edge_fields": ["from", "to", "length_m", "road_index", "pt_from", "pt_to"]})

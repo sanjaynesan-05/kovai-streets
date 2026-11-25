@@ -100,7 +100,7 @@ function escortTick(m,e,dt){if(!e||e.dead)return;const P=e.inV?e.inV.pos:e;let d
 function routeDrive(R){return(v,dt)=>{if(R.hold>0){R.hold-=dt;v.speed*=Math.max(0,1-4*dt);return}const p=R.pts[R.i];if(!p){v.speed*=Math.max(0,1-3*dt);R.done=true;return}
   const dx=p.x-v.pos.x,dz=p.z-v.pos.z,d=Math.hypot(dx,dz);if(d<4.5){if(p.stop){R.hold=p.stop;if(R.onStop)R.onStop(p)}R.i++;return}
   const diff=angDiff(v.heading,Math.atan2(dx,dz));let target=R.speed;if(Math.abs(diff)>0.5)target=Math.min(target,7);const n=R.pts[R.i+1];
-  if(d<16&&(p.stop||(n&&Math.abs(angDiff(Math.atan2(dx,dz),Math.atan2(n.x-p.x,n.z-p.z)))>0.6)))target=Math.min(target,8);if(!R.reckless&&blockedAhead(v))target=0;
+  if(d<16&&(p.stop||(n&&Math.abs(angDiff(Math.atan2(dx,dz),Math.atan2(n.x-p.x,n.z-p.z)))>0.6)))target=Math.min(target,8);if(!R.reckless&&(blockedAhead(v)||gateAhead(v)))target=0;
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);const rate=v.s.steer*1.3*Math.min(1,Math.abs(v.speed)/3);v.heading+=clamp(diff,-rate*dt,rate*dt)}}
 
 /* ---------- stealth guards ---------- */
