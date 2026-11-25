@@ -165,9 +165,9 @@ STORY.push(
    stPhone({header:'RECOVERED PHONE · SILK SUNDARAM',lines:['"Payment received. The old mill burns tonight."','"The workers will sign by Friday."','Saved contact:','A'],footer:'NUMBER UNREGISTERED · NO CALL HISTORY'})]},
  {title:'The Tail',reward:7500,intro:'Devarajan smiles for the newspapers. Let us see where he goes when the cameras are away.',
   make:()=>[stTalk('m8_brief'),stGo(...geoSidewalk(TAIL_START[0],TAIL_START[1]),'Wait near Gandhipuram for Devarajan\'s white SUV',{r:16}),
-   {init(m){const R={pts:geoTailRoute(),i:0,speed:13,hold:0};/* Gandhipuram bus stand -> VOC Park -> Lakshmi Mills (geosites.js) */
+   {init(m){const R={pts:geoTailRoute(),i:0,speed:13,hold:0};/* Gandhipuram bus stand -> VOC Park -> north-east office (geosites.js) */
       const p0=R.pts[0],p1=R.pts[1]||p0;const v=spawnVehicle('suv',p0.x,p0.z,Math.atan2(p1.x-p0.x,p1.z-p0.z),'#f2f2f2');v.keep=true;v.hp=1e6;v.script=routeDrive(R);m.tgt=v;m.R=R;m.sus=0;m.lostT=0;m.photo=0;m.plateT=0;
-      R.onStop=p=>{if(p.id==='hotel')floatMsg('He\'s stopped at a hotel by VOC Park. Keep your distance.');if(p.id==='office'){floatMsg('A construction office in Peelamedu…');say2('m8_call');say2('m8_call2')}
+      R.onStop=p=>{if(p.id==='hotel')floatMsg('He\'s stopped at a hotel by VOC Park. Keep your distance.');if(p.id==='office'){floatMsg('A construction office on the edge of town…');say2('m8_call');say2('m8_call2')}
         if(p.id==='meet'){m.atMeet=true;const mp={x:v.pos.x,z:v.pos.z},van=spawnVehicle('van',mp.x+6,mp.z+9,Math.PI,'#1a1a1a');van.keep=true;m.van=van;m.contact=npc(LOOK.contact,mp.x,mp.z+15,-Math.PI/2);floatMsg('A meeting. Photograph it from 20–75 m: stop and hold steady.')}};
       m.cleanup.push(()=>{removeVehicle(v);if(m.van)removeVehicle(m.van);npcGone(m.contact)})},
     upd(m,dt){const v=m.tgt,P=playerP(),d=Math.hypot(v.pos.x-P.x,v.pos.z-P.z);mk(v.pos.x,v.pos.z);
@@ -195,8 +195,8 @@ STORY.push(
     auto(m){killSquad(m)}},
    stDo(m=>{m.escortActive=false;m.escortMeter=null;const a=A2();a.selviTrust++;a.evidence++;if(m.workers.every(w=>w.free)){a.selviTrust++;m.reward+=2500;toast('BONUS','All three workers saved · +₹2,500',2.5)}}),
    stTalk('m9_end','m9_docs')]}},
- {title:'Night at the Godown',reward:12500,intro:'The ownership papers lead to a Thendral Builders godown south of Ukkadam. We need what is inside. Quietly.',
-  make:()=>[stTalk('m10_brief'),stDo(()=>{tod=21.3}),stGo(...W(-125,ox(418)),'Go to the Thendral Builders godown, south of Ukkadam',{r:22}),
+ {title:'Night at the Godown',reward:12500,intro:'The ownership papers lead to a Thendral Builders godown near Ukkadam. We need what is inside. Quietly.',
+  make:()=>[stTalk('m10_brief'),stDo(()=>{tod=21.3}),stGo(...W(-125,ox(418)),'Go to the Thendral Builders godown, near Ukkadam',{r:22}),
    stSearch({txt:'Disable the security panel, photograph the documents',kind:'doc',unit:'done',verb:'Working…',cx:GODOWN.x,cz:GODOWN.z,r:40,vis:60,
      pts:()=>[{...WO(-114.2,ox(452)),y:0.6,id:'panel'},{...WO(-142,ox(466)),y:0.86,id:'doc1'},{...WO(-130,ox(466)),y:0.86,id:'doc2'},{...WO(-118,ox(450)),y:0.86,id:'doc3'}],
      init(m){m.alarmLine='m10_alarm';addGuards(m,[{path:[W(-150,ox(438)),W(-100,ox(438))]},{path:[W(-100,ox(445)),W(-100,ox(472)),W(-112,ox(472))]},{path:[W(-140,ox(452)),W(-120,ox(452)),W(-120,ox(464)),W(-140,ox(464))]},{path:[W(-150,ox(445)),W(-150,ox(472))]}],{wep:'pistol',band:'#2b2d42'});

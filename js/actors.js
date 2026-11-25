@@ -50,10 +50,11 @@ function flyStep(o,dt){const f=o.fly;o.x+=f.vx*dt;o.z+=f.vz*dt;f.vy-=22*dt;f.y+=
   const gy=groundH(o.x,o.z);o.h.g.position.set(o.x,f.y,o.z);o.h.g.rotation.x-=f.spin*dt;o.h.g.rotation.z=Math.sin(time*7+o.x)*0.5;o.h.armL.rotation.x=-2+Math.sin(time*17+o.x)*1.2;o.h.armR.rotation.x=-2-Math.cos(time*15)*1.2;o.h.legL.rotation.x=Math.sin(time*13)*0.9;o.h.legR.rotation.x=-Math.sin(time*11)*0.9;
   if(f.y<=gy+0.22&&f.vy<0){if(f.vy<-7&&!f.b){f.b=1;f.vy*=-0.28;f.spin*=0.5;f.y=gy+0.23}else{o.fly=null;poseDead(o.h,gy)}}}
 function panic(x,z,r){for(const p of peds){if(!p.dead&&!p.hidden&&!p.talk&&!p.fight&&Math.abs(p.x-x)<r&&Math.abs(p.z-z)<r){p.flee=7;if(Math.random()<0.5)p.dir*=-1}}}
-function updatePeds(dt){const P=playerP();
-  for(const p of peds){if(p.hidden)continue;const dx=p.x-P.x,dz=p.z-P.z,far=dx*dx+dz*dz>200*200;
+let PED_NEAR=0;/* walkers within 150 m last frame */
+function updatePeds(dt){const P=playerP(),fill=PED_NEAR<peds.length*0.2?35:150;PED_NEAR=0;/* after a jump (load, mission start) nearly nobody is near: refill close by */
+  for(const p of peds){if(p.hidden)continue;const dx=p.x-P.x,dz=p.z-P.z,far=dx*dx+dz*dz>150*150;/* the crowd is drawn within 150 m */
     if(p.dead){if(p.fly){flyStep(p,dt);continue}p.deadT+=dt;if(p.deadT>15&&(far||p.deadT>40))placePed(p,150);continue}
-    p.h.g.visible=!far;if(far&&!p.talk){if(dx*dx+dz*dz>420*420)placePed(p,150);/* D2: walkers left far behind reappear near the player */p.s+=p.dir*p.speed*dt;[p.x,p.z]=pedPos(p);continue}
+    p.h.g.visible=!far;if(!far)PED_NEAR++;if(far&&!p.talk){if(dx*dx+dz*dz>200*200)placePed(p,fill);/* walkers left behind reappear out of sight (150-200 m away, or nearer behind the camera), so the street you are on stays busy */p.s+=p.dir*p.speed*dt;[p.x,p.z]=pedPos(p);continue}
     if(p.fight){if(updPedFight(p,dt))continue}
     if(p.talk){p.yaw+=angDiff(p.yaw,Math.atan2(player.pos.x-p.x,player.pos.z-p.z))*Math.min(1,dt*6);animHuman(p.h,0,0,false);p.h.g.rotation.y=p.yaw;continue}
     p.umb.visible=rainF>0.35&&p.hasUmb;const sp=p.flee>0?5.2:p.speed*(rainF>0.35&&!p.hasUmb?2:1);p.flee-=dt;p.s+=p.dir*sp*dt;const[nx,nz]=pedPos(p);

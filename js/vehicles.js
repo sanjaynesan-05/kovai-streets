@@ -53,7 +53,7 @@ function updAI(v,dt){const a=v.ai;if(!a.wps.length)aiNext(v);let wp=a.wps[0];
   if(!blocked&&target>1&&Math.abs(v.speed)<0.6)a.stuck+=dt;else a.stuck=0;
   const P=playerP();const dist=Math.hypot(v.pos.x-P.x,v.pos.z-P.z),far=dist>60;
   if(a.reckless){if(a.stuck>1.5){v.heading+=Math.PI*0.5*(Math.random()<0.5?-1:1);a.stuck=0;a.wps=[];}return}
-  if(((a.stuck>4||a.blockT>10)&&far)||(dist>420&&!v.keep&&!(mission&&mission.target===v))){relocateAI(v)}/* D2: the 20x20 map is big, so traffic that drifts far away respawns near the player */
+  if(((a.stuck>4||a.blockT>10)&&far)||(dist>300&&!v.keep&&!(mission&&mission.target===v))){relocateAI(v)}/* traffic that drifts more than 300 m away respawns near the player */
   if(a.blockT>2.5&&!far&&Math.random()<dt*0.4&&a.blockT<12)hornAt(v.pos)}
 function relocateAI(v){const t=v.type;removeVehicle(v);spawnAI(t,110)}
 

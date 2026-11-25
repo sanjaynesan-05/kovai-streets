@@ -108,8 +108,8 @@ function friendOpts(f){const o=[];
 function addFriend(f,n){const b=f.fr;f.fr=Math.min(100,f.fr+n);floatMsg(`${f.name} ♥ +${n}`);
   if(b<30&&f.fr>=30)toast(f.name.toUpperCase()+' TRUSTS YOU','She can now watch your back in fights',3);
   if(b<100&&f.fr>=100&&!f.perkDone){f.perkDone=true;if(f.perk==='car'){const v=spawnVehicle('sport',f.home.x+8,f.home.z+4.5,Math.PI/2);v.keep=true;toast('BEST FRIENDS!','Meena gave you her Kovai Racer sports car',4)}else toast('BEST FRIENDS!','Divya will give you armour whenever you visit',4)}}
-function startHangout(f){const opts=PLACES.filter(p=>Math.hypot(p.x-f.home.x,p.z-f.home.z)>150);const pl=rpick(opts);
-  f.comp=true;f.armed=false;f.h.gun.visible=false;mission={type:'hang',friend:f,title:'Hang out with '+f.name,reward:0,steps:[{x:pl.x,z:pl.z,txt:`Take ${f.name} to ${pl.n}`}],step:0,timer:null};
+function startHangout(f){const opts=PLACES.filter(p=>Math.hypot(p.x-f.home.x,p.z-f.home.z)>150);const pl=rpick(opts),[sx,sz]=geoSidewalk(pl.x,pl.z);/* the pavement nearest the place: landmark centres are inside their models */
+  f.comp=true;f.armed=false;f.h.gun.visible=false;mission={type:'hang',friend:f,title:'Hang out with '+f.name,reward:0,steps:[{x:sx,z:sz,txt:`Take ${f.name} to ${pl.n}`}],step:0,timer:null};
   toast('HANG OUT',`${f.name}: "Let's go to ${pl.n}!"`,2.8)}
 function sendHome(f){if(f.inCar)alightPassenger(f);f.comp=false;f.armed=false;f.inCar=false;f.h.gun.visible=false;f.awayT=0;f.goingHome=true;if(mission&&mission.type==='hang'&&mission.friend===f){mission=null;offerT=3}floatMsg(f.name+': See you later!')}
 function updateFriends(dt){for(const f of FRIENDS){const h=f.h;

@@ -14,7 +14,7 @@ function park(v){if(!v)return;v.wrecked=true;v.keep=false;v.pos.set(5000+Math.ra
 const results=[];
 /* download the map chunks along a route first: tests run long synchronous loops, during which the game's own background downloads cannot finish */
 async function preload(pts){const S=GWLD.index.size_m,keys=new Set();for(const p of pts)for(const dx of[-1,0,1])for(const dz of[-1,0,1])keys.add(Math.floor(p[0]/S+dx)+','+Math.floor(p[1]/S+dz));
-  await Promise.all([...keys].filter(k=>!GWLD.data.has(k)).map(k=>{const c=GWLD.index.chunks.find(c=>c.i+','+c.j===k);return c?fetch('geodata/processed/pilot/chunks/'+c.file).then(r=>r.json()).then(j=>GWLD.data.set(k,j)):null}))}
+  await Promise.all([...keys].filter(k=>!GWLD.data.has(k)).map(k=>{const c=GWLD.index.chunks.find(c=>c.i+','+c.j===k);return c?fetch('geodata/processed/kovai/chunks/'+c.file).then(r=>r.json()).then(j=>GWLD.data.set(k,j)):null}))}
 /* a long, straight, wide real road for vehicle tests; traffic near it is parked first */
 function quietRoad(){if(quietRoad.c)return quietRoad.c;let best=null;for(const e of NAV.E){if(e.bridge||e.layer||e.len<160)continue;const a=e.pts[0],b=e.pts[e.pts.length-1];if(Math.hypot(b[0]-a[0],b[1]-a[1])<e.len*0.97)continue;if(!best||e.w>best.w)best=e}
   const a=best.pts[0],b=best.pts[best.pts.length-1],h=Math.atan2(b[0]-a[0],b[1]-a[1]);return quietRoad.c={x:a[0]+Math.sin(h)*30,z:a[1]+Math.cos(h)*30,h}}
@@ -32,10 +32,10 @@ const groups={};
 
 groups.core=async()=>{const g=G();
   await t('page has no uncaught errors so far',()=>({pass:errs.length===0,detail:errs.join(' | ')}));
-  await t('walk forward moves the player',()=>{resetPlayer(-31,-157);const p0=g.player.pos.clone();g.setCam(Math.PI/2,-0.1);g.K.KeyW=true;S(90);g.K.KeyW=false;const d=g.player.pos.distanceTo(p0);return{pass:d>4,detail:d.toFixed(2)+' m'}});
-  await t('enter car and accelerate',()=>{resetPlayer(-24,-154);const v=g.spawnVehicle('car',-20,-151.5,Math.PI/2);g.enterVehicle(v);S(30);g.K.KeyW=true;S(180);g.K.KeyW=false;const ok=g.player.vehicle===v&&v.speed>8;g.exitV();S(20);park(v);return{pass:ok&&!g.player.vehicle,detail:'speed '+v.speed.toFixed(1)}});
-  await t('crash causes damage and dents',()=>{clearMission();const P=g.player.pos;let b=null;for(const q of queryBoxes(P.x,P.z,150))if(q.maxX-q.minX>5&&q.h>4&&q.y0<0&&(!b||(q.maxX-q.minX)>(b.maxX-b.minX)))b=q;/* real buildings are collision strips; any wide strip will do */if(!b)return{pass:false,detail:'no building nearby'};const cx=(b.minX+b.maxX)/2,cz=b.minZ-14;resetPlayer(cx+3,cz-4);for(const o of g.vehicles)if(Math.hypot(o.pos.x-cx,o.pos.z-cz)<25)park(o);const v=g.spawnVehicle('car',cx,cz,0);g.enterVehicle(v);S(25);v.speed=17;v.vx=0;v.vz=17;S(200);const r={pass:v.hp<v.s.hp&&(v.dentTot||0)>0,detail:'hp '+Math.round(v.hp)+' dent '+(v.dentTot||0).toFixed(2)};g.exitV();S(20);park(v);return r});/* drives into a real building near the start */
-  await t('crouch toggles',()=>{resetPlayer(-31,-157);g.toggleCrouch();S(3);const a=g.player.crouch;g.toggleCrouch();S(3);return{pass:a&&!g.player.crouch}});
+  await t('walk forward moves the player',()=>{const Q=quietRoad();resetPlayer(Q.x,Q.z);const p0=g.player.pos.clone();g.setCam(Math.PI/2,-0.1);g.K.KeyW=true;S(90);g.K.KeyW=false;const d=g.player.pos.distanceTo(p0);return{pass:d>4,detail:d.toFixed(2)+' m'}});
+  await t('enter car and accelerate',()=>{const Q=quietRoad();resetPlayer(Q.x-Math.sin(Q.h)*3,Q.z-Math.cos(Q.h)*3);for(const o of G().vehicles)if(Math.hypot(o.pos.x-Q.x,o.pos.z-Q.z)<120)park(o);const v=g.spawnVehicle('car',Q.x,Q.z,Q.h);g.enterVehicle(v);S(30);g.K.KeyW=true;S(180);g.K.KeyW=false;const ok=g.player.vehicle===v&&v.speed>8;g.exitV();S(20);park(v);return{pass:ok&&!g.player.vehicle,detail:'speed '+v.speed.toFixed(1)}});
+  await t('crash causes damage and dents',async()=>{clearMission();const P=g.player.pos;await preload([[P.x,P.z]]);S(60);/* build the nearby chunks first (500 m chunks) */let b=null;for(const q of queryBoxes(P.x,P.z,150))if(q.maxX-q.minX>5&&q.h>4&&q.y0<0&&(!b||(q.maxX-q.minX)>(b.maxX-b.minX)))b=q;/* real buildings are collision strips; any wide strip will do */if(!b)return{pass:false,detail:'no building nearby'};const cx=(b.minX+b.maxX)/2,cz=b.minZ-14;resetPlayer(cx+3,cz-4);for(const o of g.vehicles)if(Math.hypot(o.pos.x-cx,o.pos.z-cz)<25)park(o);const v=g.spawnVehicle('car',cx,cz,0);g.enterVehicle(v);S(25);v.speed=17;v.vx=0;v.vz=17;S(200);const r={pass:v.hp<v.s.hp&&(v.dentTot||0)>0,detail:'hp '+Math.round(v.hp)+' dent '+(v.dentTot||0).toFixed(2)};g.exitV();S(20);park(v);return r});/* drives into a real building near the start */
+  await t('crouch toggles',()=>{resetPlayer(quietRoad().x,quietRoad().z);g.toggleCrouch();S(3);const a=g.player.crouch;g.toggleCrouch();S(3);return{pass:a&&!g.player.crouch}});
   await t('pause and resume',()=>{window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyP'}));window.dispatchEvent(new KeyboardEvent('keyup',{code:'KeyP'}));const p=g.paused;document.getElementById('resumeBtn').click();return{pass:p&&!g.paused}});
   await t('city map opens and closes',()=>{const k=c=>{window.dispatchEvent(new KeyboardEvent('keydown',{code:c}));window.dispatchEvent(new KeyboardEvent('keyup',{code:c}))};k('KeyM');const a=!document.getElementById('bigmap').classList.contains('hidden');k('KeyM');const b=document.getElementById('bigmap').classList.contains('hidden');return{pass:a&&b}});
   await t('weapon wheel opens',()=>{g.openWheel('tap');const a=!document.getElementById('wheel').classList.contains('hidden');window.dispatchEvent(new KeyboardEvent('keydown',{code:'Escape'}));window.dispatchEvent(new KeyboardEvent('keyup',{code:'Escape'}));return{pass:a}});
@@ -51,8 +51,8 @@ groups.missions=async()=>{const g=G();
 
 groups.jobs=async()=>{const g=G();
   const types=['deliver','race','gang','boss','chase','fare','amb'];
-  for(const type of types){await t('job '+type,()=>{resetPlayer(-31,-157);clearMission();const cash0=g.player.cash;let ped=null;
-      if(type==='fare'||type==='amb'){const v=g.spawnVehicle('car',-28,-157,0);g.enterVehicle(v);S(30)}
+  for(const type of types){await t('job '+type,()=>{resetPlayer(quietRoad().x,quietRoad().z);clearMission();const cash0=g.player.cash;let ped=null;
+      if(type==='fare'||type==='amb'){const v=g.spawnVehicle('car',g.player.pos.x+3,g.player.pos.z,0);g.enterVehicle(v);S(30)}
       if(type==='fare'){ped=g.peds.find(p=>!p.dead&&!p.hidden)}
       g.startMission({type,x:-20,z:-150,ped});const m=g.mission;if(!m)return{pass:false,detail:'did not start'};
       for(let k=0;k<200&&g.mission===m;k++){g.player.hp=100;g.wanted=0;killMissionGoons(m);if(m.boss)m.boss.dead=true;if(m.target&&!m.target.wrecked)m.target.wrecked=true;
@@ -64,7 +64,7 @@ groups.jobs=async()=>{const g=G();
 groups.vehicles=async()=>{const g=G();
   const land=['car','sport','auto','turbo','bus','police','bike','scooter','lorry','ambulance','tank','hatch','suv','jeep','van','taxi','tempo','cruiser','sports','retro','moped','cycle'];
   for(const type of land){await t('drive '+type,()=>{clearMission();const Q=quietRoad();resetPlayer(Q.x-Math.sin(Q.h)*3,Q.z-Math.cos(Q.h)*3);for(const o of G().vehicles)if(Math.hypot(o.pos.x-Q.x,o.pos.z-Q.z)<120)park(o);const v=g.spawnVehicle(type,Q.x,Q.z,Q.h);/* quiet outskirts road */g.enterVehicle(v);S(20);g.K.KeyW=true;S(150);g.K.KeyW=false;const sp=v.speed,ok=isFinite(v.pos.x)&&isFinite(v.y)&&sp>2;g.exitV();S(15);park(v);return{pass:ok&&!g.player.vehicle,detail:'speed '+sp.toFixed(1)}})}
-  for(const type of['speedboat','fishboat']){await t('boat '+type,()=>{resetPlayer(0,0);const v=g.spawnVehicle(type,1190,0,Math.PI/2);g.player.pos.set(1188,0.5,0);g.enterVehicle(v);S(20);g.K.KeyW=true;S(150);g.K.KeyW=false;const ok=isFinite(v.pos.x)&&v.speed>2;g.exitV();S(5);park(v);return{pass:ok,detail:'speed '+v.speed.toFixed(1)}})}
+  for(const type of['speedboat','fishboat']){await t('boat '+type,()=>{resetPlayer(0,0);const v=g.spawnVehicle(type,400,860,Math.PI/2);g.player.pos.set(398,0.5,860);g.enterVehicle(v);S(20);g.K.KeyW=true;S(150);g.K.KeyW=false;const ok=isFinite(v.pos.x)&&v.speed>2;g.exitV();S(5);park(v);return{pass:ok,detail:'speed '+v.speed.toFixed(1)}})}
 };
 
 groups.world=async()=>{const g=G();
@@ -106,7 +106,7 @@ groups.world=async()=>{const g=G();
 };
 
 groups.police=async()=>{const g=G();
-  await t('5 stars: helicopter and police respond',()=>{clearMission();resetPlayer(-31,-157);g.wanted=5;let heli=false,cops=0;for(let i=0;i<10;i++){S(150);g.player.hp=100;if(g.heli&&g.heli.alive)heli=true;cops=Math.max(cops,g.vehicles.filter(v=>v.policeAI).length)}g.CHEATS.LEAVEMEALONE();S(30);return{pass:heli&&cops>0,detail:'heli '+heli+' cars '+cops}});
+  await t('5 stars: helicopter and police respond',()=>{clearMission();resetPlayer(quietRoad().x,quietRoad().z);g.wanted=5;let heli=false,cops=0;for(let i=0;i<10;i++){S(150);g.player.hp=100;if(g.heli&&g.heli.alive)heli=true;cops=Math.max(cops,g.vehicles.filter(v=>v.policeAI).length)}g.CHEATS.LEAVEMEALONE();S(30);return{pass:heli&&cops>0,detail:'heli '+heli+' cars '+cops}});
 };
 
 groups.save=async()=>{const g=G();

@@ -30,22 +30,40 @@ This document covers all the content in **Kovai Streets**: the full storyline, e
 
 ## 1. Setting
 
-The game is set on the **real streets of central Coimbatore (Kovai)**, Tamil Nadu, built from OpenStreetMap at real scale: a 6 × 6 km area around Victoria Town Hall, from Ukkadam Lake to Peelamedu. Real places keep their real names and positions: Town Hall, Ukkadam and Valankulam lakes, the Gandhipuram bus stands and flyover, Race Course, VOC Park, Avinashi Road and Trichy Road.
+> **Being rebuilt (2026-11-26):** the game moves to the fictional city and Storyline 2.0 (`REBUILD_SPEC.md`, `Kovai_Streets_Storyline_2.0.md`).
+> - **Map:** done in step R1.
+> - **Missions:** sections 3 and 3b below still describe the current missions, which were moved into the new districts. Their text names earlier places; that is rewritten in steps R4–R6.
 
-The story's own places are **fictional** and sit on ordinary plots, never on a real landmark (see `geodata/validation/sites_report.md`):
+The game is set in **Kovai**, a fictional city of about 4 × 3 km inside a ring road, with farmland around it.
 
-| Fictional place | Used in |
-|---|---|
-| Podanur, Singanallur and old Kovai mills | Missions 1, 3, 6, 7 and 9 |
-| Old quarry yard | Mission 4 (the gun deal, which used to be at a hilltop viewpoint) |
-| Old jetty on Ukkadam Lake | Mission 5 and the finale's boat escape |
-| Thendral Builders godown | Mission 10 |
-| Kovai Central Police Station | Mission 11 |
-| Ghat Wolves' walled compound | Mission 13 (the gang is from the hills; their hideout is in the city) |
-| Kovai Central mall | Mission 14 |
-| Safehouse, gun shop, Meena's and Divya's homes | Free roam |
+**Layout:**
+- The railway runs east–west through **Kovai Central** station.
+- **Silver Lake** is to the south.
+- **Silver Hill** is to the north, with a forest, a quarry and a viewpoint.
 
-The Western Ghats, Marudhamalai, Singanallur and the airport are outside the current map.
+**Eight districts:**
+- **Central Kovai:** the commercial core, with the temple gopuram and Town Hall.
+- **Old Kovai:** narrow lanes, the church and the market.
+- **Campus Nagar:** the college.
+- **Mill Estate:** mills, sheds and chimneys.
+- **East Junction:** the bus terminus and a police station.
+- **Hillcrest:** houses below Silver Hill.
+- **Lakeview:** apartments by the lake, and the safehouse.
+- **Greenfield:** warehouses on the eastern edge.
+
+Where the current missions take place:
+
+| Place | District | Used in |
+|---|---|---|
+| Mill sites (Podanur, Singanallur and Old Kovai mills) | Mill Estate | Missions 1, 3, 6, 7 and 9 |
+| Quarry yard | Silver Hill quarry | Mission 4 |
+| Jetty | Silver Lake | Mission 5 and the Act 2 finale |
+| Thendral Builders godown | Greenfield | Mission 10 |
+| Police station | East Junction | Mission 11 |
+| Ghat Wolves' walled compound | Hillcrest | Mission 13 |
+| Mall | Central Kovai, by Kovai Central | Mission 14 |
+| Safehouse | Lakeview | Free roam |
+| Gun shop, Meena's and Divya's homes | Central Kovai | Free roam |
 
 The game's central theme is Kovai's **textile mills**. Its story is about a gang trying to take them over.
 
@@ -191,7 +209,7 @@ The game's central theme is Kovai's **textile mills**. Its story is about a gang
 | 7 | **Ashes and Ledgers** | Investigation | Search the burned Singanallur mill for a **ledger**, **Sundaram's phone** and a **land agreement**. Gang members patrol with vision cones: avoid them or fight. *Optional:* a visitor pass from the night of the fire hints at an insider. The phone shows a contact saved only as **"A"** | ₹5,000 |
 | 8 | **The Tail** | Driving / surveillance | Follow Devarajan's white SUV from Gandhipuram, past a Race Course hotel and a Peelamedu office (where he takes a phone call), to a quiet meeting. Stay **20–75 m** behind: too close raises a **suspicion meter**, too far loses him. Stop and hold steady to **photograph the meeting**. *Optional:* get close to the second car to capture its registration number | ₹7,500 |
 | 9 | **Workers' Voice** | Escort / protection | Pick up **Selvi Akka** at the Podanur mill gate and get her to the workers' rally at Town Hall (she rides pillion or in your car). Fight off six attackers while keeping her **health bar** above zero. *Optional:* free **3 trapped workers** (+₹2,500, Selvi trust) | ₹10,000 |
-| 10 | **Night at the Godown** | Stealth | At night, infiltrate the Thendral Builders godown south of Ukkadam. Disable the security panel, which turns the cameras off, then photograph 3 documents and get out. Guards patrol with **vision cones**, so crouch to stay hidden and use the rear door. Melee on an unaware guard is a **silent takedown**. Being spotted raises the alarm (guards attack, reinforcements arrive) but the mission continues. *Bonus:* no alarm (+₹3,000). The documents reveal **PROJECT KOVAI · AUTHORIZED BY: A** | ₹12,500 |
+| 10 | **Night at the Godown** | Stealth | At night, infiltrate the Thendral Builders godown near Ukkadam. Disable the security panel, which turns the cameras off, then photograph 3 documents and get out. Guards patrol with **vision cones**, so crouch to stay hidden and use the rear door. Melee on an unaware guard is a **silent takedown**. Being spotted raises the alarm (guards attack, reinforcements arrive) but the mission continues. *Bonus:* no alarm (+₹3,000). The documents reveal **PROJECT KOVAI · AUTHORIZED BY: A** | ₹12,500 |
 | 11 | **The Inspector's Price** | Dialogue choice | Meet Inspector Bhaskar at the new **Kovai Central Police Station** on the north road. Choose: **pay ₹10,000** (ally), **threaten him with the evidence** (coerced) or **walk away** (neutral) | ₹3,000 |
 | 12 | **Kathir's Secret** | Chase + choice | Watch the Gandhipuram bus stand, chase the leaking scooter rider and corner him. It's Kathir. Choose: **forgive him** (₹4,000, he helps in the finale) or **hand him to the police** (₹8,000, the police ease off for 10 minutes, Paramasivam is hurt) | choice |
 | 13 | **Ghat Wolves** | Rescue | Selvi has been kidnapped and taken to the hill village on the ghat road. Free her within **4 minutes**, quietly or by force, then escape **250 m** with her alive. *Optional:* beat leader **Malai Rajan** until he **surrenders** and capture him alive (+₹3,000, Selvi trust). You learn about **Devarajan's Vault** | ₹15,000 |
@@ -406,7 +424,7 @@ Seven gang hangouts around the city each hold a group of 4 armed goons. Get clos
 ## 12. Free-roam activities
 
 - **18 drivable vehicles:** sedan, hatchback, SUV, jeep, van, taxi, police car, Kovai Racer, auto-rickshaw, turbo auto, bus, lorry, mini truck, ambulance, motorbike, cruiser, sports bike, scooter, retro scooter, moped and bicycle. There's also a tank (cheat).
-- **Boats:** speedboats and fishing boats at the jetty, and a rowboat on Ukkadam lake.
+- **Boats:** speedboats and fishing boats at the jetty, and a rowboat on the lake.
 - **Car radio:** three original stations. Kovai FM 91.4 (Carnatic fusion), Coast Beats 98.3 (dance) and Ghat Lo-fi 102.7 (chill). Change with **N** or **RADIO**.
 - **Visible car damage:** dents, smashed windows and flat tyres that pull the car to one side. Cars smoke, catch fire and explode.
 - **Combat:** fists combo (jab, jab, kick), 12 weapons, a weapon wheel that slows time, lock-on aiming, crouching behind cover, vaulting onto low walls, and people who fly and tumble when hit.

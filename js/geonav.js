@@ -1,6 +1,6 @@
 /* Kovai Streets: geonav.js
  * Step G4: road graph, traffic, traffic signals and pedestrians on the real map.
- * Data: geodata/processed/pilot/graph_pilot.json (directed edges, so one-way streets are respected; flyovers never join the road below)
+ * Data: geodata/processed/kovai/graph_pilot.json (directed edges, so one-way streets are respected; flyovers never join the road below)
  * and roads.json (edge shapes and road classes). Traffic reuses the grid AI in vehicles.js (updAI: steering, braking for cars ahead,
  * unsticking, respawning); only the waypoints (geoAINext) and red lights (geoRed) come from here. Keeps to the left, like Indian roads.
  * Pedestrians walk the sidewalks of ordinary roads (not flyovers), turning at junctions. Footways are not used yet.
@@ -14,8 +14,8 @@ const NAV_W={trunk:3,primary:3,secondary:2.5,tertiary:2,trunk_link:1.5,primary_l
 const NAV_V={trunk:1.15,primary:1.05,secondary:1,tertiary:0.9,unclassified:0.75,residential:0.65,living_street:0.45,service:0.4,track:0.35};   // cruise speed factor by road class
 const SIG_CYCLE=18;                                          // seconds per signal phase (east-west, then north-south)
 
-function initGeoNav(){Promise.all(['graph_pilot','roads','pois'].map(n=>fetch('geodata/processed/pilot/'+n+'.json',{cache:'no-cache'}).then(r=>r.json()))).then(([g,rd,pois])=>{GEO_POIS=pois.pois.filter(p=>POI_ICON[p.kind]);
-  const roads=rd.roads,E=NAV.E;for(let i=0;i<g.nodes.length;i++){NAV.OUT.push([]);NAV.IN.push([]);NAV.PADJ.push([])}
+function initGeoNav(){Promise.all(['graph_pilot','roads','pois'].map(n=>fetch('geodata/processed/kovai/'+n+'.json',{cache:'no-cache'}).then(r=>r.json()))).then(([g,rd,pois])=>{GEO_POIS=pois.pois.filter(p=>POI_ICON[p.kind]);
+  const roads=NAV.roads=rd.roads,E=NAV.E;for(let i=0;i<g.nodes.length;i++){NAV.OUT.push([]);NAV.IN.push([]);NAV.PADJ.push([])}
   g.edges.forEach(([f,t,len,ri,a,b],k)=>{const r=roads[ri],n0=g.nodes[f];let pts=r.pts.slice(a,b+1);if(Math.hypot(pts[0][0]-n0[0],pts[0][1]-n0[1])>0.5)pts=pts.slice().reverse();
     const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
     E.push({f,t,pts,cum,len:cum[cum.length-1],w:r.width,cls:r.cls,two:!r.oneway,layer:r.layer,bridge:r.bridge,ri,a,b});NAV.OUT[f].push(k);NAV.IN[t].push(k);
@@ -39,9 +39,9 @@ function navWps(e,lane,from){const p=e.pts,out=[];for(let k=from;k<p.length;k++)
 function navDir(e,end){const p=e.pts,n=p.length,a=end?p[n-2]:p[0],b=end?p[n-1]:p[1];return Math.atan2(b[0]-a[0],b[1]-a[1])}
 
 /* ---------- traffic ---------- */
-function geoSpawnAI(type,minDist){if(!NAV.ready)return null;const P=playerP(),cand=navNear(P.x,P.z,380);
+function geoSpawnAI(type,minDist){if(!NAV.ready)return null;const P=playerP(),cand=navNear(P.x,P.z,260);
   for(let t=0;t<60&&cand.length;t++){const k=cand[(Math.random()*cand.length)|0],e=NAV.E[k],n=NAV.nodes[e.f],d=Math.hypot(n[0]-P.x,n[1]-P.z);
-    if(d<minDist||d>380||Math.random()>(NAV_W[e.cls]||0.5)/3||e.len<12)continue;
+    if((d<minDist&&!(d>50&&navBehind(n[0],n[1],P)))||d>260||Math.random()>(NAV_W[e.cls]||0.5)/3||e.len<12)continue;/* traffic stays within 260 m of you */
     type=geoMix(type,e);/* D7: local vehicle mix (geolife.js) */const two=!!(VT[type]&&VT[type].two),lane=navLane(e,two),w=navWps(e,lane,0);if(vehicles.some(v=>Math.abs(v.pos.x-w[0].x)<8&&Math.abs(v.pos.z-w[0].z)<8))continue;
     const v=spawnVehicle(type,w[0].x,w[0].z,navDir(e,false)),cr=CRUISE[type]||[9,11],base=RR(cr[0],cr[1]);
     v.ai={geo:true,e:k,lane,two,base,cruise:base*(NAV_V[e.cls]||0.7),wps:w.slice(1),turnWp:null,blockT:0,stuck:0,hitT:0,i:0,j:0,dx:0,dz:0};v.speed=v.ai.cruise*0.6;v.vx=Math.sin(v.heading)*v.speed;v.vz=Math.cos(v.heading)*v.speed;
@@ -69,8 +69,10 @@ function updateGeoSignals(dt){if(!NAV.ready)return;sigT-=dt;if(sigT>0)return;sig
     if(s.m){s.lamps[0].material.color.setHex(sigRed(n,Math.PI/2)?0xff2222:0x22dd55);s.lamps[1].material.color.setHex(sigRed(n,0)?0xff2222:0x22dd55)}}}
 
 /* ---------- pedestrians: sidewalks of ordinary roads ---------- */
-function geoPlacePed(p,minD){const P=playerP();let cand=navNear(P.x,P.z,300).filter(k=>NAV.PADJ[NAV.E[k].f].some(o=>o.e===k));
-  for(let t=0;t<40&&cand.length;t++){const k=cand[(Math.random()*cand.length)|0],e=NAV.E[k],n=NAV.nodes[e.f];if(minD&&Math.hypot(n[0]-P.x,n[1]-P.z)<minD)continue;
+/* behind the camera: a spawn there cannot pop into view, so it may be closer */
+function navBehind(x,z,P){const dx=x-P.x,dz=z-P.z,d=Math.hypot(dx,dz);return dx*Math.sin(camYaw)+dz*Math.cos(camYaw)<-0.3*d}
+function geoPlacePed(p,minD){const P=playerP();let cand=navNear(P.x,P.z,200).filter(k=>NAV.PADJ[NAV.E[k].f].some(o=>o.e===k));
+  for(let t=0;t<40&&cand.length;t++){const k=cand[(Math.random()*cand.length)|0],e=NAV.E[k],n=NAV.nodes[e.f],dd=Math.hypot(n[0]-P.x,n[1]-P.z);if(minD&&dd<minD&&!(dd>45&&navBehind(n[0],n[1],P)))continue;
     if(t<30&&Math.random()>geoDensity(n[0],n[1])*(LIFE_MAIN[e.cls]?1:0.6))continue;/* D7: more people in busy areas and on main roads */
     p.ge=k;p.rev=Math.random()<0.5;p.s=RR(0,e.len);p.side=Math.random()<0.5?1:-1;p.dir=1;return}
   p.ge=null}
@@ -83,7 +85,7 @@ function geoPedPos(p){if(p.ge==null||!NAV.ready)return[p.x||0,p.z||0];let e=NAV.
   if(p.s<0&&p.cl>0){const t=clamp(1+p.s/p.cl,0,1);return[p.cw[0]+(p.cn[0]-p.cw[0])*t,p.cw[1]+(p.cn[1]-p.cw[1])*t]}
   return pedAt(e,p.rev?e.len-Math.max(0,p.s):Math.max(0,p.s),p.side,p.off)}
 /* point on an edge's sidewalk, s metres from the edge's first point, side +1/-1 relative to the edge's own direction */
-function pedAt(e,s,side,off){const c=e.cum,pts=e.pts;let k=1;while(k<c.length-1&&c[k]<s)k++;const t=clamp((s-c[k-1])/((c[k]-c[k-1])||1),0,1),a=pts[k-1],b=pts[k],dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1,o=(e.w/2+2.8+(off||0)*0.3)*side;/* D7: clear of parked cars and lamp posts */
+function pedAt(e,s,side,off){const c=e.cum,pts=e.pts;let k=1;while(k<c.length-1&&c[k]<s)k++;const t=clamp((s-c[k-1])/((c[k]-c[k-1])||1),0,1),a=pts[k-1],b=pts[k],dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1,o=(e.w/2+2.4+(off||0)*0.3)*side;/* D7: clear of parked cars and lamp posts */
   return[a[0]+dx*t+dz/l*o,a[1]+dz*t-dx/l*o]}
 
 /* ---------- step G5: route finding, GPS, police on real roads, map icons ---------- */
@@ -125,8 +127,11 @@ function drawRoute(c,map,wide){if(!GPS.route)return;c.save();c.strokeStyle='#b14
   const D=GPS.dest;if(D){const[x,y]=map(D.x,D.z);c.fillStyle='#b14dff';c.strokeStyle='#fff';c.lineWidth=2;c.beginPath();c.arc(x,y,6,0,7);c.fill();c.stroke()}c.restore()}
 
 /* police: spawn on a road 110-220 m away; when far, follow the road route instead of driving straight through buildings */
-function geoSpawnPolice(){if(!NAV.ready)return null;const P=playerP(),cand=navNear(P.x,P.z,230);
-  for(let t=0;t<40&&cand.length;t++){const e=NAV.E[cand[(Math.random()*cand.length)|0]],n=NAV.nodes[e.f],d=Math.hypot(n[0]-P.x,n[1]-P.z);if(d<110||d>220||e.layer)continue;
+/* police arrive 110-220 m away, at any point along a road (on farm roads junctions can be far apart) */
+function geoSpawnPolice(){if(!NAV.ready)return null;const P=playerP(),pts=[];
+  if(Math.hypot(lastSeen.x-P.x,lastSeen.z-P.z)>250){lastSeen.x=P.x;lastSeen.z=P.z}/* a stale sighting far away (after a long jump): dispatch to where the player is */
+  for(const k of navNear(P.x,P.z,700)){const e=NAV.E[k];if(e.layer)continue;for(let s=5;s<e.len;s+=15){const q=pedAt(e,s,1,-e.w/2/0.3),d=Math.hypot(q[0]-P.x,q[1]-P.z);if(d>=110&&d<=220)pts.push(q)}}
+  for(let t=0;t<20&&pts.length;t++){const n=pts[(Math.random()*pts.length)|0];
     if(vehicles.some(v=>Math.abs(v.pos.x-n[0])<6&&Math.abs(v.pos.z-n[1])<6))continue;
     const v=spawnVehicle('police',n[0],n[1],Math.atan2(P.x-n[0],P.z-n[1]));v.speed=14;v.policeAI={shootT:2,stuck:0,reverse:0,revSteer:1,leaving:false,leaveT:0};return v}return null}
 function geoPoliceAim(v,pa,T,dt){if(!NAV.ready)return null;pa.rtT=(pa.rtT||0)-dt;
@@ -138,9 +143,9 @@ function geoRoadblock(){const v=player.vehicle;if(!v||!NAV.ready)return;const fx
   if(!best)return;for(const o of[-3.4,3.4]){const x=best[0]+fz*o,z=best[1]-fx*o;if(vehicles.some(u=>Math.abs(u.pos.x-x)<3&&Math.abs(u.pos.z-z)<3))continue;
     const pv=spawnVehicle('police',x,z,v.heading+Math.PI/2);pv.speed=0;pv.vx=pv.vz=0;pv.policeAI={shootT:1,stuck:0,reverse:0,revSteer:1,leaving:false,leaveT:0,block:true,out:true}}}
 
-/* map icons from OpenStreetMap: hospitals, police stations, bus stands (geodata/processed/pilot/pois.json) */
+/* map icons from OpenStreetMap: hospitals, police stations, bus stands (geodata/processed/kovai/pois.json) */
 const POI_ICON={};let GEO_POIS=[];
 function letterIcon(L,bg){const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');g.fillStyle=bg;g.beginPath();g.arc(16,16,14,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=2.5;g.stroke();
   g.fillStyle='#fff';g.font='bold 18px Rajdhani,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(L,16,17);return c}
-function initGeoPois(){POI_ICON.hospital=ICON.hosp;POI_ICON.police=letterIcon('P','#1d4ed8');POI_ICON.bus_station=letterIcon('B','#2b9348')}/* the list itself loads with the road graph */
+function initGeoPois(){POI_ICON.hospital=ICON.hosp;POI_ICON.police=letterIcon('P','#1d4ed8');POI_ICON.bus_station=letterIcon('B','#2b9348');POI_ICON.fuel=letterIcon('F','#e76f51');POI_ICON.fire=letterIcon('🔥','#9d0208')}/* the list itself loads with the road graph */
 function geoIcons(){return GEO_POIS.map(p=>({x:p.x,z:p.z,img:POI_ICON[p.kind],edge:false,near:true}))}

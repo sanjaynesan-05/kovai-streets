@@ -8,7 +8,7 @@ const $=id=>document.getElementById(id);
 if(!window.THREE){$('loading').textContent='Could not load the 3D engine. Check your connection and reload.';throw new Error('Three.js failed to load')}
 const QL=(()=>{let q=(location.hash||'').replace('#','');if(!['low','medium','high'].includes(q)){try{q=localStorage.getItem('kovaiQ')||''}catch(e){}}
   if(!['low','medium','high'].includes(q))q=(window.matchMedia&&matchMedia('(pointer: coarse)').matches)?'low':'medium';return q})();
-const QS={low:{pr:1,shadow:0,peds:38,traffic:30,trees:380},medium:{pr:1.25,shadow:1024,peds:70,traffic:42,trees:800},high:{pr:1.75,shadow:2048,peds:95,traffic:52,trees:1300}}[QL];
+const QS={low:{pr:1,shadow:0,peds:120,traffic:36,trees:380},medium:{pr:1.25,shadow:1024,peds:260,traffic:56,trees:800},high:{pr:1.75,shadow:2048,peds:340,traffic:70,trees:1300}}[QL];
 
 /* ================= basics ================= */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -53,7 +53,7 @@ const PAL=['#f2e6c9','#e8d3a9','#cfe3e8','#f3c6c0','#d7e8c8','#f5f1e6','#efd28a'
 const SIGN=['#d62828','#f77f00','#2a9d8f','#1d4ed8','#7b2cbf','#e9c46a','#2b9348','#c1121f','#118ab2'];
 /* Town Hall in the old grid world: the reference point for converting grid-world mission positions (geosites.js) */
 const TH={x:-37,z:111};
-/* district labels: filled from geodata/processed/pilot/landmarks.json at start-up (geoworld.js); one default until then */
+/* district labels: filled from geodata/processed/kovai/landmarks.json at start-up (geoworld.js); one default until then */
 const DISTRICTS=[{n:'Coimbatore',x:0,z:0}];
 function roadName(x,z){return geoRoadName(x,z)}
 /* distance from (x, z) to the segment a-b (points as [x, z]); used by road names, GPS and route checks */

@@ -57,8 +57,8 @@ const DIALOGUE={
  "a1_m4_end": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "வேலு கதை முடிஞ்சது! அவங்க கடைசி துப்பாக்கிகள் உக்கடம் குளம் வழியா படகுல, ஒரு பழைய ஜெட்டிக்கு வருது.",
-  "en": "Velu is finished! Their last guns come by boat across Ukkadam Lake, to an old jetty.",
+  "ta": "வேலு கதை முடிஞ்சது! அவங்க கடைசி துப்பாக்கிகள் வாலாங்குளம் வழியா படகுல, ஒரு பழைய ஜெட்டிக்கு வருது.",
+  "en": "Velu is finished! Their last guns come by boat across Valankulam, to an old jetty.",
   "mood": "pleased",
   "whoTa": "பரமசிவம் அண்ணா"
  },
@@ -201,8 +201,8 @@ const DIALOGUE={
  "m10_brief": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "பத்திரங்கள் உக்கடத்துக்கு தெற்கே இருக்கிற தென்றல் பில்டர்ஸ் குடோனைக் காட்டுது. ராத்திரி போ. எல்லாத்தையும் போட்டோ எடு, யார் கண்ணுலயும் படாத.",
-  "en": "The papers point to a Thendral Builders godown south of Ukkadam. Go at night. Photograph everything, and do not get seen.",
+  "ta": "பத்திரங்கள் உக்கடம் பக்கத்துல இருக்கிற தென்றல் பில்டர்ஸ் குடோனைக் காட்டுது. ராத்திரி போ. எல்லாத்தையும் போட்டோ எடு, யார் கண்ணுலயும் படாத.",
+  "en": "The papers point to a Thendral Builders godown near Ukkadam. Go at night. Photograph everything, and do not get seen.",
   "mood": "hushed",
   "whoTa": "பரமசிவம் அண்ணா"
  },
@@ -569,8 +569,8 @@ const DIALOGUE={
  "intro_5": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "சுந்தரத்தோட கடைசி சரக்கு உக்கடம் குளத்துல இருக்கிற ஒரு பழைய ஜெட்டிக்கு ஸ்பீட்போட்டுல வருது. அதை நிறுத்து.",
-  "en": "Sundaram's last shipment arrives by speedboat at an old jetty on Ukkadam Lake. Stop it.",
+  "ta": "சுந்தரத்தோட கடைசி சரக்கு வாலாங்குளத்துல இருக்கிற ஒரு பழைய ஜெட்டிக்கு ஸ்பீட்போட்டுல வருது. அதை நிறுத்து.",
+  "en": "Sundaram's last shipment arrives by speedboat at an old jetty on Valankulam. Stop it.",
   "mood": "warm",
   "whoTa": "பரமசிவம் அண்ணா"
  },
@@ -609,8 +609,8 @@ const DIALOGUE={
  "intro_10": {
   "spk": "paramasivam",
   "who": "PARAMASIVAM",
-  "ta": "உரிமை பத்திரங்கள் உக்கடத்துக்கு தெற்கே இருக்கிற தென்றல் பில்டர்ஸ் குடோனுக்கு வழி காட்டுது. உள்ள இருக்கிறது நமக்கு வேணும். சத்தமில்லாம.",
-  "en": "The ownership papers lead to a Thendral Builders godown south of Ukkadam. We need what is inside. Quietly.",
+  "ta": "உரிமை பத்திரங்கள் உக்கடம் பக்கத்துல இருக்கிற தென்றல் பில்டர்ஸ் குடோனுக்கு வழி காட்டுது. உள்ள இருக்கிறது நமக்கு வேணும். சத்தமில்லாம.",
+  "en": "The ownership papers lead to a Thendral Builders godown near Ukkadam. We need what is inside. Quietly.",
   "mood": "warm",
   "whoTa": "பரமசிவம் அண்ணா"
  },

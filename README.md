@@ -2,7 +2,7 @@
 
 **A 3D open-world sandbox game set on the real streets of central Coimbatore (Kovai), Tamil Nadu. It runs in any web browser, on a computer or a phone.**
 
-Drive autos down Avinashi Road, cross the Gandhipuram Flyover, take a boat out on Ukkadam Lake and take on the gangs of Ukkadam. The map is built from OpenStreetMap at real scale: a 6 × 6 km area around Victoria Town Hall.
+Drive autos round the Kovai Ring Road, cross the Station Flyover, take a boat out on Silver Lake and take on the gangs of Mill Estate. The map is Kovai, a fictional city (being rebuilt; see `REBUILD_SPEC.md`). Before that it was a compact fictional city based on central Coimbatore, about 3.2 × 3.2 km from Gandhipuram down to Town Hall and Ukkadam. The main roads, flyovers, railway, lakes, parks and landmarks are the real ones from OpenStreetMap at 1:1 scale; the neighbourhood streets and most buildings in between are generated, so the blocks are tidy and packed.
 
 ![Kovai Streets title screen](screenshots/00-title.jpg)
 
@@ -97,7 +97,7 @@ Drive autos down Avinashi Road, cross the Gandhipuram Flyover, take a boat out o
 ## ✨ Features
 
 ### 🏙️ A living city
-- **Real streets:** 4,781 roads and about 30,000 building outlines from OpenStreetMap, at 1:1 scale, with real flyovers, lakes, railway lines and land use. The map streams in 1 km pieces as you move.
+- **A city based on Kovai:** the real main roads, flyovers, lakes, railway and landmarks from OpenStreetMap at 1:1 scale, with about 1,000 generated neighbourhood streets and 19,000 buildings packed in between. The map streams in 1 km pieces as you move.
 - **Shopfronts on every street**: Sri Lakshmi Stores, Kovai Textiles, Raj Medicals, Hotel Arul and more, with shelves of goods and roll-down shutters.
 - Balconies, rooftop water tanks, AC units and satellite dishes.
 - Textured asphalt, paved sidewalks, **black-and-yellow kerbs** and zebra crossings.
@@ -199,21 +199,26 @@ Press **Enter** while playing, type a code and press **Enter** again. You can al
 
 ## 🗺️ The map
 
-The map is the real street layout of central Coimbatore, built from OpenStreetMap at 1:1 scale: about 6 × 6 km around Victoria Town Hall, from Ukkadam Lake in the south-west to Peelamedu in the north-east. Real landmarks keep their real names and places. The game's own places (the mills, the mall, the godown, the police station, the safehouse and the hideouts) are fictional, and are placed on ordinary plots away from real landmarks.
+The map is **Kovai**, a fictional city of about 4 × 3 km inside a ring road, with farmland around it. The railway runs east–west through Kovai Central station. Silver Lake is to the south, and Silver Hill, with a forest, a quarry and a viewpoint, is to the north. Main roads are designed; the streets and buildings of each district are generated in that district's own style (`tools/geo/build_kovai.py`, see `REBUILD_SPEC.md`).
 
-| Area | What's there |
+| District | What's there |
 |---|---|
-| **Town Hall** | Victoria Town Hall, the clock tower, Koniamman Temple, the Town Hall rally spot, the gun shop |
-| **Ukkadam** | Ukkadam (Periyakulam) Lake, the bus stand, the fictional lakeside jetty |
-| **Gandhipuram** | The central and town bus stands, 100 Feet Road, Cross Cut Road, the Gandhipuram Flyover |
-| **R.S. Puram** | Residential streets around DB Road; the safehouse is nearby |
-| **Race Course** | The walking track, VOC Park, Valankulam Lake; Meena's home |
-| **Lakshmi Mills / Peelamedu** | Avinashi Road and its flyover; Paramasivam Anna; Divya's home; the Kovai Central mall is towards VOC Park |
-| **Ramanathapuram** | Trichy Road (Tiruchi Road) and its flyover |
+| **Central Kovai** | The commercial core: temple gopuram, Town Hall and its square, Devarajan Tower, Royal Grand Hotel, the mall, Government Hospital, fire station |
+| **Old Kovai** | Narrow lanes and small shophouses, the church, the market, a hospital, a mosque on the east edge |
+| **Campus Nagar** | The college, its sports ground, students and tea stalls |
+| **Mill Estate** | Mills with chimneys, sheds and warehouses, Podanur Mill and Old Kovai Mills, a police station |
+| **East Junction** | The bus terminus, a police station, the communications facility, workshops |
+| **Hillcrest** | Houses among trees below Silver Hill; the road up to the viewpoint |
+| **Lakeview** | Apartments and the lakeside park south of Silver Lake |
+| **Greenfield** | Warehouses and farmhouses on the city's eastern edge |
 
-**Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · P police station · B bus stand · ♥ friends · coloured letters = jobs · gold **S** = story · green house = safehouse · skull = rampage
+Also: Kovai Central station, with a flyover crossing the railway east of it; the Kovai Municipal Cricket Stadium; and petrol bunks on the ring road and outer highway.
 
-**Not in the map yet:** the Western Ghats, Marudhamalai, Singanallur and the airport are outside the current 6 × 6 km area. The ground is flat until real elevation data is added. Data © OpenStreetMap contributors (ODbL); see `geodata/README.md`.
+**Map icons:** ✚ hospital (stand on the red ring to heal) · 🔫 gun shop · P police station · B bus stand · F petrol bunk · 🔥 fire station · ♥ friends · coloured letters = jobs · gold **S** = story · green house = safehouse · skull = rampage
+
+**Being rebuilt:**
+- The story missions still use the earlier place names in their text and voice lines until Acts 1–3 are rewritten (R4–R6).
+- Silver Hill is flat until step R2 adds terrain.
 
 ---
 
@@ -476,7 +481,7 @@ Some of the techniques used:
 - **Geometry batching:** thousands of static buildings and props are merged into a handful of meshes for performance.
 - **Procedural facade textures** with lit and unlit window maps that glow at night.
 - **Extruded side profiles** for curved car bodies. People are merged into about 7 meshes each, with jointed limbs.
-- **A real-geography pipeline** (`tools/geo/`): OpenStreetMap is projected to UTM 43N at 1:1 and split into 1 km chunks that stream in and out around the player.
+- **A real-geography pipeline** (`tools/geo/`): OpenStreetMap is projected to UTM 43N at 1:1; `build_city.py` keeps the main roads and landmarks of the centre, grows neighbourhood streets square to them and fills every frontage with buildings; the result is split into 1 km chunks that stream in and out around the player.
 - **A custom GLSL water shader** with wave displacement, foam, a Fresnel sky reflection and fog. The same wave formula runs in JavaScript so boats and swimmers stay in sync.
 - **A spatial-hash collision grid** with height-aware colliders built from real building outlines, so you can drive over and under real flyovers and walk under mall floors.
 - **Vehicle physics** with mass, lateral grip, impulse collisions, spin, slopes and buoyancy.
@@ -487,7 +492,7 @@ Some of the techniques used:
 ## ⚠️ Known limitations
 
 - **Visual style:** it's stylised and low-poly. Everything is generated by code without hand-made 3D models, so characters and vehicles are simple up close.
-- **Map size:** only a 6 × 6 km pilot area of central Coimbatore so far, and the ground is flat (no elevation data yet).
+- **Map size:** a compact 3.2 × 3.2 km city, and the ground is flat (no elevation data yet).
 - **Saves are per browser:** progress is stored in your browser's local storage, so it doesn't follow you to another device or browser, and clearing site data erases it. Progress partway through a mission isn't saved.
 - **Performance:** older phones should use **Low** quality. High quality is meant for desktop GPUs.
 - **Geography:** the map comes from OpenStreetMap and has not been checked against official maps. The game's mission sites are fictional. See `geodata/validation/g7_validation.md`.
@@ -514,7 +519,7 @@ Some of the techniques used:
 - **Game design and direction:** *[Your name here]*
 - **Code, models and textures:** generated with **Claude** by Anthropic, through conversation
 - **3D engine:** [Three.js](https://threejs.org) © three.js authors, MIT licence (see `THREE-LICENSE.txt`)
-- **Map reference data:** landmark positions from [OpenStreetMap](https://www.openstreetmap.org/copyright) © OpenStreetMap contributors, available under the Open Database Licence (ODbL 1.0). The game map is a compressed, simplified layout based on this data, not an accurate map. See `tools/map/`.
+- **Map reference data:** landmark positions from [OpenStreetMap](https://www.openstreetmap.org/copyright) © OpenStreetMap contributors, available under the Open Database Licence (ODbL 1.0). The game map is a fictional city based on this data (real main roads and landmarks, generated neighbourhood streets and buildings), not an accurate map. See `tools/geo/build_city.py`.
 - **Fonts:** [Bebas Neue](https://fonts.google.com/specimen/Bebas+Neue) and [Rajdhani](https://fonts.google.com/specimen/Rajdhani) via Google Fonts (SIL Open Font Licence)
 
 **About the content:** real neighbourhood and road names are used only to evoke Coimbatore's geography. All shops, brands, characters, the mall, the station design and the statue are original and fictional. Kovai Streets is an independent fan project inspired by open-world games. It is not affiliated with, or endorsed by, any game publisher.

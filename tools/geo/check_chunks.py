@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from chunk_pilot import clip_poly, ring_area   # area clipping is shared with the chunker; the line checks below are independent
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-SRC = os.path.join(ROOT, "geodata", "processed", "pilot")
+SRC = os.path.join(ROOT, "geodata", "processed", os.environ.get("KS_DATASET", "pilot"))
 CH = os.path.join(SRC, "chunks")
 EPS = 0.02   # metres: coordinates are stored to 0.01 m
 

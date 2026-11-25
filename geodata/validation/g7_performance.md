@@ -54,3 +54,14 @@ Lamps, parked cars, vendor carts and bus stops are added per chunk at full detai
 - **Traffic:** the target is 35 vehicles in Gandhipuram and 34 at the Peelamedu edge (the Medium preset base is 42), and there were 36–37 on the road.
 - **Low preset:** no parked cars or carts, and half as many lamps. Use it on phones.
 - **Bus stops:** generated every few hundred metres along trunk and primary roads. They are not real stop positions.
+
+## After restoring building detail
+
+Real buildings now use the grid world's detailed look: four facade styles with window textures that light up at night, ground-floor shopfronts, roof parapets, water tanks, stair rooms, AC units, dishes, balconies and shop awnings.
+
+| Area | Draw calls | Triangles |
+|---|---|---|
+| Gandhipuram | 541 | 970,252 |
+
+- **Applies to every graphics preset,** as requested: every player gets full building detail.
+- **Cost:** this is about 4 times the triangles of the plain boxes. It's fine for a desktop graphics card, but heavy for phones. If phones struggle, the next step is a lower detail level for distant chunks.

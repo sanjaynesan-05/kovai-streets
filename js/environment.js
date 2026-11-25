@@ -13,9 +13,20 @@ function addBeam(v){if(v.s.boat||v.type==='tank'||!beamMat)return;const b=new TH
 let sky,stars,moon,tod=8.5,dayF=1,rainF=0,rainOn=false,weatherT=RR(200,320),thunderT=20,flashT=0;
 function buildSky(){scene.background=null;
   sky=new THREE.Mesh(new THREE.SphereGeometry(2400,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
-    uniforms:{top:{value:new THREE.Color()},hor:{value:new THREE.Color()},sunCol:{value:new THREE.Color()},sunDir:{value:new THREE.Vector3(0,1,0)},glow:{value:1}},
+    uniforms:{top:{value:new THREE.Color()},hor:{value:new THREE.Color()},sunCol:{value:new THREE.Color()},sunDir:{value:new THREE.Vector3(0,1,0)},glow:{value:1},
+      duskCol:{value:new THREE.Color('#ff7a3a')},dusk:{value:0},day:{value:1},cover:{value:0.35},t:{value:0}},
     vertexShader:'varying vec3 vD;void main(){vD=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-    fragmentShader:'uniform vec3 top,hor,sunCol,sunDir;uniform float glow;varying vec3 vD;void main(){vec3 d=normalize(vD);float h=d.y;vec3 c=mix(hor,top,pow(clamp(h,0.0,1.0),0.55));if(h<0.0)c=hor*0.92;float s=max(dot(d,sunDir),0.0);c+=sunCol*(pow(s,900.0)*2.0+pow(s,10.0)*0.32*glow);gl_FragColor=vec4(c,1.0);}'}));
+    /* gradient; warm band on the sun's side at sunrise and sunset; sun/moon glow; drifting clouds (value-noise fbm projected on a sky plane) */
+    fragmentShader:'uniform vec3 top,hor,sunCol,sunDir,duskCol;uniform float glow,dusk,day,cover,t;varying vec3 vD;'+
+      'float hs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}'+
+      'float nz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(hs(i),hs(i+vec2(1.0,0.0)),f.x),mix(hs(i+vec2(0.0,1.0)),hs(i+vec2(1.0,1.0)),f.x),f.y);}'+
+      'float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<5;i++){v+=a*nz(p);p*=2.03;a*=0.5;}return v;}'+
+      'void main(){vec3 d=normalize(vD);float h=d.y;vec3 c=mix(hor,top,pow(clamp(h,0.0,1.0),0.55));if(h<0.0)c=hor*0.92;'+
+      'float side=max(dot(normalize(d.xz+1e-4),normalize(sunDir.xz+1e-4)),0.0);c=mix(c,duskCol,dusk*pow(side,3.0)*pow(1.0-clamp(h,0.0,1.0),5.0)*0.9);'+
+      'float s=max(dot(d,sunDir),0.0);c+=sunCol*(pow(s,900.0)*2.0+pow(s,10.0)*0.32*glow);'+
+      'if(h>0.02){vec2 uv=d.xz/(h+0.12)*1.6+vec2(t*0.006,t*0.002);float n=fbm(uv);float m=smoothstep(1.0-cover,1.28-cover,n)*smoothstep(0.02,0.18,h);'+
+      'vec3 cc=mix(vec3(1.0),hor,0.35)*(0.08+0.92*day)+sunCol*0.35*pow(s,4.0);cc=mix(cc,duskCol*1.1,dusk*0.6);c=mix(c,cc*(0.75+0.25*n),m*0.85);}'+
+      'gl_FragColor=vec4(c,1.0);}'}));
   sky.renderOrder=-10;sky.frustumCulled=false;scene.add(sky);
   const sp=[];for(let i=0;i<700;i++){const a=Math.random()*Math.PI*2,y=Math.random()*0.95+0.05,r=Math.sqrt(1-y*y);sp.push(Math.cos(a)*r*2200,y*2200,Math.sin(a)*r*2200)}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
@@ -23,7 +34,7 @@ function buildSky(){scene.background=null;
   moon=new THREE.Mesh(new THREE.SphereGeometry(45,16,12),new THREE.MeshBasicMaterial({color:0xf4f1e8,fog:false,transparent:true,opacity:0}));scene.add(moon)}
 const _sd=new THREE.Vector3(),_cA=new THREE.Color(),_cB=new THREE.Color(),_cC=new THREE.Color();
 const C_DAYTOP=new THREE.Color('#3f7fd0'),C_NIGHTTOP=new THREE.Color('#050a1a'),C_DAYHOR=new THREE.Color('#cfe3ee'),C_DUSKHOR=new THREE.Color('#ff9a5a'),C_NIGHTHOR=new THREE.Color('#0d1730'),
-  C_RAINTOP=new THREE.Color('#5d6670'),C_RAINHOR=new THREE.Color('#9aa3a8'),C_SUN=new THREE.Color('#fff1c0'),C_DUSKSUN=new THREE.Color('#ff7a2a'),C_MOON=new THREE.Color('#8fa8ff');
+  C_RAINTOP=new THREE.Color('#5d6670'),C_HAZE=new THREE.Color('#d8ccb6'),C_RAINHOR=new THREE.Color('#9aa3a8'),C_SUN=new THREE.Color('#fff1c0'),C_DUSKSUN=new THREE.Color('#ff7a2a'),C_MOON=new THREE.Color('#8fa8ff');
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 function updateSky(dt,advance){if(advance)tod=(tod+dt*24/(16*60))%24;
   const th=(tod-6)/12*Math.PI,elev=Math.sin(th);_sd.set(Math.cos(th),elev,0.35).normalize();
@@ -34,10 +45,10 @@ function updateSky(dt,advance){if(advance)tod=(tod+dt*24/(16*60))%24;
   const top=_cA.copy(C_NIGHTTOP).lerp(C_DAYTOP,dayF),hor=_cB.copy(C_NIGHTHOR).lerp(C_DAYHOR,dayF).lerp(C_DUSKHOR,dusk*0.85*(1-rainF*0.7));
   const rb=0.25+0.75*dayF;_cC.copy(C_RAINTOP).multiplyScalar(rb);top.lerp(_cC,rainF*0.75);_cC.copy(C_RAINHOR).multiplyScalar(rb);hor.lerp(_cC,rainF*0.8);
   if(flashT>0){flashT-=dt;top.lerp(new THREE.Color(1,1,1),flashT*3);hor.lerp(new THREE.Color(1,1,1),flashT*3)}
-  const u=sky.material.uniforms;u.top.value.copy(top);u.hor.value.copy(hor);
+  const u=sky.material.uniforms;u.top.value.copy(top);u.hor.value.copy(hor);u.dusk.value=dusk*(1-rainF*0.7);u.day.value=dayF;u.cover.value=0.35+rainF*0.5;u.t.value+=dt;
   const night=elev<-0.05;u.sunDir.value.copy(night?_sd.clone().negate():_sd);u.sunCol.value.copy(night?C_MOON:C_SUN).lerp(C_DUSKSUN,night?0:dusk).multiplyScalar((night?0.25:1)*(1-rainF*0.85));u.glow.value=night?0.3:1;
-  scene.fog.color.copy(hor);scene.fog.near=lerpN(120,190,dayF)*(1-rainF*0.6);scene.fog.far=lerpN(900,1500,dayF)*(1-rainF*0.65);
-  sky.position.copy(camera.position);stars.position.copy(camera.position);stars.material.opacity=(1-dayF)*(1-rainF)*0.9;
+  scene.fog.color.copy(hor).lerp(C_HAZE,0.35*dayF*(1-rainF));scene.fog.near=lerpN(90,160,dayF)*(1-rainF*0.6);scene.fog.far=lerpN(700,1250,dayF)*(1-rainF*0.65);   /* dusty daytime haze */
+  sky.position.copy(camera.position);stars.position.copy(camera.position);stars.material.opacity=(1-smooth(-0.3,-0.1,elev))*(1-rainF)*0.9;/* only once the sky is dark */
   moon.position.copy(camera.position).addScaledVector(_sd,-2150);moon.material.opacity=(1-dayF)*(1-rainF*0.8);
   const ld=night?_sd.clone().negate():_sd;SUN_OFF.copy(ld).multiplyScalar(170);
   sun.intensity=(0.95*dayF+0.16*(1-dayF))*(1-0.6*rainF);sun.color.copy(night?C_MOON:new THREE.Color('#fff0d2')).lerp(C_DUSKSUN,night?0:dusk*0.6);

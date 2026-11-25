@@ -11,7 +11,8 @@ buildings inside their radius; the report lists how many. Run:  python tools/geo
 import json, math, os
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-P = os.path.join(ROOT, "geodata", "processed", "pilot")
+DATASET = os.environ.get("KS_DATASET", "pilot")
+P = os.path.join(ROOT, "geodata", "processed", DATASET)
 load = lambda n: json.load(open(os.path.join(P, n + ".json"), encoding="utf-8"))
 
 # kind: 'area' = cleared space for a rebuilt fictional structure; 'open' = open spot by a road, nothing cleared;
@@ -36,10 +37,32 @@ SITES = [
     dict(id="jetty", kind="jetty", old=(1025, 200), r=190, tgt=(-700, 1000), name="Lakeside jetty (fictional)", lake="w24711461"),
 ]
 TH_GRID = (-37, 111)   # Town Hall block in the grid world
+# compact city (build_city.py): preferred areas inside its 3.2 x 3.2 km core; the jetty moves to Chinna Kulam (Ukkadam Lake is only an edge sliver there)
+CITY_TGT = {"mill_podanur": (-900, 300), "mill_singanallur": (1700, -700), "mill_kovai": (1700, -2350), "mall": (1100, -1300), "godown": (-500, 350),
+            "police": (500, -1500), "safehouse": (-1000, -1200), "hideout": (-1050, -400), "dealyard": (1750, -1700), "jetty": (1250, 100)}
+# designed city (build_kovai.py): the current missions' places in the new districts, until Acts 1-3 are rewritten (REBUILD_SPEC.md, R4-R6)
+KOVAI_TGT = {"mill_podanur": (-1250, 300), "mill_singanallur": (-1650, -150), "mill_kovai": (-420, 230), "mall": (520, 250), "godown": (1900, 880),
+             "police": (1480, 60), "safehouse": (450, 1260), "hideout": (520, -1320), "dealyard": (-330, -1650), "rally": (180, -230), "jetty": (1000, 900)}
+if DATASET == "kovai":
+    for s in SITES:
+        if s["id"] in KOVAI_TGT: s["tgt"] = KOVAI_TGT[s["id"]]
+        if s["id"] == "jetty": s["lake"] = "w1"
+if DATASET == "city":
+    for s in SITES:
+        if s["id"] in CITY_TGT: s["tgt"] = CITY_TGT[s["id"]]
+        if s["id"] == "jetty": s["lake"] = "w128964694"
 
 
 def grid_to_real(x, z):
-    """Inverse of the D1 compressed transform (tools/map/build_registry.py): grid units around Town Hall -> real metres."""
+    """Inverse of the D1 compressed transform (tools/map/build_registry.py): grid units around Town Hall -> real metres.
+    For the compact city: each axis is scaled so the grid world (about +-1100 units) fills the core, Town Hall staying at 0, 0
+    (same as gridToReal in js/geosites.js)."""
+    if DATASET == "kovai":   # grid world fills the ring road; same as gridToReal in js/geosites.js
+        fx, fz = max(-1, min(1, (x - TH_GRID[0]) / 1100)), max(-1, min(1, (z - TH_GRID[1]) / 1100))
+        return 200 + (fx * 2000 if fx < 0 else fx * 1700), -300 + (fz * 1050 if fz < 0 else fz * 1700)
+    if DATASET == "city":
+        fx, fz = max(-1, min(1, (x - TH_GRID[0]) / 1100)), max(-1, min(1, (z - TH_GRID[1]) / 1100))
+        return (fx * 1100 if fx < 0 else fx * 1800), (fz * 2500 if fz < 0 else fz * 420)
     dx, dz = x - TH_GRID[0], z - TH_GRID[1]; g = math.hypot(dx, dz)
     if g == 0: return 0.0, 0.0
     r = g * 9 if g <= 3000 / 9 else 3000 + (g - 3000 / 9) * 25
@@ -141,6 +164,7 @@ def main():
                 a, b = ring[i - 1], ring[i]; L = math.hypot(b[0] - a[0], b[1] - a[1])
                 for t in [k / max(1, int(L // 6)) for k in range(int(L // 6) + 1)]:
                     px, pz = a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
+                    if not (rect[0] + 60 < px < rect[2] - 60 and rect[1] + 60 < pz < rect[3] - 60): continue   # real shore, not the map edge
                     for rot, (ux, uz) in enumerate(((1, 0), (0, 1), (-1, 0), (0, -1))):   # rot = quarter turns of the old +x jetty axis
                         if in_water(px - ux * 8, pz - uz * 8) or not in_water(px + ux * 10, pz + uz * 10): continue
                         vx, vz = -uz, ux   # old +z maps to this perpendicular

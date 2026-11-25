@@ -20,14 +20,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from geo import to_game
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-SRC = os.path.join(ROOT, "geodata", "processed", "pilot")
+DATASET = os.environ.get("KS_DATASET", "pilot")   # "city" = the compact city from build_city.py
+SRC = os.path.join(ROOT, "geodata", "processed", DATASET)
 OUT = os.path.join(SRC, "chunks")
 BBOX = (10.978, 76.947, 11.032, 77.003)
-SIZE = 1000.0
+SIZE = 500.0 if DATASET in ("city", "kovai") else 1000.0   # the dense city streams in 500 m chunks so full detail can stop nearer the player
 
 
 def pilot_rect():
-    """Largest axis-aligned game rectangle inside the projected lat/lon box (UTM grid north differs slightly from true north)."""
+    """Largest axis-aligned game rectangle inside the projected lat/lon box (UTM grid north differs slightly from true north).
+    The city dataset uses the core rectangle stored in its meta.json."""
+    if DATASET != "pilot": return tuple(json.load(open(os.path.join(SRC, "meta.json"), encoding="utf-8"))["rect"])
     c = [to_game(la, lo) for la in (BBOX[0], BBOX[2]) for lo in (BBOX[1], BBOX[3])]   # SW, SE, NW, NE
     (swx, swz), (sex, sez), (nwx, nwz), (nex, nez) = c
     return (math.ceil(max(swx, nwx)), math.ceil(max(nwz, nez)), math.floor(min(sex, nex)), math.floor(min(swz, sez)))   # x0, z0, x1, z1
@@ -152,6 +155,9 @@ def main():
     for kind, items in (("signals", roads["signals"]), ("crossings", rail["crossings"])):
         for p in items:
             if inside(*p): chunks[chunk_of(*p)][kind].append(p)
+    if os.path.exists(os.path.join(SRC, "trees.json")):   # the designed city's trees (build_kovai.py): [x, z, kind] points
+        for t in load("trees.json")["trees"]:
+            if inside(t[0], t[1]): chunks[chunk_of(t[0], t[1])]["trees"].append(t)
     for s in rail["stations"]:
         if inside(*s["p"]): chunks[chunk_of(*s["p"])]["stations"].append(s)
 
