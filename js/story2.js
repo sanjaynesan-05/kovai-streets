@@ -97,10 +97,20 @@ function escortTick(m,e,dt){if(!e||e.dead)return;const P=e.inV?e.inV.pos:e;let d
   m.escortMeter={label:e.name,v:e.hp/100,col:e.hp>40?'#2ecc71':'#ff6b6b'};if(e.hp<=0&&!e.dead){e.dead=true;poseDead(e.h,humanY(P.x,P.z,0));missionFail(e.name+' was badly hurt')}}
 
 /* ---------- scripted driving (vehicle.script runs inside updateVehicles, before physics) ---------- */
+/* clear ordinary traffic jammed in front of a scripted vehicle: removed when the player is over 35 m away, otherwise nudged to the kerb */
+function unblockRoute(v){const fx=Math.sin(v.heading),fz=Math.cos(v.heading);for(const o of vehicles.slice()){if(o===v||o===player.vehicle||o.keep||o.policeAI)continue;const dx=o.pos.x-v.pos.x,dz=o.pos.z-v.pos.z,f=dx*fx+dz*fz,s=dx*fz-dz*fx;
+  if(f>0&&f<14&&Math.abs(s)<4){if(farFrom(o.pos.x,o.pos.z)>35)removeVehicle(o);else{const k=s>=0?1:-1;o.pos.x+=fz*k*4;o.pos.z-=fx*k*4;o.speed=o.vx=o.vz=0}}}}
+/* a scripted vehicle stuck in traffic: the tail's "too close" suspicion rises much slower */
+const routeStuck=R=>R&&(R.stuck||0)>1;
 function routeDrive(R){return(v,dt)=>{if(R.hold>0){R.hold-=dt;v.speed*=Math.max(0,1-4*dt);return}const p=R.pts[R.i];if(!p){v.speed*=Math.max(0,1-3*dt);R.done=true;return}
   const dx=p.x-v.pos.x,dz=p.z-v.pos.z,d=Math.hypot(dx,dz);if(d<4.5){if(p.stop){R.hold=p.stop;if(R.onStop)R.onStop(p)}R.i++;return}
-  const diff=angDiff(v.heading,Math.atan2(dx,dz));let target=R.speed;if(Math.abs(diff)>0.5)target=Math.min(target,7);const n=R.pts[R.i+1];
-  if(d<16&&(p.stop||(n&&Math.abs(angDiff(Math.atan2(dx,dz),Math.atan2(n.x-p.x,n.z-p.z)))>0.6)))target=Math.min(target,8);if(!R.reckless&&(blockedAhead(v)||gateAhead(v)))target=0;
+  let diff=angDiff(v.heading,Math.atan2(dx,dz));let target=R.speed;if(Math.abs(diff)>0.5)target=Math.min(target,7);const n=R.pts[R.i+1];
+  if(d<16&&(p.stop||(n&&Math.abs(angDiff(Math.atan2(dx,dz),Math.atan2(n.x-p.x,n.z-p.z)))>0.6)))target=Math.min(target,8);
+  if(!R.reckless&&gateAhead(v))target=0;
+  else if(!R.reckless&&blockedAhead(v)){/* stuck behind traffic: honk at 2 s, try to steer round at 4 s, clear the blocker at 8 s */
+    R.stuck=(R.stuck||0)+dt;R.free=0;target=0;if(R.stuck>2&&!R.honked){R.honked=true;noise(0.35,420,0.25,1)}
+    if(R.stuck>4){diff+=0.45;target=4}if(R.stuck>8){unblockRoute(v);R.stuck=4}}
+  else{R.free=(R.free||0)+dt;if(R.free>1){R.stuck=0;R.honked=false}}/* reset only after driving freely for a second (bumping does not reset it) */
   v.speed+=clamp(target-v.speed,-v.s.brake*dt,v.s.acc*dt);const rate=v.s.steer*1.3*Math.min(1,Math.abs(v.speed)/3);v.heading+=clamp(diff,-rate*dt,rate*dt)}}
 
 /* ---------- stealth guards ---------- */
@@ -172,7 +182,7 @@ STORY.push(
         if(p.id==='meet'){m.atMeet=true;const mp={x:v.pos.x,z:v.pos.z},van=spawnVehicle('van',mp.x+6,mp.z+9,Math.PI,'#1a1a1a');van.keep=true;m.van=van;m.contact=npc(LOOK.contact,mp.x,mp.z+15,-Math.PI/2);floatMsg('A meeting. Photograph it from 20–75 m: stop and hold steady.')}};
       m.cleanup.push(()=>{removeVehicle(v);if(m.van)removeVehicle(m.van);npcGone(m.contact)})},
     upd(m,dt){const v=m.tgt,P=playerP(),d=Math.hypot(v.pos.x-P.x,v.pos.z-P.z);mk(v.pos.x,v.pos.z);
-      if(d<20)m.sus+=((20-d)*2.5+12)*dt;else m.sus=Math.max(0,m.sus-7*dt);if(d>75)m.lostT+=dt;else m.lostT=0;
+      if(d<20)m.sus+=((20-d)*2.5+12)*dt*(routeStuck(m.R)?0.2:1);else m.sus=Math.max(0,m.sus-7*dt);if(d>75)m.lostT+=dt;else m.lostT=0;
       if(m.sus>=100)return'He spotted you';if(m.lostT>9||d>220)return'You lost him';
       m.meters=[{label:d>75?'Losing him…':'Suspicion',v:d>75?Math.min(1,m.lostT/9):m.sus/100,col:d>75?'#7fb8ff':m.sus>60?'#ff4d4d':'#ffb347'}];
       if(m.contact)npcIdle(m.contact,dt,false);

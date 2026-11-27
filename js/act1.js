@@ -38,7 +38,7 @@ function stPhoto(o){const mn=o.min||15,mx=o.max||70,S=o.secs||2.5;return{init(m)
 function stTail(o){const mn=o.min||20,mx=o.max||85;return{init(m){const pts=o.route(m),p0=pts[0],p1=pts[1]||p0,v=spawnVehicle(o.type||'suv',p0.x,p0.z,Math.atan2(p1.x-p0.x,p1.z-p0.z),o.color||'#151515');
     v.keep=true;v.hp=o.hp||1e6;const R={pts,i:1,speed:o.speed||11,hold:0};R.onStop=p=>{if(o.onStop)o.onStop(p,m)};v.script=routeDrive(R);m.tgt=v;m.R=R;m.sus=0;m.lostT=0;m.cleanup.push(()=>{if(vehicles.includes(v)&&v!==player.vehicle)removeVehicle(v)})},
   upd(m,dt){const v=m.tgt,P=playerP(),d=Math.hypot(v.pos.x-P.x,v.pos.z-P.z);mk(v.pos.x,v.pos.z);
-    if(d<mn)m.sus+=((mn-d)*2.5+12)*dt;else m.sus=Math.max(0,m.sus-7*dt);if(d>mx)m.lostT+=dt;else m.lostT=0;
+    if(d<mn)m.sus+=((mn-d)*2.5+12)*dt*(routeStuck(m.R)?0.2:1);else m.sus=Math.max(0,m.sus-7*dt);if(d>mx)m.lostT+=dt;else m.lostT=0;
     if(m.sus>=100)return'They spotted you';if(m.lostT>10||d>240)return'You lost them';
     m.meters=[{label:d>mx?'Losing them…':'Suspicion',v:d>mx?Math.min(1,m.lostT/10):m.sus/100,col:d>mx?'#7fb8ff':m.sus>60?'#ff4d4d':'#ffb347'}];m.txt=`${o.txt} (stay ${mn}–${mx} m behind)`;
     return m.forced||(o.until?o.until(m):!!m.R.done)},
